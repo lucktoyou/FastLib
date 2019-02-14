@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--TitleBar通用属性-->
+    <declare-styleable name="TitleBar">
+        <attr name="titleText" format="string"/>
+        <attr name="leftText" format="string"/>
+        <attr name="rightText" format="string"/>
+        <attr name="leftIcon" format="reference"/>
+        <attr name="rightIcon" format="reference"/>
+        <attr name="titleColor" format="color"/>
+        <attr name="leftTextColor" format="color"/>
+        <attr name="rightTextColor" format="color"/>
+    </declare-styleable>
+</resources>

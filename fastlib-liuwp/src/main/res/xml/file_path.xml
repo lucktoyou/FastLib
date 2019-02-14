@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <paths>
+    <!--
+            <root-path/> 代表设备的根目录new File("/");
+
+            <files-path/> 代表context.getFilesDir()
+
+            <cache-path/> 代表context.getCacheDir()
+
+            <external-path/> 代表Environment.getExternalStorageDirectory()
+
+            <external-files-path>代表context.getExternalFilesDirs()
+
+            <external-cache-path>代表getExternalCacheDirs()
+
+         代码中path=""，是有特殊意义的，它代表根目录，也就是说你可以向其它的应用共享根目录及其子目录下任何一个文件了，
+         如果你将path设为path=”pictures”， 那么它代表着根目录下的pictures目录(eg:/storage/emulated/0/pictures)，
+         如果你向其它应用分享pictures目录范围之外的文件是不行的。-->
+        <external-path path="" name="camera_photos" />
+    </paths>
+</resources>
