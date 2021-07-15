@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--TitleBar通用属性-->
+    <declare-styleable name="CircleImageView">
+        <attr name="borderWidth" format="dimension" />
+        <attr name="borderColor" format="color" />
+        <attr name="borderOverlay" format="boolean" />
+        <attr name="circleBackgroundColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="MultiStateFrameLayout">
+        <attr name="loadingView" format="reference"/>
+        <attr name="errorView" format="reference"/>
+        <attr name="emptyView" format="reference"/>
+        <attr name="noNetworkView" format="reference"/>
+        <attr name="contentView" format="reference"/>
+    </declare-styleable>
+
     <declare-styleable name="TitleBar">
-        <attr name="titleText" format="string"/>
-        <attr name="leftText" format="string"/>
-        <attr name="rightText" format="string"/>
-        <attr name="leftIcon" format="reference"/>
-        <attr name="rightIcon" format="reference"/>
-        <attr name="titleColor" format="color"/>
-        <attr name="leftTextColor" format="color"/>
-        <attr name="rightTextColor" format="color"/>
+        <attr name="title" format="string" />
+        <attr name="leftText" format="string" />
+        <attr name="rightText" format="string" />
+        <attr name="leftIcon" format="reference" />
+        <attr name="rightIcon" format="reference" />
+        <attr name="titleColor" format="color" />
+        <attr name="leftTextColor" format="color" />
+        <attr name="rightTextColor" format="color" />
     </declare-styleable>
 </resources>

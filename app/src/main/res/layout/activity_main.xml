@@ -1,18 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="com.example.fastlibdemo.MainActivity">
 
-    <TextView
+    <Button
+        android:id="@+id/btnProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="37dp"
+        android:text="进度条"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-</android.support.constraint.ConstraintLayout>
+    <Button
+        android:id="@+id/btnDatabase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:text="数据库"
+        app:layout_constraintStart_toStartOf="@+id/btnProgress"
+        app:layout_constraintTop_toBottomOf="@+id/btnProgress" />
+
+    <Button
+        android:id="@+id/btnNet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="网络"
+        app:layout_constraintStart_toStartOf="@+id/btnDatabase"
+        app:layout_constraintTop_toBottomOf="@+id/btnDatabase" />
+
+    <Button
+        android:id="@+id/btnTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:text="任务"
+        app:layout_constraintStart_toStartOf="@+id/btnNet"
+        app:layout_constraintTop_toBottomOf="@+id/btnNet" />
+
+    <Button
+        android:id="@+id/btnPermission"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="权限请求"
+        app:layout_constraintStart_toStartOf="@+id/btnTask"
+        app:layout_constraintTop_toBottomOf="@+id/btnTask" />
+
+    <Button
+        android:id="@+id/btnDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="快捷弹框"
+        app:layout_constraintBottom_toTopOf="@+id/btnPopupWindow"
+        app:layout_constraintStart_toStartOf="@+id/btnPopupWindow" />
+
+    <Button
+        android:id="@+id/btnLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="日志"
+        app:layout_constraintStart_toStartOf="@+id/btnMulti"
+        app:layout_constraintTop_toBottomOf="@+id/btnMulti" />
+
+    <Button
+        android:id="@+id/btnMulti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="65dp"
+        android:text="多状态视图"
+        app:layout_constraintBottom_toTopOf="@+id/btnDialog"
+        app:layout_constraintStart_toStartOf="@+id/btnDialog" />
+
+    <Button
+        android:id="@+id/btnDecoration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="9dp"
+        android:text="条目装饰"
+        app:layout_constraintBottom_toTopOf="@+id/btnMulti"
+        app:layout_constraintStart_toStartOf="@+id/btnMulti" />
+
+    <Button
+        android:id="@+id/btnCountdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="37dp"
+        android:text="倒计时"
+        app:layout_constraintEnd_toEndOf="@+id/btnDecoration"
+        app:layout_constraintStart_toStartOf="@+id/btnDecoration"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnCountdown2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="倒计时(service)"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toStartOf="@+id/btnCountdown"
+        app:layout_constraintTop_toBottomOf="@+id/btnCountdown" />
+
+    <Button
+        android:id="@+id/btnWeb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:text="网页"
+        app:layout_constraintStart_toStartOf="@+id/btnPermission"
+        app:layout_constraintTop_toBottomOf="@+id/btnPermission" />
+
+    <Button
+        android:id="@+id/btnList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="列表"
+        app:layout_constraintStart_toStartOf="@+id/btnWeb"
+        app:layout_constraintTop_toBottomOf="@+id/btnWeb" />
+
+    <Button
+        android:id="@+id/btnPopupWindow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="14dp"
+        android:text="底部弹框PopupWindow"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="@+id/btnList"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnList" />
+
+    <Button
+        android:id="@+id/btnNotificationToNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="57dp"
+        android:text="通知跳转下一页"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toEndOf="@+id/btnCountdown2"
+        app:layout_constraintStart_toStartOf="@+id/btnPopupWindow"
+        app:layout_constraintTop_toBottomOf="@+id/btnPopupWindow" />
+
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="下一个页面"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toStartOf="@+id/btnNotificationToNext"
+        app:layout_constraintTop_toBottomOf="@+id/btnNotificationToNext" />
+
+    <com.fastlib.widget.CircleImageView
+        android:id="@+id/circleImageView"
+        android:layout_width="101dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="42dp"
+        android:src="@drawable/car"
+        app:borderColor="@color/translucent"
+        app:borderOverlay="true"
+        app:borderWidth="13dp"
+        app:circleBackgroundColor="@color/grey_300"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnList" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

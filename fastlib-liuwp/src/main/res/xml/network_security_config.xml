@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="InsecureBaseConfiguration,AcceptsUserCertificates">
+    <!--网络安全配置：允许明文传输-->
+    <base-config cleartextTrafficPermitted="true"/>
+</network-security-config>

@@ -1,19 +1,29 @@
 package com.fastlib.utils;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.DrawableRes;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
+import com.fastlib.BuildConfig;
+import com.google.android.material.snackbar.Snackbar;
+
 /**
+ * Created by liuwp on 2020/11/17.
  * Notification统一管理类
  */
 public class N {
@@ -23,179 +33,128 @@ public class N {
         throw new UnsupportedOperationException("cannot be instantiated");
     }
 
-    public static void showShort(Context context, CharSequence message) {
-        showToastShort(context, message);
-    }
-
-    public static void showLong(Context context, int message) {
-        showToastLong(context, message);
-    }
-
-    public static void showLong(Context context, CharSequence message) {
-        showToastLong(context, message);
-    }
-
     /**
-     * 短时间显示Toast
+     * 显示Toast
      *
      * @param context
      * @param message
      */
-    public static void showToastShort(Context context, CharSequence message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    public static void showToast(Context context, CharSequence message) {
+        Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     /**
-     * 短时间显示Toast
-     *
-     * @param context
-     * @param message
-     */
-    public static void showToastShort(Context context, int message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 长时间显示Toast
-     *
-     * @param context
-     * @param message
-     */
-    public static void showToastLong(Context context, CharSequence message) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     * 长时间显示Toast
-     *
-     * @param context
-     * @param message
-     */
-    public static void showToastLong(Context context, int message) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     * 自定义时间显示Toast
-     *
-     * @param context
-     * @param message
-     * @param duration
-     */
-    public static void showToast(Context context, CharSequence message, int duration) {
-        Toast.makeText(context, message, duration).show();
-    }
-
-    /**
-     * 自定义时间显示Toast
-     *
-     * @param context
-     * @param message
-     * @param duration
-     */
-    public static void showToast(Context context, int message, int duration) {
-        Toast.makeText(context, message, duration).show();
-    }
-
-    /**
-     * 短时间显示Snackbar
-     *
-     * @param view
-     * @param message
-     */
-    public static void showSnackbarShort(View view, CharSequence message) {
-        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 短时间显示Snackbar，有监听
+     * 显示SnackBar
      *
      * @param view
      * @param message
      * @param actionMessage
      * @param listener
      */
-    public static void showSnackbarShort(View view, CharSequence message, CharSequence actionMessage, View.OnClickListener listener) {
-        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).setAction(actionMessage, listener).show();
+    public static void showSnackBar(View view, CharSequence message, CharSequence actionMessage, View.OnClickListener listener) {
+        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+        snackbar.setAction(actionMessage, listener);
+        snackbar.show();
     }
 
     /**
-     * 短时间显示Snackbar
-     *
-     * @param view
-     * @param message
-     */
-    public static void showSnackbarShort(View view, int message) {
-        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 长时间显示Snackbar
-     *
-     * @param view
-     * @param message
-     */
-    public static void showSnackbarLong(View view, CharSequence message) {
-        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
-    }
-
-    /**
-     * 长时间显示Snackbar
-     *
-     * @param view
-     * @param message
-     */
-    public static void showSnackbarLong(View view, int message) {
-        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
-    }
-
-    /**
-     * 长时间显示Snackbar，有监听
-     *
-     * @param view
-     * @param message
-     * @param actionMessage
-     * @param listener
-     */
-    public static void showSnackbarLong(View view, CharSequence message, CharSequence actionMessage, View.OnClickListener listener) {
-        Snackbar.make(view, message, Snackbar.LENGTH_LONG).setAction(actionMessage, listener);
-    }
-
-    /**
-     * 显示通知,适配Android 8.0及以上版本。
+     * 显示通知,支持点击跳转,适配Android 8.0及以上版本。
+     * 使用默认的声音、振动、闪光;震动需添加权限:<uses-permission android:name="android.permission.VIBRATE"/>
+     * 点击“不再提示”按钮，通知开关关闭后不再提示。
      *
      * @param context
      * @param id
      * @param icon
      * @param title
      * @param message
-     * @param channelId   渠道id，例：chat
-     * @param channelName 渠道名称，例：聊天消息
-     * @param importance  重要等级，例：NotificationManager.IMPORTANCE_HIGH
+     * @param channelId     渠道id，例：chat
+     * @param channelName   渠道名称，例：聊天消息
+     * @param importance    重要等级，例：NotificationManager.IMPORTANCE_HIGH
+     * @param pendingIntent 例：PendingIntent.getActivities(context, 0, intents, PendingIntent.FLAG_UPDATE_CURRENT)
      */
-    public static void showNotify(Context context, int id, @DrawableRes int icon, CharSequence title, CharSequence message, String channelId, String channelName, int importance) {
+    public static void showNotify(final Context context, int id, @DrawableRes int icon, CharSequence title, CharSequence message, final String channelId, String channelName, int importance, PendingIntent pendingIntent) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        final SharedPreferences sp = context.getSharedPreferences(BuildConfig.DEFAULT_DATA_FILE_NAME, Context.MODE_PRIVATE);
+        final String ALL_NOTIFICATION_NOT_ENABLED = "allNotificationNotEnabled";
+        final String CHANNEL_NOTIFICATION_NOT_ENABLED = channelId + "NotificationNotEnabled";
+        //创建通知渠道
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (manager != null) {
-                manager.createNotificationChannel(new NotificationChannel(channelId, channelName, importance));
-            }
-//            //检测通知渠道是否关闭
-//            if (manager != null && manager.getNotificationChannel(channelId).getImportance() == NotificationManager.IMPORTANCE_NONE) {
-//                Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
-//                intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
-//                intent.putExtra(Settings.EXTRA_CHANNEL_ID,manager.getNotificationChannel(channelId).getId());
-//                context.startActivity(intent);
-//            }
+            NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
+            manager.createNotificationChannel(channel);
         }
+        //检测通知是否开启.注意这个方法判断的是通知总开关，如果APP通知被关闭，则其下面的所有通知渠道也被关闭.
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled() && sp.getBoolean(ALL_NOTIFICATION_NOT_ENABLED, true)) {
+            new AlertDialog.Builder(context)
+                    .setTitle("提示")
+                    .setMessage("是否开启通知？")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //打开通知设置页面
+                            String packageName = context.getPackageName();
+                            int uid = context.getApplicationInfo().uid;
+                            Intent intent = new Intent();
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
+                                intent.putExtra(Settings.EXTRA_CHANNEL_ID, uid);
+                            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+                                intent.putExtra("app_package", packageName);
+                                intent.putExtra("app_uid", uid);
+                            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+                                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                                intent.setData(Uri.parse("package:" + packageName));
+                            } else {
+                                intent.setAction(Settings.ACTION_SETTINGS);
+                            }
+                            context.startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("不再提示", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            sp.edit().putBoolean(ALL_NOTIFICATION_NOT_ENABLED, false).apply();
+                        }
+                    })
+                    .show();
+            return;
+        }
+        //检测某一渠道的通知是否开启.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && manager.getNotificationChannel(channelId).getImportance() == NotificationManager.IMPORTANCE_NONE && sp.getBoolean(CHANNEL_NOTIFICATION_NOT_ENABLED, true)) {
+            new AlertDialog.Builder(context)
+                    .setTitle("提示")
+                    .setMessage("是否开启“" + channelName + "”的通知渠道，成功开启后可正常接收通知？")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
+                            intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
+                            intent.putExtra(Settings.EXTRA_CHANNEL_ID, channelId);
+                            context.startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("不再提示", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            sp.edit().putBoolean(CHANNEL_NOTIFICATION_NOT_ENABLED, false).apply();
+                        }
+                    })
+                    .show();
+            return;
+        }
+        //通知内容
         Notification notification = new NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(icon)
                 .setContentTitle(title)
                 .setContentText(message)
+                .setContentIntent(pendingIntent)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setAutoCancel(true)
                 .build();
-        if (manager != null) {
-            manager.notify(id, notification);
-        }
+        //发送通知
+        manager.notify(id, notification);
     }
 }

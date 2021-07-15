@@ -6,14 +6,21 @@
         android:allowBackup="true"
         android:supportsRtl="true">
 
+        <service android:name=".base.custom.CountDownService"/>
+
+        <activity
+            android:name=".utils.permission.PermissionActivity"
+            android:theme="@style/PermissionActivityStyle" />
+
+        <!--调用：FastUtil.getFileProviderAuthority(context)-->
+        <!--android:authorities属性值由applicationId和自定义的名称组成的Uri字符串。-->
+        <!--grantUriPermissions:true，表示授予uri临时访问权限。-->
+        <!--exported:要求必须为false，为true则会报安全异常。-->
         <provider
-            android:name="android.support.v4.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:grantUriPermissions="true"
-            android:exported="false">
-            <!--android:authorities属性值由applicationId和自定义的名称组成的Uri字符串。-->
-            <!--grantUriPermissions:true，表示授予uri临时访问权限。-->
-            <!--exported:要求必须为false，为true则会报安全异常。-->
+            android:name=".base.custom.FastFileProvider"
+            android:authorities="${applicationId}.fastfileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_path" />

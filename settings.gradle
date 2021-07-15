@@ -1,1 +1,3 @@
-include ':app', ':fastlib-liuwp'
+rootProject.name='FastLib'
+include ':app'
+include ':fastlib-liuwp'

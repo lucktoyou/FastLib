@@ -4,57 +4,22 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.lucktoyou'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 27
+        targetSdkVersion 29
         versionCode 1
-        versionName "1.0.0"
-//        renderscriptTargetApi 15
-//        renderscriptSupportModeEnabled true
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+        versionName "3.6.1"
+        buildConfigField("String","DEFAULT_DATA_FILE_NAME","\"fastlib\"") //SharedPreferences和数据库默认存储名
     }
 }
 
-////统一使用版本
-//configurations.all {
-//    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-//        def requested = details.requested
-//        if (requested.group == 'com.android.support') {
-//            if (!requested.name.startsWith("multidex")) {
-//                details.useVersion '26.1.0'
-//            }
-//        }
-//    }
-//}
-
-/*Gradle配置implementation、api与compile的区别:
- *  自Gradle 3.4开始，compile被废弃，取而代之的是implementation和api两个配置项。
- *  使用implementation配置依赖，对Gradle来说：
- *      编译时：不允许外部模块调用此依赖包，除非外部模块自己声明此依赖.
- *      运行时：此依赖包只允许在运行时使用反射机制调用.
- *      也就是说模块使用implementation屏蔽了外部模块直接调用它声明的依赖。
- *  这样做有几个好处：（翻译自Gradle 文档）
- *      ①依赖关系不会泄漏到消费者的编译类路径中，所以永远不会意外地依赖于传递依赖项.
- *      ②由于减少的类路径大小编译更快。
- *      ③当实现依赖关系发生变化时，重新编译会更少：消费者不需要重新编译。
- *      ④cleaner发布：当与新的maven-publish插件结合使用时，Java库会生成POM文件，
- *      这些文件可以精确地区分编译库所需的内容和运行时使用库所需的内容（换句话说，不要
- *      混合编译library本身所需的东西，以及编译library所需的东西）。
- *  使用api替换compile：
- *      编译时与implementation相反，它允许外部模块不管在编译时还是运行时都可以调用api声明的依赖。和原来的compile很类似。
- */
 dependencies {
-    api fileTree(include: ['*.jar'], dir: 'libs')
-    api 'com.android.support:appcompat-v7:27.1.1'
-    api 'com.android.support:support-v4:27.1.1'
-    api 'com.android.support:cardview-v7:27.1.1'//卡片视图
-    api 'com.android.support:design:27.1.1'//使用RecyclerView、TabLayout等控件
-    api 'com.google.code.gson:gson:2.2.4'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.orhanobut:logger:2.2.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+    implementation rootProject.ext.dependencies.appcompat
+    implementation rootProject.ext.dependencies.material
+    implementation rootProject.ext.dependencies.gson
 }

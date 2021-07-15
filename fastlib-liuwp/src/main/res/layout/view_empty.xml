@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/empty_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/empty_retry_view"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/empty" />
+
+    <TextView
+        android:id="@+id/state_hint_content"
+        style="@style/StateLayout.Content"
+        android:layout_below="@id/empty_retry_view"
+        android:text="@string/empty_view_hint" />
+</RelativeLayout>

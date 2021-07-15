@@ -11,6 +11,7 @@ import android.widget.EditText;
 
 /**
  * Created by liuwp on 2017/12/19.
+ * Modified by liuwp on 2021/5/25.
  *
  * 软键盘:打开、关闭、监听
  */
@@ -50,6 +51,7 @@ public class SortKeyboardUtil {
     }
 
     //设置点击EditView以外区域可隐藏软件盘
+    //boolean dispatchTouchEvent(MotionEvent ev)
     public static boolean setEditViewOutsideHideKeyboard(Activity activity, MotionEvent ev,boolean interceptEvent) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             View v = activity.getCurrentFocus();

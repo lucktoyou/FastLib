@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="15dp"
+            android:textSize="9sp"
+            android:text="数据库常用方法：增、改、删、查" />
+
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="37dp"
+            android:onClick="@{onClick}"
+            android:text="增加"
+            android:layout_below="@+id/tvContent"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="90dp" />
+
+        <Button
+            android:id="@+id/btnUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/btnSave"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@+id/btnSave"
+            android:onClick="@{onClick}"
+            android:text="修改" />
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/btnSave"
+            android:layout_below="@+id/btnSave"
+            android:layout_marginTop="37dp"
+            android:onClick="@{onClick}"
+            android:text="删除" />
+
+        <Button
+            android:id="@+id/btnQuery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/btnDelete"
+            android:layout_below="@+id/btnDelete"
+            android:layout_marginTop="30dp"
+            android:onClick="@{onClick}"
+            android:text="查询" />
+
+        <Button
+            android:id="@+id/btnDataFromDb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="37dp"
+            android:onClick="@{onClick}"
+            android:text="数据来自数据库（自定义构造时）"
+            android:layout_below="@+id/btnQuery"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="90dp" />
+    </RelativeLayout>
+</androidx.core.widget.NestedScrollView>

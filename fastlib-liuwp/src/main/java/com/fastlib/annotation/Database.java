@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * notnull和defaultValue两个值暂时不使用
+ * Modified by liuwp on 2021/7/14.
+ * notNull和defaultValue两个值暂时不使用。
  */
 @Target({ElementType.FIELD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

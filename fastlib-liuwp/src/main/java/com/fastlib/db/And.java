@@ -2,7 +2,7 @@ package com.fastlib.db;
 
 /**
  * Created by sgfb on 17/1/6.
- * 数据库与条件过滤
+ * 数据库与条件过滤.
  */
 public class And extends FilterCommand{
 

@@ -1,6 +1,6 @@
 package com.fastlib.db;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Created by sgfb on 17/7/9.
@@ -10,11 +10,11 @@ public class FunctionCommand{
     private FunctionType mType;
     private FilterCommand mFilterCommand;
 
-    private FunctionCommand( FunctionType type){
+    private FunctionCommand(FunctionType type){
         mType = type;
     }
 
-    private FunctionCommand(FunctionType type, @Nullable FilterCommand filterCommand) {
+    private FunctionCommand(FunctionType type,@Nullable FilterCommand filterCommand){
         mType = type;
         mFilterCommand = filterCommand;
     }
@@ -87,11 +87,11 @@ public class FunctionCommand{
         return new FunctionCommand(FunctionType.AVG,filterCommand);
     }
 
-    public FunctionType getType() {
+    public FunctionType getType(){
         return mType;
     }
 
-    public FilterCommand getFilterCommand() {
+    public FilterCommand getFilterCommand(){
         return mFilterCommand;
     }
 }

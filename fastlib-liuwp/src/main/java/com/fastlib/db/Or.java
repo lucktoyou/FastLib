@@ -2,11 +2,11 @@ package com.fastlib.db;
 
 /**
  * Created by sgfb on 17/1/6.
- * 数据库或条件过滤
+ * 数据库或条件过滤.
  */
 public class Or extends FilterCommand{
 
-    private Or(Condition condition) {
+    private Or(Condition condition){
         super(condition);
     }
 
@@ -15,7 +15,7 @@ public class Or extends FilterCommand{
     }
 
     @Override
-    public int getType() {
+    public int getType(){
         return TYPE_OR;
     }
 }

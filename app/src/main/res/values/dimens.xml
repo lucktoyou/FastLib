@@ -1,0 +1,21 @@
+<resources>
+    <!--状态栏高度-->
+    <dimen name="status_bar_height">0dp</dimen>
+    <!--标题栏高度-->
+    <dimen name="title_bar_height">45dp</dimen>
+    <!--导航栏高度 例：APP中“首页”的页面大概率出现的底部导航栏高度-->
+    <dimen name="navigation_bar_height">60dp</dimen>
+    <!--导航条高度 例：APP中“我”的页面大概率出现的导航条目高度-->
+    <dimen name="navigation_item_height">60dp</dimen>
+    <!--侧滑菜单条目宽度-->
+    <dimen name="swipe_menu_item_width">100dp</dimen>
+
+    <!--基本字体定义-->
+    <dimen name="font_size_tiny">10sp</dimen>
+    <dimen name="font_size_small">12sp</dimen>
+    <dimen name="font_size_normal">14sp</dimen>
+    <dimen name="font_size_normal_high">16sp</dimen>
+    <dimen name="font_size_large">18sp</dimen>
+    <dimen name="font_size_large_high">20sp</dimen>
+    <dimen name="font_size_xlarge">22sp</dimen>
+</resources>

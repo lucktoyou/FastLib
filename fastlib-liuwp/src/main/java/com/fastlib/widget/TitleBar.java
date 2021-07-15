@@ -75,9 +75,9 @@ public class TitleBar extends FrameLayout{
 
     private void init(AttributeSet attrs){
         init();
-        TypedArray ta=getContext().obtainStyledAttributes(attrs,R.styleable.TitleBar);
+        TypedArray ta=getContext().obtainStyledAttributes(attrs, R.styleable.TitleBar);
 
-        mTitle.setText(ta.getString(R.styleable.TitleBar_titleText));
+        mTitle.setText(ta.getString(R.styleable.TitleBar_title));
         mTitle.setTextColor(ta.getColor(R.styleable.TitleBar_titleColor,mTitle.getCurrentTextColor()));
         mLeftText.setText(ta.getString(R.styleable.TitleBar_leftText));
         mLeftText.setTextColor(ta.getColor(R.styleable.TitleBar_leftTextColor,mLeftText.getCurrentTextColor()));
