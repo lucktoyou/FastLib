@@ -1,7 +1,11 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven-publish'
 
-group='com.github.lucktoyou'
+def gStr = 'com.github.lucktoyou'
+def aStr = 'FastLib'
+def vStr = '3.6.3'
+group = gStr
+version = vStr
 
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
@@ -9,9 +13,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 1
-        versionName "3.6.1"
-        buildConfigField("String","DEFAULT_DATA_FILE_NAME","\"fastlib\"") //SharedPreferences和数据库默认存储名
+        buildConfigField("String","DEFAULT_DATA_FILE_NAME","\"fastlib\"")
     }
 }
 
@@ -22,4 +24,17 @@ dependencies {
     implementation rootProject.ext.dependencies.appcompat
     implementation rootProject.ext.dependencies.material
     implementation rootProject.ext.dependencies.gson
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = gStr
+                artifactId = aStr
+                version = vStr
+            }
+        }
+    }
 }

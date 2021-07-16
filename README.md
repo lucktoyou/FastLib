@@ -15,7 +15,7 @@ allprojects {
 ```groovy
 dependencies {
     //...
-    implementation 'com.github.lucktoyou:FastLib:3.6.1'
+    implementation 'com.github.lucktoyou:FastLib:release'
 }
 ```
 
