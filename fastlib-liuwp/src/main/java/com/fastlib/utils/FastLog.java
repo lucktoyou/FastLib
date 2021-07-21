@@ -15,9 +15,13 @@ import com.orhanobut.logger.PrettyFormatStrategy;
  * 3.使用范围：打印库内、库外日志信息。
  */
 public class FastLog{
-    private static final boolean debug = BuildConfig.DEBUG;
+    private static boolean debug = BuildConfig.DEBUG;
     private static final PrettyFormatStrategy strategy = PrettyFormatStrategy.newBuilder().showThreadInfo(true).methodCount(2).tag("PRETTY_LOG").build();
     private static final AndroidLogAdapter adapter = new AndroidLogAdapter(strategy);
+
+    public static void setDebug(boolean debug){
+        FastLog.debug = debug;
+    }
 
     public static void d(String msg){
         if(debug && !TextUtils.isEmpty(msg)){
