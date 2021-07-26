@@ -1,23 +1,30 @@
 package com.example.fastlibdemo.next;
 
+import android.annotation.SuppressLint;
 import android.widget.Toast;
 
 import com.example.fastlibdemo.R;
 import com.example.fastlibdemo.base.BindViewFragment;
 import com.example.fastlibdemo.databinding.FragmentBlankBinding;
 import com.fastlib.annotation.Bind;
-import com.fastlib.annotation.ContentView;
 import com.fastlib.base.EventObserver;
 import com.fastlib.utils.N;
 import com.fastlib.utils.permission.FastPermission;
 import com.fastlib.utils.permission.OnPermissionCallback;
 import com.fastlib.utils.permission.Permission;
 
+@SuppressLint("NonConstantResourceId")
 public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
 
     @Override
     public void alreadyPrepared() {
 
+    }
+
+
+    @Bind(R.id.btnTest)
+    public void test() {
+        N.showToast(getContext(),"click ok");
     }
 
     @Bind(R.id.btnPermission)
@@ -74,6 +81,7 @@ public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
 
     @Bind(R.id.btnSend)
     public void send() {
+        N.showToast(getContext(),"已发送需显示文本");
         EventObserver.getInstance().sendEvent(new InfoEvent("hello world！"));
     }
 }
