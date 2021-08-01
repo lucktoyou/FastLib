@@ -3,7 +3,7 @@ apply plugin: 'maven-publish'
 
 def gStr = 'com.github.lucktoyou'
 def aStr = 'FastLib'
-def vStr = '3.6.4'
+def vStr = '3.6.7'
 group = gStr
 version = vStr
 
@@ -11,8 +11,8 @@ android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 29
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
         buildConfigField("String","DEFAULT_DATA_FILE_NAME","\"fastlib\"")
     }
 }

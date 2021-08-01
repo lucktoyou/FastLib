@@ -16,11 +16,16 @@ import com.orhanobut.logger.PrettyFormatStrategy;
  */
 public class FastLog{
     private static boolean debug = BuildConfig.DEBUG;
-    private static final PrettyFormatStrategy strategy = PrettyFormatStrategy.newBuilder().showThreadInfo(true).methodCount(2).tag("PRETTY_LOG").build();
+    private static PrettyFormatStrategy strategy = PrettyFormatStrategy.newBuilder().showThreadInfo(true).methodCount(2).tag("FAST_PRETTY_LOGGER").build();
     private static final AndroidLogAdapter adapter = new AndroidLogAdapter(strategy);
 
     public static void setDebug(boolean debug){
         FastLog.debug = debug;
+    }
+
+    public static void setDebug(boolean debug,boolean showThreadInfo,int methodCount,String tag){
+        FastLog.debug = debug;
+        strategy = PrettyFormatStrategy.newBuilder().showThreadInfo(showThreadInfo).methodCount(methodCount).tag(tag).build();
     }
 
     public static void d(String msg){

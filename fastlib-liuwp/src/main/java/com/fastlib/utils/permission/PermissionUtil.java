@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
@@ -15,8 +14,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-
-import com.fastlib.utils.FastLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,21 +24,12 @@ import java.util.List;
  * 辅助工具
  */
 public class PermissionUtil{
-    public static final int PERMISSION_REQUEST_CODE = 777;
+    public static final int PERMISSION_REQUEST_CODE = 1;
+    public static final int ACTION_MANAGE_OVERLAY_PERMISSION = 2;
+    public static final int ACTION_WRITE_SETTINGS_PERMISSION = 3;
+    public static final int ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = 4;
     private static List<String> mAppPermissions;
 
-    //过滤出实际参与权限申请的权限
-    public static String[] getRealRequestPermissions(@NonNull String[] permissions){
-        List<String> list = new ArrayList<>(Arrays.asList(permissions));
-        for(String p: list){
-            if(Build.VERSION.SDK_INT<29 && p.equals(Permission.ACCESS_BACKGROUND_LOCATION)){
-                if(list.remove(p)){
-                    FastLog.d("Android 10(Q 29)以下系统版本不存在权限："+p+"，此权限从实际参与请求的权限数组中移除，不会参与权限申请");
-                }
-            }
-        }
-        return list.toArray(new String[0]);
-    }
 
     //检查权限是否在清单中注册
     public static void checkPermissionsWhetherRegisteredInManifest(@NonNull Context context,@NonNull String[] permissions){

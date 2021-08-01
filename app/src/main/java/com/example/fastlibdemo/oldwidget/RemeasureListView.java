@@ -1,24 +1,24 @@
-package com.fastlib.widget;
+package com.example.fastlibdemo.oldwidget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.GridView;
+import android.widget.ListView;
 
 /**
  * Modified by liuwp on 20/11/2.
- * 当ScrollView中嵌入GridView会因冲突导致显示不全，重新测量。
+ * 当ScrollView中嵌入ListView会因冲突导致显示不全，重新测量。
  */
-public class RemeasureGridView extends GridView{
+public class RemeasureListView extends ListView{
 
-    public RemeasureGridView(Context context) {
+    public RemeasureListView(Context context) {
         super(context);
     }
 
-    public RemeasureGridView(Context context, AttributeSet attrs) {
+    public RemeasureListView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public RemeasureGridView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public RemeasureListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

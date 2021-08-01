@@ -4,7 +4,8 @@
 
     <application
         android:allowBackup="true"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true">
 
         <service android:name=".base.custom.CountDownService"/>
 
@@ -12,10 +13,10 @@
             android:name=".utils.permission.PermissionActivity"
             android:theme="@style/PermissionActivityStyle" />
 
-        <!--调用：FastUtil.getFileProviderAuthority(context)-->
-        <!--android:authorities属性值由applicationId和自定义的名称组成的Uri字符串。-->
-        <!--grantUriPermissions:true，表示授予uri临时访问权限。-->
-        <!--exported:要求必须为false，为true则会报安全异常。-->
+        <!--FastUtil.getFileProviderAuthority(context)-->
+        <!--android:authorities="${applicationId}.fileprovider"；由applicationId和自定义的名称组成的Uri字符串。-->
+        <!--android:grantUriPermissions="true"；为true表示授予uri临时访问权限。-->
+        <!--android:exported="false"；要求必须为false，为true则会报安全异常。-->
         <provider
             android:name=".base.custom.FastFileProvider"
             android:authorities="${applicationId}.fastfileprovider"

@@ -37,7 +37,10 @@ import java.lang.annotation.RetentionPolicy;
         Permission.RECEIVE_WAP_PUSH,
         Permission.RECEIVE_MMS,
         Permission.READ_EXTERNAL_STORAGE,
-        Permission.WRITE_EXTERNAL_STORAGE
+        Permission.WRITE_EXTERNAL_STORAGE,
+        Permission.SYSTEM_ALERT_WINDOW,
+        Permission.WRITE_SETTINGS,
+        Permission.MANAGE_EXTERNAL_STORAGE
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface PermissionDef{

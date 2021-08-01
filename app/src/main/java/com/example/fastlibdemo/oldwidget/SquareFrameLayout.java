@@ -1,4 +1,4 @@
-package com.fastlib.widget;
+package com.example.fastlibdemo.oldwidget;
 
 import android.content.Context;
 import android.util.AttributeSet;

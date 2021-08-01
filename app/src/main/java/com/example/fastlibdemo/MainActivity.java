@@ -114,7 +114,7 @@ public class MainActivity extends FastActivity {
     @Bind(R.id.btnPermission)
     public void permission() {
         FastPermission.with(this)
-                .permissions(Permission.CAMERA, Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE)
+                .permissions(Permission.CAMERA, Permission.WRITE_EXTERNAL_STORAGE)
                 .request(new OnPermissionCallback() {
                     @Override
                     public void onPermissionSuccess() {

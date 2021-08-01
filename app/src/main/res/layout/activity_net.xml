@@ -73,7 +73,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnNetUpload" />
 
-    <com.fastlib.widget.PinchImageView
+    <ImageView
         android:id="@+id/imgSource"
         android:layout_width="260dp"
         android:layout_height="260dp"
@@ -81,7 +81,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.fastlib.widget.PinchImageView
+    <ImageView
         android:id="@+id/imgCompress"
         android:layout_width="260dp"
         android:layout_height="260dp"

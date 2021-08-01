@@ -14,7 +14,7 @@ public class AndroidScreens {
     private static File rootFile;
 
     static {
-        rootFile = new File("E:/Liuwp_project/MyLib/fastlib-liuwp/src/main/res");
+        rootFile = new File("E:/Liuwp_project_open_source/Fastlib/app/src/main/res");
         if (!rootFile.exists()) {
             rootFile.mkdirs();
         }
