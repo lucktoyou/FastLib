@@ -211,62 +211,6 @@ public class MultiStateFrameLayout extends FrameLayout {
     }
 
     /**
-     * 显示加载中视图
-     */
-    public final void showLoading() {
-        showLoading(mLoadingViewResId, DEFAULT_LAYOUT_PARAMS);
-    }
-
-    /**
-     * 显示加载中视图
-     *
-     * @param hintResId  自定义提示文本内容
-     * @param formatArgs 占位符参数
-     */
-    public final void showLoading(int hintResId, Object... formatArgs) {
-        showLoading();
-        setStateHintContent(mLoadingView, hintResId, formatArgs);
-    }
-
-    /**
-     * 显示加载中视图
-     *
-     * @param hint 自定义提示文本内容
-     */
-    public final void showLoading(String hint) {
-        showLoading();
-        setStateHintContent(mLoadingView, hint);
-    }
-
-    /**
-     * 显示加载中视图
-     *
-     * @param layoutId     自定义布局文件
-     * @param layoutParams 布局参数
-     */
-    public final void showLoading(int layoutId, ViewGroup.LayoutParams layoutParams) {
-        showLoading(null == mLoadingView ? inflateView(layoutId) : mLoadingView, layoutParams);
-    }
-
-    /**
-     * 显示加载中视图
-     *
-     * @param view         自定义视图
-     * @param layoutParams 布局参数
-     */
-    public final void showLoading(View view, ViewGroup.LayoutParams layoutParams) {
-        checkNull(view, "Loading view is null.");
-        checkNull(layoutParams, "Layout params is null.");
-        changeViewState(STATE_LOADING);
-        if (null == mLoadingView) {
-            mLoadingView = view;
-            mOtherIds.add(mLoadingView.getId());
-            addView(mLoadingView, 0, layoutParams);
-        }
-        showViewById(mLoadingView.getId());
-    }
-
-    /**
      * 显示无网络视图
      */
     public final void showNoNetwork() {
@@ -325,6 +269,42 @@ public class MultiStateFrameLayout extends FrameLayout {
         }
         showViewById(mNoNetworkView.getId());
     }
+
+    /**
+     * 显示加载中视图
+     */
+    public final void showLoading() {
+        showLoading(mLoadingViewResId, DEFAULT_LAYOUT_PARAMS);
+    }
+
+    /**
+     * 显示加载中视图
+     *
+     * @param layoutId     自定义布局文件
+     * @param layoutParams 布局参数
+     */
+    public final void showLoading(int layoutId, ViewGroup.LayoutParams layoutParams) {
+        showLoading(null == mLoadingView ? inflateView(layoutId) : mLoadingView, layoutParams);
+    }
+
+    /**
+     * 显示加载中视图
+     *
+     * @param view         自定义视图
+     * @param layoutParams 布局参数
+     */
+    public final void showLoading(View view, ViewGroup.LayoutParams layoutParams) {
+        checkNull(view, "Loading view is null.");
+        checkNull(layoutParams, "Layout params is null.");
+        changeViewState(STATE_LOADING);
+        if (null == mLoadingView) {
+            mLoadingView = view;
+            mOtherIds.add(mLoadingView.getId());
+            addView(mLoadingView, 0, layoutParams);
+        }
+        showViewById(mLoadingView.getId());
+    }
+
 
     /**
      * 显示内容视图
