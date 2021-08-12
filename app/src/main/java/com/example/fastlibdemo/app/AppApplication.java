@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Process;
 import android.webkit.WebView;
 
+import com.example.fastlibdemo.BuildConfig;
 import com.fastlib.db.FastDatabase;
 import com.fastlib.net.HttpGlobalConfig;
 import com.fastlib.net.Request;
@@ -21,7 +22,7 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        FastLog.setDebug(true,false,0,"FAST_LOGGER");
         FastDatabase.getConfig().setVersion(6);
         HttpGlobalConfig.getInstance().setRootAddress("https://www.xxx.com:443");
         HttpGlobalConfig.getInstance().setGlobalListener(new GlobalListener(){
