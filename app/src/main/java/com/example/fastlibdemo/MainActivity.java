@@ -23,7 +23,6 @@ import com.example.fastlibdemo.pop.SelectMapPop;
 import com.example.fastlibdemo.task.TaskActivity;
 import com.example.fastlibdemo.view.H5Activity;
 import com.example.fastlibdemo.view.MultiActivity;
-import com.example.fastlibdemo.R;
 import com.fastlib.annotation.Bind;
 import com.fastlib.annotation.ContentView;
 import com.fastlib.annotation.Event;
@@ -32,16 +31,19 @@ import com.fastlib.base.FastDialog;
 import com.fastlib.base.custom.CountDownService;
 import com.fastlib.base.module.FastActivity;
 import com.fastlib.bean.event.EventCountDown;
+import com.fastlib.utils.DeviceUtil;
 import com.fastlib.utils.EncryptUtil;
 import com.fastlib.utils.FastLog;
 import com.fastlib.utils.FastUtil;
 import com.fastlib.utils.FileUtil;
 import com.fastlib.utils.N;
+import com.fastlib.utils.TimeUtil;
 import com.fastlib.utils.core.SaveUtil;
 import com.fastlib.utils.permission.FastPermission;
 import com.fastlib.utils.permission.OnPermissionCallback;
 import com.fastlib.utils.permission.Permission;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +54,7 @@ public class MainActivity extends FastActivity {
 
     @Override
     public void alreadyPrepared() {
-        SaveUtil.saveToSp(this,"data", "hello world!");
+        SaveUtil.saveToSp("data", "hello world!");
     }
 
     @Bind(R.id.btnLog)
@@ -73,7 +75,16 @@ public class MainActivity extends FastActivity {
         FastLog.e("测试:" + Integer.class);
         FastLog.e("测试:" + Boolean.TRUE);
         FastLog.e("测试:" + FileUtil.isSDCardAvailable());
+
+        Date date = TimeUtil.stringToDate("2001.12.12-08:23:21", "yyyy.MM.dd-HH:mm:ss");
+        FastLog.e("测试:"+date);//Wed Dec 12 08:23:21 GMT+08:00 2001
+
+        FastLog.e("手机设备厂商："+DeviceUtil.getManufacturer());
+        FastLog.e("手机设备型号："+DeviceUtil.getModel());
+        FastLog.e("手机设备系统版本："+ DeviceUtil.getSystemVersion());
+        FastLog.e("手机设备ID："+DeviceUtil.getUniqueDeviceId());
     }
+
 
     @Bind(R.id.btnProgress)
     public void progress() {

@@ -4,7 +4,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
+/**
+ * Modified by liuwp on 2021/8/16.
+ */
 public class TimeUtil {
     private static final int MASK_TIME_UNIT_BASE = 1;
     public static final int MASK_TIME_UNIT_YEAR = MASK_TIME_UNIT_BASE;
@@ -89,7 +93,7 @@ public class TimeUtil {
      * @return 格式化后字符串
      */
     public static String dateToString(Date date, String format) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
         return sdf.format(date);
     }
 
@@ -106,14 +110,14 @@ public class TimeUtil {
      * 字符串转成指定格式的date类型
      * String dateStr = "2001.12.12-08:23:21";
      * String format = "yyyy.MM.dd-HH:mm:ss";
-     * TimeUtil.StringToDate(dateStr, format).toString()<==>"Wed Dec 12 08:23:21 GMT+08:00 2001"
+     * TimeUtil.stringToDate(dateStr, format).toString()<==>"Wed Dec 12 08:23:21 GMT+08:00 2001"
      * GMT+08:00表示东八区
      * @param dateStr 日期字符串
      * @param format 指定格式
      * @return 日期
      */
-    public static Date StringToDate(String dateStr, String format) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
+    public static Date stringToDate(String dateStr, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
         try {
             return sdf.parse(dateStr);
         } catch (ParseException e) {

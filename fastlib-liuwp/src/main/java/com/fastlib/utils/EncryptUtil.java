@@ -26,13 +26,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * <pre>
- *     author: Blankj
- *     blog  : http://blankj.com
- *     time  : 2016/08/02
- *     desc  : utils about encrypt
- * </pre>
- *
  * Modified by liuwp on 2020/10/27.
  * 加密解密工具类.
  * 来源：https://github.com/Blankj/AndroidUtilCode/blob/master/lib/utilcode/src/main/java/com/blankj/utilcode/util/EncryptUtils.java

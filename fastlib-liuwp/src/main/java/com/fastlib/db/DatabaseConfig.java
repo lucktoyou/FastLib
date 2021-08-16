@@ -23,7 +23,7 @@ public class DatabaseConfig{
     private File mFileRefDir;
 
     public DatabaseConfig(){
-        mVersion = SaveUtil.getFromSp(ContextHolder.getContext(),SAVE_INT_DB_VERSION,1);
+        mVersion = SaveUtil.getFromSp(SAVE_INT_DB_VERSION,1);
         mCurrentDatabase = DEFAULT_DATABASE_NAME+".db";
         mFileRefDir = createDatabaseFileReferenceDirectory();
     }
@@ -58,7 +58,7 @@ public class DatabaseConfig{
             return;
         }
         mVersion = newVersion;
-        SaveUtil.saveToSp(ContextHolder.getContext(),SAVE_INT_DB_VERSION,newVersion);
+        SaveUtil.saveToSp(SAVE_INT_DB_VERSION,newVersion);
     }
 
     public int getVersion(){

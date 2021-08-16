@@ -8,7 +8,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -19,12 +18,12 @@ import androidx.annotation.DrawableRes;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.fastlib.BuildConfig;
+import com.fastlib.utils.core.SaveUtil;
 import com.google.android.material.snackbar.Snackbar;
 
 /**
  * Created by liuwp on 2020/11/17.
- * Notification统一管理类
+ * Notification统一管理类.
  */
 public class N {
 
@@ -75,7 +74,6 @@ public class N {
      */
     public static void showNotify(final Context context, int id, @DrawableRes int icon, CharSequence title, CharSequence message, final String channelId, String channelName, int importance, PendingIntent pendingIntent) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        final SharedPreferences sp = context.getSharedPreferences(BuildConfig.DEFAULT_DATA_FILE_NAME, Context.MODE_PRIVATE);
         final String ALL_NOTIFICATION_NOT_ENABLED = "allNotificationNotEnabled";
         final String CHANNEL_NOTIFICATION_NOT_ENABLED = channelId + "NotificationNotEnabled";
         //创建通知渠道
@@ -84,7 +82,7 @@ public class N {
             manager.createNotificationChannel(channel);
         }
         //检测通知是否开启.注意这个方法判断的是通知总开关，如果APP通知被关闭，则其下面的所有通知渠道也被关闭.
-        if (!NotificationManagerCompat.from(context).areNotificationsEnabled() && sp.getBoolean(ALL_NOTIFICATION_NOT_ENABLED, true)) {
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled() && SaveUtil.getFromSp(ALL_NOTIFICATION_NOT_ENABLED, true)) {
             new AlertDialog.Builder(context)
                     .setTitle("提示")
                     .setMessage("是否开启通知？")
@@ -116,14 +114,14 @@ public class N {
                     .setNegativeButton("不再提示", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            sp.edit().putBoolean(ALL_NOTIFICATION_NOT_ENABLED, false).apply();
+                            SaveUtil.saveToSp(ALL_NOTIFICATION_NOT_ENABLED, false);
                         }
                     })
                     .show();
             return;
         }
         //检测某一渠道的通知是否开启.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && manager.getNotificationChannel(channelId).getImportance() == NotificationManager.IMPORTANCE_NONE && sp.getBoolean(CHANNEL_NOTIFICATION_NOT_ENABLED, true)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && manager.getNotificationChannel(channelId).getImportance() == NotificationManager.IMPORTANCE_NONE && SaveUtil.getFromSp(CHANNEL_NOTIFICATION_NOT_ENABLED, true)) {
             new AlertDialog.Builder(context)
                     .setTitle("提示")
                     .setMessage("是否开启“" + channelName + "”的通知渠道，成功开启后可正常接收通知？")
@@ -139,7 +137,7 @@ public class N {
                     .setNegativeButton("不再提示", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            sp.edit().putBoolean(CHANNEL_NOTIFICATION_NOT_ENABLED, false).apply();
+                            SaveUtil.saveToSp(CHANNEL_NOTIFICATION_NOT_ENABLED, false);
                         }
                     })
                     .show();

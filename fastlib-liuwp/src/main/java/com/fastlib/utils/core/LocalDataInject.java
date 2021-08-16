@@ -1,9 +1,7 @@
 package com.fastlib.utils.core;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Pair;
@@ -15,7 +13,6 @@ import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.fastlib.BuildConfig;
 import com.fastlib.annotation.Bind;
 import com.fastlib.annotation.LocalData;
 import com.fastlib.db.And;
@@ -385,8 +382,7 @@ public class LocalDataInject {
      * @return
      */
     private Object loadLocalDataFromSp(int position, LocalData ld) {
-        SharedPreferences sp = ContextHolder.getContext(mHost).getSharedPreferences(BuildConfig.DEFAULT_DATA_FILE_NAME, Context.MODE_PRIVATE);
-        return sp.getAll().get(ld.value()[position]);
+        return SaveUtil.getFromSp(ld.value()[position], null);
     }
 
     /**
@@ -426,8 +422,7 @@ public class LocalDataInject {
      * @throws IllegalAccessException
      */
     private void loadLocalDataFromSp(Field field, LocalData lr) throws IllegalAccessException {
-        SharedPreferences sp = ContextHolder.getContext(mHost).getSharedPreferences(BuildConfig.DEFAULT_DATA_FILE_NAME, Context.MODE_PRIVATE);
-        field.set(mHost, sp.getAll().get(lr.value()[0]));
+        field.set(mHost, SaveUtil.getFromSp(lr.value()[0], null));
     }
 
     /**
