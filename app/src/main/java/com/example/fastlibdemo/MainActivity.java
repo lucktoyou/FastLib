@@ -71,18 +71,18 @@ public class MainActivity extends FastActivity {
         FastLog.e("测试:" + EncryptUtil.encryptMD5ToString("你好世界"));//65396ee4aad0b4f17aacd1c6112ee364
         FastLog.e("测试:" + EncryptUtil.encryptSHA1ToString("你好世界"));//dabaa5fe7c47fb21be902480a13013f16a1ab6eb
 
-        FastLog.e("测试:" + int.class);
-        FastLog.e("测试:" + Integer.class);
-        FastLog.e("测试:" + Boolean.TRUE);
+        FastLog.e("测试:" + int.class);//int
+        FastLog.e("测试:" + Integer.class);//class java.lang.Integer
+        FastLog.e("测试:" + Boolean.TRUE);//true
         FastLog.e("测试:" + FileUtil.isSDCardAvailable());
 
         Date date = TimeUtil.stringToDate("2001.12.12-08:23:21", "yyyy.MM.dd-HH:mm:ss");
         FastLog.e("测试:"+date);//Wed Dec 12 08:23:21 GMT+08:00 2001
 
-        FastLog.e("手机设备厂商："+DeviceUtil.getManufacturer());
-        FastLog.e("手机设备型号："+DeviceUtil.getModel());
-        FastLog.e("手机设备系统版本："+ DeviceUtil.getSystemVersion());
-        FastLog.e("手机设备ID："+DeviceUtil.getUniqueDeviceId());
+        FastLog.e("手机设备厂商："+DeviceUtil.getManufacturer());//Xiaomi
+        FastLog.e("手机设备型号："+DeviceUtil.getModel());//M2011K2C
+        FastLog.e("手机设备系统版本："+ DeviceUtil.getSystemVersion());//11
+        FastLog.e("手机设备ID："+DeviceUtil.getUniqueDeviceId());//286892be19e0c38f88325c343f83c7bf7
     }
 
 
