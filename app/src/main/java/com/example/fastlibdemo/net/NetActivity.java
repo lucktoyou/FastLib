@@ -1,7 +1,6 @@
 package com.example.fastlibdemo.net;
 
 import android.graphics.BitmapFactory;
-import android.text.TextUtils;
 import android.text.format.Formatter;
 
 import com.example.fastlibdemo.R;
@@ -19,11 +18,6 @@ import com.fastlib.utils.FastLog;
 import com.fastlib.utils.FastUtil;
 import com.fastlib.utils.N;
 import com.fastlib.utils.zipimage.FastLuban;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.ypx.imagepicker.ImagePicker;
 import com.ypx.imagepicker.bean.ImageItem;
 import com.ypx.imagepicker.bean.MimeType;
@@ -55,39 +49,12 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                         if(result == null){
                             N.showToast(NetActivity.this,"result=null");
                         }else {
-                            N.showToast(NetActivity.this,transformJsonIfChineseMessyCode(result));
+                            N.showToast(NetActivity.this,result);
+                            FastLog.e(result);
                         }
                     }
                 })
         );
-    }
-
-    /**
-     * 解决php返回json字符串出现的中文编码问题。
-     * 如果是json字符串转化后输出，如果只是普通的字符串直接输出。
-     * @param str 字符串
-     * @return 转换后字符串
-     */
-    public String transformJsonIfChineseMessyCode(String str){
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        if(TextUtils.isEmpty(str)){
-            return str;
-        }else {
-            boolean isValidJSON;//是否是有效json字符串
-            try {
-                gson.fromJson(str, Object.class);
-                isValidJSON = true;
-            } catch(JsonSyntaxException ex) {
-                isValidJSON = false;
-            }
-            if(isValidJSON){
-                JsonParser parser = new JsonParser();
-                JsonObject object = parser.parse(str).getAsJsonObject();
-                return gson.toJson(object);
-            }else {
-                return str;
-            }
-        }
     }
 
     @Bind(R.id.btnNetPost)
@@ -102,7 +69,8 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                         if(result == null){
                             N.showToast(NetActivity.this,"result=null");
                         }else {
-                            N.showToast(NetActivity.this,result.toString());
+                            N.showToast(NetActivity.this,result);
+                            FastLog.e(result);
                         }
                     }
                 })
@@ -122,7 +90,8 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                             if(result == null){
                                 N.showToast(NetActivity.this,"result=null");
                             }else {
-                                N.showToast(NetActivity.this,result.toString());
+                                N.showToast(NetActivity.this,result);
+                                FastLog.e(result);
                             }
                         }
                     })
@@ -210,7 +179,7 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                 loading(" 已上传：" + current + "/" + total);
             }
         });
-        request.setListener(new SimpleListener<Response<Object>>() {
+        request.setListener(new SimpleListener<ResponseEHome<Object>>() {
             @Override
             public void onError(Request request, Exception error) {
                 super.onError(request, error);
@@ -218,7 +187,7 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                 N.showToast(NetActivity.this,"上传失败");
             }
             @Override
-            public void onResponseSuccess(Request request, Response<Object> result) {
+            public void onResponseSuccess(Request request, ResponseEHome<Object> result) {
                 dismissLoading();
                 if (result.success) {
                     N.showToast(NetActivity.this, result.msg);
@@ -239,7 +208,8 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                         if(result == null){
                             N.showToast(NetActivity.this,"result=null");
                         }else {
-                            N.showToast(NetActivity.this,result.toString());
+                            N.showToast(NetActivity.this,result);
+                            FastLog.e(result);
                         }
                     }
                 })

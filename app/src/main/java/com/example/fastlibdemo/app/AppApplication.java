@@ -22,7 +22,7 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        FastLog.setDebug(true,false,0,"FAST_LOGGER");
+        FastLog.setDebug(true,false,0,"FAST_LOG");
         FastDatabase.getConfig().setVersion(6);
         HttpGlobalConfig.getInstance().setRootAddress("https://www.xxx.com:443");
         HttpGlobalConfig.getInstance().setGlobalListener(new GlobalListener(){
@@ -34,7 +34,7 @@ public class AppApplication extends Application {
 
             @Override
             public byte[] onRawData(Request request, byte[] data) {
-                request.printRequestAndResponse(data);
+                request.printRequestAndResponse(data,true);
                 return super.onRawData(request,data);
             }
 

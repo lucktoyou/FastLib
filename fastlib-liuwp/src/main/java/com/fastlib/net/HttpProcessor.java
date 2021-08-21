@@ -21,6 +21,7 @@ import com.fastlib.net.tool.Cancelable;
 import com.fastlib.net.tool.SimpleStatistical;
 import com.fastlib.net.tool.Statistical;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -253,7 +254,12 @@ public class HttpProcessor implements Runnable, Cancelable {
                 else {
                     Gson gson = new Gson();
                     String json = new String(bytes);
-                    wrapperListener.onResponseSuccess(mRequest, gson.fromJson(json, mCallbackType));
+                    try {
+                        Object obj = gson.fromJson(json, mCallbackType);
+                        wrapperListener.onResponseSuccess(mRequest, obj);
+                    } catch (JsonSyntaxException e) {
+                        wrapperListener.onError(mRequest, e);
+                    }
                 }
             } catch (IOException e) {
                 //这里仅关闭流时可能出现的异常，不处理

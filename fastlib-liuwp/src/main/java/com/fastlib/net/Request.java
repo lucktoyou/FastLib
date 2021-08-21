@@ -15,6 +15,11 @@ import com.fastlib.net.upload.UploadingListener;
 import com.fastlib.net.tool.Statistical;
 import com.fastlib.utils.core.Reflect;
 import com.fastlib.utils.FastLog;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -345,11 +350,21 @@ public class Request{
     //============================= 以下为打印输出内容 ==============================================
 
     /**
-     * 打印请求信息和响应结果
+     * 打印请求信息和响应结果（响应结果仅为原始字节数据new String(rawBytes)成字符串后打印）
      *
      * @param rawBytes 网络请求结束后返回的原始字节流
      */
     public void printRequestAndResponse(byte[] rawBytes){
+        printRequestAndResponse(rawBytes,false);
+    }
+
+    /**
+     * 打印请求信息和响应结果
+     *
+     * @param rawBytes 网络请求结束后返回的原始字节流
+     * @param prettyLog 是否格式化日志
+     */
+    public void printRequestAndResponse(byte[] rawBytes,boolean prettyLog){
         StringBuilder sb = new StringBuilder();
 
         RequestHeader requestHeaderEntity = getRequestHeader();
@@ -406,15 +421,43 @@ public class Request{
         if (resultType == void.class || resultType == Void.class){
             sb.append("【响应结果("+resultType.toString()+")】\n"+ null);
         } else if(resultType == null || resultType == Object.class || resultType == byte[].class){
-            sb.append("【响应结果("+(resultType==null?null:resultType.toString())+")】\n").append(new String(rawBytes));
+            sb.append("【响应结果("+(resultType==null?null:resultType.toString())+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
         } else if (resultType == File.class){
             sb.append("【响应结果("+resultType.toString()+")】\n").append(getDownloadable().getTargetFile().getAbsoluteFile());
         } else if (resultType == String.class){
-            sb.append("【响应结果("+resultType.toString()+")】\n").append(new String(rawBytes));
+            sb.append("【响应结果("+resultType.toString()+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
         } else {
-            sb.append("【响应结果("+resultType.toString()+")】\n").append(new String(rawBytes));
+            sb.append("【响应结果("+resultType.toString()+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
         }
 
         FastLog.i(sb.toString());
+    }
+
+    /**
+     * 如果是有效json字符串格式化输出。
+     *
+     * @param bytes 字节流
+     * @return 漂亮的打印日志
+     */
+    private String prettyLog(byte[] bytes){
+        String str = new String(bytes);
+        if(TextUtils.isEmpty(str)){
+            return str;
+        }else {
+            Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+            boolean isValidJSON;//是否是有效json字符串
+            try {
+                gson.fromJson(str, Object.class);
+                isValidJSON = true;
+            } catch(JsonSyntaxException ex) {
+                isValidJSON = false;
+            }
+            if(isValidJSON){
+                JsonElement jsonElement = JsonParser.parseString(str);
+                return gson.toJson(jsonElement);
+            }else {
+                return str;
+            }
+        }
     }
 }

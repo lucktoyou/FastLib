@@ -1,6 +1,6 @@
 package com.example.fastlibdemo.net;
 
-public class Response<T> {
+public class ResponseEHome<T> {
     public boolean success;
     public String msg;
     public T obj;
