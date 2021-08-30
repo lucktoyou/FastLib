@@ -1,6 +1,5 @@
 package com.fastlib.base.decoration;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -10,8 +9,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.fastlib.utils.DensityUtil;
 
 
 /**
@@ -26,10 +23,6 @@ public class FastDividerDecoration extends RecyclerView.ItemDecoration {
     private int dividerThickness;
     private int layoutOrientation;
 
-
-    public FastDividerDecoration(@NonNull Context context,@ColorInt int color, int orientation) {
-        this(color, DensityUtil.dp2px(context, 1), orientation);
-    }
 
     /**
      * @param color       分割线颜色

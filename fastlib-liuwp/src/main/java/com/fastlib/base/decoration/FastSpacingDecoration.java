@@ -1,13 +1,10 @@
 package com.fastlib.base.decoration;
 
-import android.content.Context;
 import android.graphics.Rect;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.fastlib.utils.DensityUtil;
 
 /**
  * Created by liuwp on 2020/9/3.
@@ -18,10 +15,6 @@ public class FastSpacingDecoration extends RecyclerView.ItemDecoration {
     private int spanCount;
     private int spacing;
     private boolean includeEdge;
-
-    public FastSpacingDecoration(@NonNull Context context,int spanCount, boolean includeEdge){
-        this(spanCount, DensityUtil.dp2px(context,8),includeEdge);
-    }
 
     /**
      * @param spanCount     网格中的列数
