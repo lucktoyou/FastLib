@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Base64;
 import android.view.View;
@@ -237,7 +238,11 @@ public class MainActivity extends FastActivity {
 
     @Bind(R.id.btnNext)
     public void next(){
-      startActivity(new Intent(this, NextActivity.class));
+        Intent intent = new Intent(this,NextActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("data","点击按钮进入");
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
     @Bind(R.id.btnNotificationToNext)
@@ -248,6 +253,9 @@ public class MainActivity extends FastActivity {
     private PendingIntent getPendingIntent(Context context) {
         Intent main = new Intent(context, MainActivity.class);
         Intent next = new Intent(context,NextActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("data","点击通知进入");
+        next.putExtras(bundle);
         Intent[] intents = new Intent[]{main,next};
         return PendingIntent.getActivities(context, 0, intents, PendingIntent.FLAG_UPDATE_CURRENT);
     }

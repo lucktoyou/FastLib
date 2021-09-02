@@ -7,23 +7,21 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 
-import com.example.fastlibdemo.R;
 import com.example.fastlibdemo.base.BindViewActivity;
 import com.example.fastlibdemo.databinding.ActivityNextBinding;
-import com.fastlib.annotation.ContentView;
+import com.fastlib.annotation.LocalData;
 import com.fastlib.base.adapter.FastFragmentPagerAdapter;
 import com.fastlib.utils.FastLog;
+import com.fastlib.utils.N;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NextActivity extends BindViewActivity<ActivityNextBinding>{
 
-    @Override
-    public void alreadyPrepared() {
-        FastLog.d("=========== alreadyPrepared 准备工作完毕");
-        mViewBinding.viewPager.setAdapter(new FastFragmentPagerAdapter(getSupportFragmentManager(),getFragments()));
-        mViewBinding.tabLayout.setupWithViewPager(mViewBinding.viewPager);
+    @LocalData("data")
+    private void showMsg(String data){
+        N.showToast(this,data);
     }
 
     private List<Pair<String, Fragment>> getFragments() {
@@ -33,7 +31,14 @@ public class NextActivity extends BindViewActivity<ActivityNextBinding>{
         return data;
     }
 
-//========================================================================================================
+    @Override
+    public void alreadyPrepared() {
+        FastLog.d("=========== alreadyPrepared 准备工作完毕");
+        mViewBinding.viewPager.setAdapter(new FastFragmentPagerAdapter(getSupportFragmentManager(),getFragments()));
+        mViewBinding.tabLayout.setupWithViewPager(mViewBinding.viewPager);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

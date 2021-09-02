@@ -121,7 +121,7 @@ public class ModuleDelegate implements ModuleInterface {
 
     private void endInternalPrepareTask() {
         alreadyPrepared();
-        mLocalDataInject.toggleDelayLocalDataMethod();
+        mLocalDataInject.injectDelayTriggerMethod();
     }
 
     /**

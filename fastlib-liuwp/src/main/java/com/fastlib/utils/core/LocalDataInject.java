@@ -32,13 +32,14 @@ import java.util.List;
 /**
  * Created by sgfb on 17/2/20.
  * Modified by liuwp on 2020/8/13.
+ * Modified by liuwp on 2021/9/2.
  * 本地数据注入.
  */
 public class LocalDataInject {
-    private List<Pair<Field, LocalData>> mChildActivityGiver = new ArrayList<>(); //子Activity返回时获取Intent中数据
-    private List<Pair<Method, LocalData>> mDelayToggleList = new ArrayList<>(); //延迟触发的本地数据注入方法
-    private List<Pair<Method, LocalData>> mChildToggle2 = new ArrayList<>();  //子模块返回后触发的方法
-    private SparseArray<Object[]> mToggleData = new SparseArray<>(); //触发后读取数据缓存点
+    private List<Pair<Field,LocalData>> mChildTriggerFields = new ArrayList<>();  //子Activity返回触发的数据注入字段
+    private List<Pair<Method,LocalData>> mChildTriggerMethods = new ArrayList<>();//子Activity返回触发的数据注入方法
+    private List<Pair<Method,LocalData>> mDelayTriggerMethods = new ArrayList<>();//延迟触发的数据注入方法
+    private SparseArray<Object[]> mTriggerData = new SparseArray<>();             //触发后读取数据缓存点
     private Object mHost;
 
     public LocalDataInject(@Nullable Object host) {
@@ -46,16 +47,19 @@ public class LocalDataInject {
             mHost = host;
     }
 
-    public void toggleDelayLocalDataMethod() {
+    /**
+     * 处理从父Activity获取的Intent中包含所需的数据并注入到延迟触发的方法中。
+     */
+    public void injectDelayTriggerMethod() {
         Bundle bundle = null;
 
         if (mHost instanceof Activity)
             bundle = ((Activity) mHost).getIntent().getExtras();
         else if (mHost instanceof Fragment)
             bundle = ((Fragment) mHost).getArguments();
-        if (bundle == null) return;    //如果bundle为空说明当前host不支持这个方法
+        if (bundle == null) return;//如果bundle为空说明当前host不支持这个方法
 
-        for (Pair<Method, LocalData> pair : mDelayToggleList) {
+        for (Pair<Method, LocalData> pair : mDelayTriggerMethods) {
             LocalData ld = pair.second;
             Object[] args = new Object[ld.value().length];
 
@@ -79,13 +83,13 @@ public class LocalDataInject {
      * @param data 数据包裹
      */
     public void injectChildBack(Intent data) {
-        for (Pair<Field, LocalData> pair : mChildActivityGiver)
+        for (Pair<Field, LocalData> pair : mChildTriggerFields)
             try {
                 loadLocalDataFromIntent(data, pair.first, pair.second);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
-        for (Pair<Method, LocalData> pair : mChildToggle2) {
+        for (Pair<Method, LocalData> pair : mChildTriggerMethods) {
             if (data == null) return;
             LocalData ld = pair.second;
             Object[] args = new Object[ld.value().length];
@@ -123,7 +127,7 @@ public class LocalDataInject {
                             loadLocalDataFromIntent(null, field, lr);
                             break;
                         case INTENT_CHILD:
-                            mChildActivityGiver.add(new Pair<>(field, lr));
+                            mChildTriggerFields.add(new Pair<>(field, lr));
                             break;
                         case SP:
                             loadLocalDataFromSp(field, lr);
@@ -171,7 +175,7 @@ public class LocalDataInject {
                                 v.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        invokeToggleCallback(v, m, ld, bind.bindType(), this, null, null, null);
+                                        invokeTriggerCallback(v, m, ld, bind.bindType(), this, null, null, null);
                                     }
                                 });
                                 break;
@@ -179,7 +183,7 @@ public class LocalDataInject {
                                 v.setOnLongClickListener(new View.OnLongClickListener() {
                                     @Override
                                     public boolean onLongClick(View v) {
-                                        invokeToggleCallback(v, m, ld, bind.bindType(), null, this, null, null);
+                                        invokeTriggerCallback(v, m, ld, bind.bindType(), null, this, null, null);
                                         return false;
                                     }
                                 });
@@ -188,7 +192,7 @@ public class LocalDataInject {
                                 ((AdapterView<?>) v).setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                     @Override
                                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                        invokeToggleCallback(parent, m, ld, bind.bindType(), null, null, this, null);
+                                        invokeTriggerCallback(parent, m, ld, bind.bindType(), null, null, this, null);
                                     }
                                 });
                                 break;
@@ -196,24 +200,27 @@ public class LocalDataInject {
                                 ((AdapterView<?>) v).setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                                     @Override
                                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                                        invokeToggleCallback(parent, m, ld, bind.bindType(), null, null, null, this);
+                                        invokeTriggerCallback(parent, m, ld, bind.bindType(), null, null, null, this);
                                         return false;
                                     }
                                 });
                         }
-                    } else { //延迟或子模块触发
+                    } else {
+                        //延迟触发或子activity返回后触发
                         if (ld.from() == LocalData.GiverType.INTENT_CHILD) {
-                            mChildToggle2.add(Pair.create(m, ld));
-                        } else mDelayToggleList.add(Pair.create(m, ld));
+                            mChildTriggerMethods.add(Pair.create(m, ld));
+                        } else {
+                            mDelayTriggerMethods.add(Pair.create(m, ld));
+                        }
                     }
                 }
             }
         }
     }
 
-    private void invokeToggleCallback(View v, Method m, LocalData ld, Bind.BindType type, View.OnClickListener clickListener, View.OnLongClickListener longClickListtener,
-                                      AdapterView.OnItemClickListener itemClickListener, AdapterView.OnItemLongClickListener itemLongClickListener) {
-        Object[] data = mToggleData.get(v.getId());
+    private void invokeTriggerCallback(View v,Method m,LocalData ld,Bind.BindType type,View.OnClickListener clickListener,View.OnLongClickListener longClickListtener,
+                                       AdapterView.OnItemClickListener itemClickListener,AdapterView.OnItemLongClickListener itemLongClickListener) {
+        Object[] data = mTriggerData.get(v.getId());
         Class<?>[] paramTypes = m.getParameterTypes();
         try {
             if (data == null) { //如果没有则读取一份进入缓存
@@ -248,7 +255,7 @@ public class LocalDataInject {
                         ((AdapterView<?>) v).setOnItemLongClickListener(itemLongClickListener);
                         break;
                 }
-                mToggleData.append(v.getId(), data);
+                mTriggerData.append(v.getId(), data);
             } else{
                 FastLog.d("缓存中有触发数据");
             }
