@@ -22,6 +22,11 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        initFastLib();
+        initWebView();
+    }
+
+    private void initFastLib(){
         FastLog.setDebug(true,false,0,"FAST_LOG");
         FastDatabase.getConfig().setVersion(6);
         HttpGlobalConfig.getInstance().setRootAddress("https://www.xxx.com:443");
@@ -54,7 +59,9 @@ public class AppApplication extends Application {
                 super.onRequestComplete();
             }
         });
+    }
 
+    private void initWebView(){
         //Android P行为变更，WebView不可多进程使用同一个目录，需要为不同进程设置不同目录.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             String currentProcessName = AppUtil.getProcessName(this, Process.myPid());

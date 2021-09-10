@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fastlib.R;
-import com.fastlib.utils.DensityUtil;
+import com.fastlib.utils.FastUtil;
 
 /**
  * Created by sgfb on 17/3/27.
@@ -57,7 +57,7 @@ public class TitleBar extends FrameLayout{
         mRightIcon.setLayoutParams(rightIconLp);
 
         //文字有左右10内边距，标题默认17sp大小
-        int dp10= DensityUtil.dp2px(getContext(),10);
+        int dp10= FastUtil.dp2px(getContext(),10);
         mTitle.setTextSize(17);
         mLeftText.setPadding(dp10,0,dp10,0);
         mLeftIcon.setPadding(dp10,0,dp10,0);
