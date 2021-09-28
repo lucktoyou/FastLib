@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.text.format.Formatter;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
@@ -44,6 +45,7 @@ import com.fastlib.utils.permission.FastPermission;
 import com.fastlib.utils.permission.OnPermissionCallback;
 import com.fastlib.utils.permission.Permission;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -258,5 +260,23 @@ public class MainActivity extends FastActivity {
         next.putExtras(bundle);
         Intent[] intents = new Intent[]{main,next};
         return PendingIntent.getActivities(context, 0, intents, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    @Bind(R.id.circleImageView)
+    public void showCacheSize(){
+        mThreadPool.execute(new Runnable(){
+            @Override
+            public void run(){
+                File[] extraFile = {getFilesDir(),getExternalFilesDir(null)};
+                long cacheSize = SaveUtil.cacheSize(MainActivity.this,extraFile);
+                final String formatCacheSize = Formatter.formatFileSize(MainActivity.this,cacheSize);
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        N.showToast(MainActivity.this,formatCacheSize);
+                    }
+                });
+            }
+        });
     }
 }

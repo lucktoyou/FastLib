@@ -26,6 +26,10 @@ public class SaveUtil {
         //can't instance
     }
 
+    public static void saveToSp(String key, Object obj) {
+        saveToSp(DEFAULT_SP_NAME, key, obj);
+    }
+
     /**
      * 保存数据到SharedPreferences.仅支持基本数据
      *
@@ -53,8 +57,8 @@ public class SaveUtil {
         editor.apply();
     }
 
-    public static void saveToSp(String key, Object obj) {
-        saveToSp(DEFAULT_SP_NAME, key, obj);
+    public static <T> T getFromSp(String key, T def) {
+        return (T) getFromSp(DEFAULT_SP_NAME, key, def);
     }
 
     /**
@@ -74,9 +78,6 @@ public class SaveUtil {
         return (T) obj;
     }
 
-    public static <T> T getFromSp(String key, T def) {
-        return (T) getFromSp(DEFAULT_SP_NAME, key, def);
-    }
 
     /**
      * 保存数据到内部
