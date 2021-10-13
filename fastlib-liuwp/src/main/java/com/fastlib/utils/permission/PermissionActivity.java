@@ -77,7 +77,7 @@ public class PermissionActivity extends AppCompatActivity{
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
             if(mPermissionCallback!=null){
                 mPermissionCallback.onPermissionSuccess();
-                finish();
+                checkFinish();
             }
             return;
         }
@@ -89,7 +89,7 @@ public class PermissionActivity extends AppCompatActivity{
             }else{
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionSuccess();
-                    finish();
+                    checkFinish();
                 }
             }
             return;
@@ -102,7 +102,7 @@ public class PermissionActivity extends AppCompatActivity{
             }else{
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionSuccess();
-                    finish();
+                    checkFinish();
                 }
             }
             return;
@@ -112,7 +112,7 @@ public class PermissionActivity extends AppCompatActivity{
             if(Build.VERSION.SDK_INT<Build.VERSION_CODES.R){
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                    finish();
+                    checkFinish();
                 }
             }else{
                 if(!Environment.isExternalStorageManager()){
@@ -122,7 +122,7 @@ public class PermissionActivity extends AppCompatActivity{
                 }else{
                     if(mPermissionCallback!=null){
                         mPermissionCallback.onPermissionSuccess();
-                        finish();
+                        checkFinish();
                     }
                 }
             }
@@ -132,7 +132,7 @@ public class PermissionActivity extends AppCompatActivity{
             if(PermissionUtil.checkPermissionsGranted(mOwner,mPermissions)){
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionSuccess();
-                    finish();
+                    checkFinish();
                 }
             }else{
                 final String[] unauthorizedPermissions = PermissionUtil.getUnauthorizedPermissionList(mOwner,mPermissions);
@@ -145,7 +145,7 @@ public class PermissionActivity extends AppCompatActivity{
                             .setNegativeButton("取消",new DialogInterface.OnClickListener(){
                                 @Override
                                 public void onClick(DialogInterface dialog,int which){
-                                    finish();
+                                    checkFinish();
                                 }
                             })
                             .setPositiveButton("下一步",new DialogInterface.OnClickListener(){
@@ -210,6 +210,13 @@ public class PermissionActivity extends AppCompatActivity{
         return hint;
     }
 
+    private void checkFinish() {
+        if (!isFinishing()) {
+            finish();
+            overridePendingTransition(0, 0);
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,@NonNull String[] permissions,@NonNull int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
@@ -219,13 +226,13 @@ public class PermissionActivity extends AppCompatActivity{
                     if(PermissionUtil.checkPermissionsGranted(grantResults)){
                         if(mPermissionCallback!=null){
                             mPermissionCallback.onPermissionSuccess();
-                            finish();
+                            checkFinish();
                         }
                     }else{
                         if(PermissionUtil.shouldShowRequestPermissionRationale(mOwner,permissions)){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,permissions));
-                                finish();
+                                checkFinish();
                             }
                         }else{
                             mAlertDialog = new AlertDialog.Builder(mOwner)
@@ -235,14 +242,14 @@ public class PermissionActivity extends AppCompatActivity{
                                     .setNegativeButton("取消",new DialogInterface.OnClickListener(){
                                         @Override
                                         public void onClick(DialogInterface dialog,int which){
-                                            finish();
+                                            checkFinish();
                                         }
                                     })
                                     .setPositiveButton("手动开启",new DialogInterface.OnClickListener(){
                                         @Override
                                         public void onClick(DialogInterface dialog,int which){
                                             PermissionUtil.toApplicationSetting(mOwner);
-                                            finish();
+                                            checkFinish();
                                         }
                                     }).create();
                             if(mAlertDialog!=null)
@@ -265,12 +272,12 @@ public class PermissionActivity extends AppCompatActivity{
                         if(Settings.canDrawOverlays(mOwner)){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionSuccess();
-                                finish();
+                                checkFinish();
                             }
                         }else{
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                                finish();
+                                checkFinish();
                             }
                         }
                     }
@@ -281,12 +288,12 @@ public class PermissionActivity extends AppCompatActivity{
                         if(Settings.System.canWrite(mOwner)){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionSuccess();
-                                finish();
+                                checkFinish();
                             }
                         }else{
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                                finish();
+                                checkFinish();
                             }
                         }
                     }
@@ -297,12 +304,12 @@ public class PermissionActivity extends AppCompatActivity{
                         if(Environment.isExternalStorageManager()){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionSuccess();
-                                finish();
+                                checkFinish();
                             }
                         }else{
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                                finish();
+                                checkFinish();
                             }
                         }
                     }

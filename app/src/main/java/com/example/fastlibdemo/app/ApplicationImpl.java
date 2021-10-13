@@ -17,11 +17,15 @@ import com.fastlib.utils.FastLog;
 /**
  * Created by liuwp on 2020/3/28.
  */
-public class AppApplication extends Application {
+public class ApplicationImpl extends Application {
+
+    public static ActivityStack mActivityStack;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mActivityStack = new ActivityStack(this);
+        //mActivityStack.clearStack();
         initFastLib();
         initWebView();
     }
