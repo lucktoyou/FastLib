@@ -41,7 +41,10 @@ import java.lang.annotation.RetentionPolicy;
         Permission.SYSTEM_ALERT_WINDOW,
         Permission.WRITE_SETTINGS,
         Permission.MANAGE_EXTERNAL_STORAGE,
-        Permission.REQUEST_INSTALL_PACKAGES
+        Permission.REQUEST_INSTALL_PACKAGES,
+        Permission.BLUETOOTH_SCAN,
+        Permission.BLUETOOTH_ADVERTISE,
+        Permission.BLUETOOTH_CONNECT
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface PermissionDef{

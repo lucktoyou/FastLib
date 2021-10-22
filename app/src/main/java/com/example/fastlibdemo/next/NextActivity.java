@@ -1,9 +1,5 @@
 package com.example.fastlibdemo.next;
 
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 
@@ -11,7 +7,6 @@ import com.example.fastlibdemo.base.BindViewActivity;
 import com.example.fastlibdemo.databinding.ActivityNextBinding;
 import com.fastlib.annotation.LocalData;
 import com.fastlib.base.adapter.FastFragmentPagerAdapter;
-import com.fastlib.utils.FastLog;
 import com.fastlib.utils.N;
 
 import java.util.ArrayList;

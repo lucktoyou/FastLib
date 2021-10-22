@@ -5,6 +5,8 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.fastlib.utils.N;
+
 
 /***
  * Created by liuwp on 2020/8/5
@@ -13,12 +15,12 @@ import androidx.annotation.Nullable;
  *
  *  ①问世背景：流行的几个第三方权限申请库各有优缺点而且修改起来不方便。
  *  ②设计原则：代码解耦、链式调用。
- *  ③适配范围：android api（4.4 - 11.0）
+ *  ③适配范围：android api（4.4 - 12.0）
  *  ②使用方式：链式调用。
  **/
 public class FastPermission{
 
-    private final String[] mPermissions;
+    private String[] mPermissions;
     private final String mFailureHint;
     private final String mRationaleHint;
 
@@ -29,11 +31,13 @@ public class FastPermission{
     }
 
     private void request(Context context,OnPermissionCallback permissionCallback){
+        mPermissions = PermissionUtil.getRealRequestPermissions(mPermissions);
         if (mPermissions==null || mPermissions.length==0) {
-            throw new IllegalArgumentException("permissions can't be null");
+            N.showToast(context,"滤除掉违规添加的权限后，没有多余的权限需要申请.");
+        }else {
+            PermissionHelper.getInstance().setPermissionCallback(permissionCallback);
+            PermissionActivity.start(context,mPermissions,mFailureHint,mRationaleHint);
         }
-        PermissionHelper.getInstance().setPermissionCallback(permissionCallback);
-        PermissionActivity.start(context,mPermissions,mFailureHint,mRationaleHint);
     }
 
 

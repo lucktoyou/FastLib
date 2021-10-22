@@ -6,44 +6,79 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/btnTest"
+        android:id="@+id/btnPermissionInstall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="77dp"
-        android:text="Fragment点击，@Bind()注解"
+        android:layout_marginTop="48dp"
+        android:text="Fragment中权限申请：允许安装应用"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnPermission"
+        android:id="@+id/btnPermissionCamera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="41dp"
+        android:layout_marginTop="16dp"
+        android:text="Fragment中权限申请：相机、读写文件"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnPermissionInstall" />
+
+    <Button
+        android:id="@+id/btnPermissionLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="14dp"
         android:text="Fragment中权限申请，位置信息"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnTest" />
+        app:layout_constraintTop_toBottomOf="@+id/btnPermissionCamera" />
 
     <Button
-        android:id="@+id/btnPermission2"
+        android:id="@+id/btnPermissionFile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fragment中权限申请，特殊权限"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="15dp"
+        android:text="Fragment中权限申请，访问SD卡所有文件"
         android:textAllCaps="false"
-        app:layout_constraintStart_toStartOf="@+id/btnPermission"
-        app:layout_constraintTop_toBottomOf="@+id/btnPermission" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnPermissionLocation" />
+
+    <Button
+        android:id="@+id/btnPermissionBluetooth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="15dp"
+        android:text="Fragment中权限申请，蓝牙"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnPermissionFile" />
+
+    <Button
+        android:id="@+id/btnTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="79dp"
+        android:text="Fragment点击，@Bind()注解"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnPermissionBluetooth" />
 
     <Button
         android:id="@+id/btnSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="26dp"
         android:text="Fragment中发送广播"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnPermission2" />
+        app:layout_constraintTop_toBottomOf="@+id/btnTest" />
 </androidx.constraintlayout.widget.ConstraintLayout>

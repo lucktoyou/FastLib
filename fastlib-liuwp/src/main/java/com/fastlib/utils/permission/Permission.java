@@ -3,6 +3,8 @@ package com.fastlib.utils.permission;
 import android.content.Context;
 import android.os.Build;
 
+import androidx.annotation.RequiresApi;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,6 +61,27 @@ public class Permission{
 
     public static final String READ_EXTERNAL_STORAGE = "android.permission.READ_EXTERNAL_STORAGE";
     public static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+    /**
+     * 在Android 12(S 31) 之前，蓝牙权限在AndroidManifest.xml文件直接添加；
+     * 从Android 12(S 31)开始，过去的蓝牙权限被拆分成了3个新的权限，并且全都是运行时权限：
+     *  *  BLUETOOTH_SCAN 用于使用蓝牙扫描附件其他的蓝牙设备
+     *  *  BLUETOOTH_ADVERTISE 用于允许当前的设备被其他的蓝牙设备所发现
+     *  *  BLUETOOTH_CONNECT 用于连接之前已经配对过的蓝牙设备
+     *
+     *  <!-- Request legacy Bluetooth permissions on older devices. -->
+     *  <uses-permission android:name="android.permission.BLUETOOTH"
+     *      android:maxSdkVersion="30" />
+     *  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+     *      android:maxSdkVersion="30" />
+     *  <!-- Request new Bluetooth permissions on android 12,12+ devices. -->
+     *  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+     *  <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+     *  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+     */
+    public static final String BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN";
+    public static final String BLUETOOTH_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE";
+    public static final String BLUETOOTH_CONNECT = "android.permission.BLUETOOTH_CONNECT";
 
     ////////////////////////////////////////////////
     // 特殊权限
@@ -238,6 +261,19 @@ public class Permission{
                 }
                 case Permission.REQUEST_INSTALL_PACKAGES:{
                     String message = "安装应用";
+                    if(!textList.contains(message)){
+                        textList.add(message);
+                    }
+                    break;
+                }
+                case Permission.BLUETOOTH_SCAN:
+                case Permission.BLUETOOTH_ADVERTISE:
+                case Permission.BLUETOOTH_CONNECT:{
+                    String message;
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                        message = "蓝牙";
+                    else
+                        message = "";
                     if(!textList.contains(message)){
                         textList.add(message);
                     }

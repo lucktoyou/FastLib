@@ -41,10 +41,6 @@ import com.fastlib.utils.FileUtil;
 import com.fastlib.utils.N;
 import com.fastlib.utils.TimeUtil;
 import com.fastlib.utils.core.SaveUtil;
-import com.fastlib.utils.permission.FastPermission;
-import com.fastlib.utils.permission.OnPermissionCallback;
-import com.fastlib.utils.permission.Permission;
-import com.fastlib.utils.permission.PermissionActivity;
 
 import java.io.File;
 import java.util.Date;
@@ -126,32 +122,7 @@ public class MainActivity extends FastActivity {
 
     @Bind(R.id.btnPermission)
     public void permission() {
-        FastPermission.with(this)
-                .permissions(Permission.REQUEST_INSTALL_PACKAGES)
-                .request(new OnPermissionCallback() {
-                    @Override
-                    public void onPermissionSuccess() {
-                        N.showToast(MainActivity.this, "权限申请成功");
-                    }
-
-                    @Override
-                    public void onPermissionFailure(String hint) {
-                        N.showToast(MainActivity.this,hint);
-                    }
-                });
-//        FastPermission.with(this)
-//                .permissions(Permission.CAMERA, Permission.WRITE_EXTERNAL_STORAGE)
-//                .request(new OnPermissionCallback() {
-//                    @Override
-//                    public void onPermissionSuccess() {
-//                        N.showToast(MainActivity.this, "权限申请成功");
-//                    }
-//
-//                    @Override
-//                    public void onPermissionFailure(String hint) {
-//                        N.showToast(MainActivity.this,hint);
-//                    }
-//                });
+        N.showToast(MainActivity.this,"Look BlankFragment");
     }
 
     @Bind(R.id.btnDialog)

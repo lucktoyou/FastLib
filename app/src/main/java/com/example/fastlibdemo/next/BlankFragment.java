@@ -15,22 +15,50 @@ import com.fastlib.utils.permission.FastPermission;
 import com.fastlib.utils.permission.OnPermissionCallback;
 import com.fastlib.utils.permission.Permission;
 
+import java.util.ArrayList;
+
+
 @SuppressLint("NonConstantResourceId")
 public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
 
-    @Override
-    public void alreadyPrepared(){
+    @Bind(R.id.btnPermissionInstall)
+    public void permissionInstall(){
+        //允许安装未知应用
+        FastPermission.with(getContext())
+                .permissions(Permission.REQUEST_INSTALL_PACKAGES)
+                .request(new OnPermissionCallback(){
+                    @Override
+                    public void onPermissionSuccess(){
+                        N.showToast(getContext(),"权限申请成功");
+                    }
 
+                    @Override
+                    public void onPermissionFailure(String hint){
+                        N.showToast(getContext(),hint);
+                    }
+                });
     }
 
+    @Bind(R.id.btnPermissionCamera)
+    public void permissionCamera(){
+        //调用相机，同时读写文件
+        FastPermission.with(getContext())
+                .permissions(Permission.CAMERA,Permission.READ_EXTERNAL_STORAGE,Permission.WRITE_EXTERNAL_STORAGE)
+                .request(new OnPermissionCallback(){
+                    @Override
+                    public void onPermissionSuccess(){
+                        N.showToast(getContext(),"权限申请成功");
+                    }
 
-    @Bind(R.id.btnTest)
-    public void test(){
-        N.showToast(getContext(),"click ok");
+                    @Override
+                    public void onPermissionFailure(String hint){
+                        N.showToast(getContext(),hint);
+                    }
+                });
     }
 
-    @Bind(R.id.btnPermission)
-    public void permission(){
+    @Bind(R.id.btnPermissionLocation)
+    public void permissionLocation(){
         //前后台都能获取定位信息
         FastPermission.with(getContext())
                 .permissions(Permission.ACCESS_FINE_LOCATION,Permission.ACCESS_COARSE_LOCATION)
@@ -43,7 +71,7 @@ public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
                                     .request(new OnPermissionCallback(){
                                         @Override
                                         public void onPermissionSuccess(){
-                                            Toast.makeText(getContext(),"权限申请成功",Toast.LENGTH_SHORT).show();
+                                            N.showToast(getContext(),"权限申请成功");
                                         }
 
                                         @Override
@@ -52,7 +80,7 @@ public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
                                         }
                                     });
                         }else{
-                            Toast.makeText(getContext(),"权限申请成功",Toast.LENGTH_SHORT).show();
+                            N.showToast(getContext(),"权限申请成功");
                         }
                     }
 
@@ -63,11 +91,11 @@ public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
                 });
     }
 
-    @Bind(R.id.btnPermission2)
-    public void permission2(){
+    @Bind(R.id.btnPermissionFile)
+    public void permissionFile(){
         //访问所有文件
         FastPermission.with(getContext())
-                .permissions(Permission.WRITE_EXTERNAL_STORAGE)
+                .permissions(Permission.READ_EXTERNAL_STORAGE,Permission.WRITE_EXTERNAL_STORAGE)
                 .request(new OnPermissionCallback(){
                     @Override
                     public void onPermissionSuccess(){
@@ -98,6 +126,38 @@ public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
 
     }
 
+    @Bind(R.id.btnPermissionBluetooth)
+    public void permissionBluetooth(){
+        //获取蓝牙权限
+        ArrayList<String> permissions = new ArrayList<>();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            permissions.add(Permission.BLUETOOTH_ADVERTISE);
+            permissions.add(Permission.BLUETOOTH_CONNECT);
+            permissions.add(Permission.BLUETOOTH_SCAN);
+        }
+        if(permissions.isEmpty()){
+            N.showToast(getContext(),"权限申请成功");
+        }else{
+            FastPermission.with(getContext())
+                    .permissions(Permission.BLUETOOTH_SCAN,Permission.BLUETOOTH_CONNECT,Permission.BLUETOOTH_ADVERTISE)
+                    .request(new OnPermissionCallback(){
+                        @Override
+                        public void onPermissionSuccess(){
+                            N.showToast(getContext(),"权限申请成功");
+                        }
+
+                        @Override
+                        public void onPermissionFailure(String hint){
+                            N.showToast(getContext(),hint);
+                        }
+                    });
+        }
+    }
+
+    @Bind(R.id.btnTest)
+    public void test(){
+        N.showToast(getContext(),"click ok");
+    }
 
     @Bind(R.id.btnSend)
     public void send(){
@@ -107,5 +167,10 @@ public class BlankFragment extends BindViewFragment<FragmentBlankBinding>{
     @Event
     public void showEventInfo(InfoEvent event){
         N.showToast(getContext(),"收到blank发送信息："+event.content);
+    }
+
+    @Override
+    public void alreadyPrepared(){
+
     }
 }

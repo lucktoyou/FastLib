@@ -255,8 +255,8 @@ public class PermissionActivity extends AppCompatActivity{
             FastLog.d(TAG+"#onActivityResult(): mPermissionCallback="+mPermissionCallback);
         }
         switch(requestCode){
-            //todo: 选择允许安装未知应用权限mPermissionCallback=null，不允许不会为空，原因？
             case PermissionUtil.REQUEST_CODE_INSTALL:{
+                //选择允许安装未知应用权限mPermissionCallback=null.
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                     if(getPackageManager().canRequestPackageInstalls()){
                         if(mPermissionCallback!=null){

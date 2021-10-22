@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
@@ -30,6 +31,30 @@ public class PermissionUtil{
     public static final int ACTION_WRITE_SETTINGS_PERMISSION = 202;
     public static final int ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = 203;
     private static List<String> mAppPermissions;
+
+
+    //过滤出实际需要去请求的权限
+    public static String[] getRealRequestPermissions(@NonNull String[] permissions) {
+        List<String> list = new ArrayList<>(Arrays.asList(permissions));
+        List<String> realList = new ArrayList<>();
+        for(int i = 0;i<list.size();i++){
+            String p = list.get(i);
+            //Android 10(Q 29)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && p.equals(Permission.ACCESS_BACKGROUND_LOCATION)) {
+                continue;
+            }
+            //从android 11(R 30)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && p.equals(Permission.MANAGE_EXTERNAL_STORAGE)) {
+                continue;
+            }
+            //Android 12(S 31)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && (p.equals(Permission.BLUETOOTH_ADVERTISE) || p.equals(Permission.BLUETOOTH_CONNECT) || p.equals(Permission.BLUETOOTH_SCAN))) {
+               continue;
+            }
+            realList.add(p);
+        }
+        return realList.toArray(new String[0]);
+    }
 
     //检查权限是否在清单中注册
     public static void checkPermissionsWhetherRegisteredInManifest(@NonNull Context context,@NonNull String[] permissions){
