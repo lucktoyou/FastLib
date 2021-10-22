@@ -5,7 +5,6 @@ import android.os.Build;
 import android.os.Process;
 import android.webkit.WebView;
 
-import com.example.fastlibdemo.BuildConfig;
 import com.fastlib.db.FastDatabase;
 import com.fastlib.net.HttpGlobalConfig;
 import com.fastlib.net.Request;
@@ -19,13 +18,9 @@ import com.fastlib.utils.FastLog;
  */
 public class ApplicationImpl extends Application {
 
-    public static ActivityStack mActivityStack;
-
     @Override
     public void onCreate() {
         super.onCreate();
-        mActivityStack = new ActivityStack(this);
-        //mActivityStack.clearStack();
         initFastLib();
         initWebView();
     }

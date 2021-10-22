@@ -76,6 +76,13 @@ public class Permission{
      */
     public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
 
+    /**
+     * Android 8.0(O 26)系统开始对安装未知来源的应用程序进行了限制。
+     * 在8.0系统之前，只要用户在手机设置中开启了“允许安装未知来源的应用”这个选项，那么就可以在这台手机上随意安装任意的APK。
+     * 而从8.0系统开始，每个应用程序如果想要去跳转安装一个APK，都需要单独让用户去同意一遍“允许安装未知来源的的应用”这个选项才行。
+     */
+    public static final String REQUEST_INSTALL_PACKAGES = "android.permission.REQUEST_INSTALL_PACKAGES";
+
     ////////////////////////////////////////////////
     // 将权限转换为文本
     //////////////////////////////////////
@@ -123,7 +130,7 @@ public class Permission{
                 case Permission.ACCESS_FINE_LOCATION:
                 case Permission.ACCESS_COARSE_LOCATION:{
                     String message;
-                    if(Build.VERSION.SDK_INT >= 29)
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                         message = "前台获取位置信息";
                     else
                         message = "位置信息";
@@ -134,7 +141,7 @@ public class Permission{
                 }
                 case Permission.ACCESS_BACKGROUND_LOCATION:{
                     String message;
-                    if(Build.VERSION.SDK_INT >= 29)
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                         message = "后台获取位置信息";
                     else
                         message = "";
@@ -166,7 +173,7 @@ public class Permission{
                 case Permission.WRITE_CALL_LOG:
                 case Permission.PROCESS_OUTGOING_CALLS:{
                     String message;
-                    if(Build.VERSION.SDK_INT >= 29)
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                         message = "通话记录";
                     else
                         message = "电话";
@@ -224,6 +231,13 @@ public class Permission{
                 }
                 case Permission.MANAGE_EXTERNAL_STORAGE:{
                     String message = "所有文件访问";
+                    if(!textList.contains(message)){
+                        textList.add(message);
+                    }
+                    break;
+                }
+                case Permission.REQUEST_INSTALL_PACKAGES:{
+                    String message = "安装应用";
                     if(!textList.contains(message)){
                         textList.add(message);
                     }

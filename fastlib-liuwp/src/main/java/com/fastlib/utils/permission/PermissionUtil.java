@@ -24,12 +24,12 @@ import java.util.List;
  * 辅助工具
  */
 public class PermissionUtil{
-    public static final int PERMISSION_REQUEST_CODE = 1;
-    public static final int ACTION_MANAGE_OVERLAY_PERMISSION = 2;
-    public static final int ACTION_WRITE_SETTINGS_PERMISSION = 3;
-    public static final int ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = 4;
+    public static final int REQUEST_CODE_PERMISSION = 101;
+    public static final int REQUEST_CODE_INSTALL = 102;
+    public static final int ACTION_MANAGE_OVERLAY_PERMISSION = 201;
+    public static final int ACTION_WRITE_SETTINGS_PERMISSION = 202;
+    public static final int ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = 203;
     private static List<String> mAppPermissions;
-
 
     //检查权限是否在清单中注册
     public static void checkPermissionsWhetherRegisteredInManifest(@NonNull Context context,@NonNull String[] permissions){

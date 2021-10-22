@@ -40,7 +40,8 @@ import java.lang.annotation.RetentionPolicy;
         Permission.WRITE_EXTERNAL_STORAGE,
         Permission.SYSTEM_ALERT_WINDOW,
         Permission.WRITE_SETTINGS,
-        Permission.MANAGE_EXTERNAL_STORAGE
+        Permission.MANAGE_EXTERNAL_STORAGE,
+        Permission.REQUEST_INSTALL_PACKAGES
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface PermissionDef{

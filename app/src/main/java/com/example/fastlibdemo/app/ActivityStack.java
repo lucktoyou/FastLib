@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
+import com.fastlib.utils.FastLog;
+
 import java.util.Vector;
 
 public class ActivityStack{
@@ -18,7 +20,7 @@ public class ActivityStack{
                 StringBuilder sb=new StringBuilder();
                 for(Activity active:mStack)
                     sb.append("->").append(active.getClass().getSimpleName());
-                System.out.println("add "+activity.getClass().getSimpleName()+" \n"+sb);
+                FastLog.d("add "+activity.getClass().getSimpleName()+" \n"+sb);
             }
 
             @Override
@@ -52,7 +54,7 @@ public class ActivityStack{
                 StringBuilder sb=new StringBuilder();
                 for(Activity active:mStack)
                     sb.append("->").append(active.getClass().getSimpleName());
-                System.out.println("remove "+activity.getClass().getSimpleName()+"\n"+sb);
+                FastLog.d("remove "+activity.getClass().getSimpleName()+"\n"+sb);
             }
         });
     }

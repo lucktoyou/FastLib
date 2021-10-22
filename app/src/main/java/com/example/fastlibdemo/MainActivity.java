@@ -12,8 +12,9 @@ import android.text.format.Formatter;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.fastlibdemo.db.LibraryActivity;
@@ -28,7 +29,6 @@ import com.example.fastlibdemo.view.MultiActivity;
 import com.fastlib.annotation.Bind;
 import com.fastlib.annotation.ContentView;
 import com.fastlib.annotation.Event;
-import com.fastlib.annotation.LocalData;
 import com.fastlib.base.FastDialog;
 import com.fastlib.base.custom.CountDownService;
 import com.fastlib.base.module.FastActivity;
@@ -44,6 +44,7 @@ import com.fastlib.utils.core.SaveUtil;
 import com.fastlib.utils.permission.FastPermission;
 import com.fastlib.utils.permission.OnPermissionCallback;
 import com.fastlib.utils.permission.Permission;
+import com.fastlib.utils.permission.PermissionActivity;
 
 import java.io.File;
 import java.util.Date;
@@ -54,17 +55,15 @@ import java.util.Map;
 @SuppressLint("NonConstantResourceId")
 @ContentView(R.layout.activity_main)
 public class MainActivity extends FastActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
     public void alreadyPrepared() {
-        SaveUtil.saveToSp("data", "hello world!");
+        FastLog.d(TAG+"#alreadyPrepared()：准备工作完毕");
     }
 
     @Bind(R.id.btnLog)
-    @LocalData(value = "data", from = LocalData.GiverType.SP)
-    public void printLog(View view, String data) {
-        FastLog.e("测试:" + data);
-
+    public void printLog(View view) {
         Map<String, String> map = new HashMap<>();
         map.put(null, "我是null key的值");
         FastLog.e("测试:" + map.get(null));
@@ -128,11 +127,11 @@ public class MainActivity extends FastActivity {
     @Bind(R.id.btnPermission)
     public void permission() {
         FastPermission.with(this)
-                .permissions(Permission.CAMERA, Permission.WRITE_EXTERNAL_STORAGE)
+                .permissions(Permission.REQUEST_INSTALL_PACKAGES)
                 .request(new OnPermissionCallback() {
                     @Override
                     public void onPermissionSuccess() {
-                        Toast.makeText(MainActivity.this, "权限申请成功", Toast.LENGTH_SHORT).show();
+                        N.showToast(MainActivity.this, "权限申请成功");
                     }
 
                     @Override
@@ -140,6 +139,19 @@ public class MainActivity extends FastActivity {
                         N.showToast(MainActivity.this,hint);
                     }
                 });
+//        FastPermission.with(this)
+//                .permissions(Permission.CAMERA, Permission.WRITE_EXTERNAL_STORAGE)
+//                .request(new OnPermissionCallback() {
+//                    @Override
+//                    public void onPermissionSuccess() {
+//                        N.showToast(MainActivity.this, "权限申请成功");
+//                    }
+//
+//                    @Override
+//                    public void onPermissionFailure(String hint) {
+//                        N.showToast(MainActivity.this,hint);
+//                    }
+//                });
     }
 
     @Bind(R.id.btnDialog)
@@ -278,5 +290,63 @@ public class MainActivity extends FastActivity {
                 });
             }
         });
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // 生命周期
+    ///////////////////////////
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        FastLog.d(TAG+"#onCreate()");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        FastLog.d(TAG+"#onRestart()");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FastLog.d(TAG+"# onStart()");
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        FastLog.d(TAG+"#onRestoreInstanceState()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FastLog.d(TAG+"#onResume()");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        FastLog.d(TAG+"#onPause()");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FastLog.d(TAG+"#onStop()");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        FastLog.d(TAG+"#onSaveInstanceState()");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        FastLog.d(TAG+"#onDestroy()");
     }
 }

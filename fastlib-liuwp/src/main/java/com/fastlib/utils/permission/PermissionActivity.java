@@ -4,6 +4,7 @@ package com.fastlib.utils.permission;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,6 +21,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.fastlib.utils.FastLog;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -31,17 +34,18 @@ import java.util.List;
  * 用于具体的权限申请.
  **/
 public class PermissionActivity extends AppCompatActivity{
+    private static final String TAG = PermissionActivity.class.getSimpleName();
+    private static final boolean DEBUG = false;
     private static final String ARG_PERMISSIONS = "permissions";
     private static final String ARG_FAILURE_HINT = "failureHint";
     private static final String ARG_RATIONALE_HINT = "rationaleHint";
-
-    private static OnPermissionCallback mPermissionCallback;
 
     private PermissionActivity mOwner;
     private AlertDialog mAlertDialog;
     private String[] mPermissions;
     private String mFailureHint;
     private String mRationaleHint;
+    private OnPermissionCallback mPermissionCallback;
     private boolean mIsNotFirstResume = false;
     private int mSpecialPermissionRequestCode = -1;
 
@@ -70,6 +74,10 @@ public class PermissionActivity extends AppCompatActivity{
         mPermissions = getIntent().getStringArrayExtra(ARG_PERMISSIONS);
         mFailureHint = getIntent().getStringExtra(ARG_FAILURE_HINT);
         mRationaleHint = getIntent().getStringExtra(ARG_RATIONALE_HINT);
+        mPermissionCallback = PermissionHelper.getInstance().getPermissionCallback();
+        if(DEBUG){
+            FastLog.d(TAG+"#onCreate(): mRationaleHint="+mRationaleHint +" mFailureHint="+mFailureHint+" mPermissionCallback="+mPermissionCallback);
+        }
     }
 
     private void startPermissionsRequest(){
@@ -77,8 +85,8 @@ public class PermissionActivity extends AppCompatActivity{
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
             if(mPermissionCallback!=null){
                 mPermissionCallback.onPermissionSuccess();
-                checkFinish();
             }
+            checkFinish();
             return;
         }
         if(mPermissions.length==1 && mPermissions[0].equals(Permission.SYSTEM_ALERT_WINDOW)){
@@ -89,8 +97,8 @@ public class PermissionActivity extends AppCompatActivity{
             }else{
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionSuccess();
-                    checkFinish();
                 }
+                checkFinish();
             }
             return;
         }
@@ -102,18 +110,18 @@ public class PermissionActivity extends AppCompatActivity{
             }else{
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionSuccess();
-                    checkFinish();
                 }
+                checkFinish();
             }
             return;
         }
-        //设置android:requestLegacyExternalStorage="true"，从android 11开始启用Scoped Storage.
         if(mPermissions.length==1 && mPermissions[0].equals(Permission.MANAGE_EXTERNAL_STORAGE)){
+            //设置android:requestLegacyExternalStorage="true"，从android 11开始启用Scoped Storage.
             if(Build.VERSION.SDK_INT<Build.VERSION_CODES.R){
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                    checkFinish();
                 }
+                checkFinish();
             }else{
                 if(!Environment.isExternalStorageManager()){
                     mSpecialPermissionRequestCode = PermissionUtil.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
@@ -122,8 +130,27 @@ public class PermissionActivity extends AppCompatActivity{
                 }else{
                     if(mPermissionCallback!=null){
                         mPermissionCallback.onPermissionSuccess();
-                        checkFinish();
                     }
+                    checkFinish();
+                }
+            }
+            return;
+        }
+        if(mPermissions.length==1 && mPermissions[0].equals(Permission.REQUEST_INSTALL_PACKAGES)){
+            if(Build.VERSION.SDK_INT<Build.VERSION_CODES.O){
+                if(mPermissionCallback!=null){
+                    mPermissionCallback.onPermissionSuccess();
+                }
+                checkFinish();
+            }else{
+                if(!getPackageManager().canRequestPackageInstalls()){
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,Uri.parse("package:"+getPackageName()));
+                    startActivityForResult(intent,PermissionUtil.REQUEST_CODE_INSTALL);
+                }else{
+                    if(mPermissionCallback!=null){
+                        mPermissionCallback.onPermissionSuccess();
+                    }
+                    checkFinish();
                 }
             }
             return;
@@ -132,8 +159,8 @@ public class PermissionActivity extends AppCompatActivity{
             if(PermissionUtil.checkPermissionsGranted(mOwner,mPermissions)){
                 if(mPermissionCallback!=null){
                     mPermissionCallback.onPermissionSuccess();
-                    checkFinish();
                 }
+                checkFinish();
             }else{
                 final String[] unauthorizedPermissions = PermissionUtil.getUnauthorizedPermissionList(mOwner,mPermissions);
                 if(PermissionUtil.shouldShowRequestPermissionRationale(mOwner,mPermissions)){
@@ -151,13 +178,13 @@ public class PermissionActivity extends AppCompatActivity{
                             .setPositiveButton("下一步",new DialogInterface.OnClickListener(){
                                 @Override
                                 public void onClick(DialogInterface dialog,int which){
-                                    ActivityCompat.requestPermissions(mOwner,unauthorizedPermissions,PermissionUtil.PERMISSION_REQUEST_CODE);
+                                    ActivityCompat.requestPermissions(mOwner,unauthorizedPermissions,PermissionUtil.REQUEST_CODE_PERMISSION);
                                 }
                             }).create();
                     if(mAlertDialog!=null)
                         mAlertDialog.show();
                 }else{
-                    ActivityCompat.requestPermissions(mOwner,unauthorizedPermissions,PermissionUtil.PERMISSION_REQUEST_CODE);
+                    ActivityCompat.requestPermissions(mOwner,unauthorizedPermissions,PermissionUtil.REQUEST_CODE_PERMISSION);
                 }
             }
             return;
@@ -178,7 +205,9 @@ public class PermissionActivity extends AppCompatActivity{
             String permission = iterator.next();
             if(permission.equals(Permission.SYSTEM_ALERT_WINDOW) ||
                     permission.equals(Permission.WRITE_SETTINGS) ||
-                    permission.equals(Permission.MANAGE_EXTERNAL_STORAGE)){
+                    permission.equals(Permission.MANAGE_EXTERNAL_STORAGE) ||
+                    permission.equals(Permission.REQUEST_INSTALL_PACKAGES)
+            ){
                 iterator.remove();
             }
         }
@@ -189,7 +218,9 @@ public class PermissionActivity extends AppCompatActivity{
         for(String permission: permissions){
             if(permission.equals(Permission.SYSTEM_ALERT_WINDOW) ||
                     permission.equals(Permission.WRITE_SETTINGS) ||
-                    permission.equals(Permission.MANAGE_EXTERNAL_STORAGE)){
+                    permission.equals(Permission.MANAGE_EXTERNAL_STORAGE) ||
+                    permission.equals(Permission.REQUEST_INSTALL_PACKAGES)
+            ){
                 return false;
             }
         }
@@ -218,22 +249,51 @@ public class PermissionActivity extends AppCompatActivity{
     }
 
     @Override
+    protected void onActivityResult(int requestCode,int resultCode,@Nullable Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(DEBUG){
+            FastLog.d(TAG+"#onActivityResult(): mPermissionCallback="+mPermissionCallback);
+        }
+        switch(requestCode){
+            //todo: 选择允许安装未知应用权限mPermissionCallback=null，不允许不会为空，原因？
+            case PermissionUtil.REQUEST_CODE_INSTALL:{
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                    if(getPackageManager().canRequestPackageInstalls()){
+                        if(mPermissionCallback!=null){
+                            mPermissionCallback.onPermissionSuccess();
+                        }
+                    }else{
+                        if(mPermissionCallback!=null){
+                            mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
+                        }
+                    }
+                    checkFinish();
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode,@NonNull String[] permissions,@NonNull int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(DEBUG){
+            FastLog.d(TAG+"#onRequestPermissionsResult(): mPermissionCallback="+mPermissionCallback);
+        }
         switch(requestCode){
-            case PermissionUtil.PERMISSION_REQUEST_CODE:{
+            case PermissionUtil.REQUEST_CODE_PERMISSION:{
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                     if(PermissionUtil.checkPermissionsGranted(grantResults)){
                         if(mPermissionCallback!=null){
                             mPermissionCallback.onPermissionSuccess();
-                            checkFinish();
                         }
+                        checkFinish();
                     }else{
                         if(PermissionUtil.shouldShowRequestPermissionRationale(mOwner,permissions)){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,permissions));
-                                checkFinish();
                             }
+                            checkFinish();
                         }else{
                             mAlertDialog = new AlertDialog.Builder(mOwner)
                                     .setTitle("提示")
@@ -262,9 +322,13 @@ public class PermissionActivity extends AppCompatActivity{
         }
     }
 
+
     @Override
     protected void onResume(){
         super.onResume();
+        if(DEBUG){
+            FastLog.d(TAG+"#onResume(): mPermissionCallback="+mPermissionCallback);
+        }
         if(mIsNotFirstResume && mSpecialPermissionRequestCode!=-1){
             switch(mSpecialPermissionRequestCode){
                 case PermissionUtil.ACTION_MANAGE_OVERLAY_PERMISSION:{
@@ -272,14 +336,13 @@ public class PermissionActivity extends AppCompatActivity{
                         if(Settings.canDrawOverlays(mOwner)){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionSuccess();
-                                checkFinish();
                             }
                         }else{
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                                checkFinish();
                             }
                         }
+                        checkFinish();
                     }
                     break;
                 }
@@ -288,14 +351,13 @@ public class PermissionActivity extends AppCompatActivity{
                         if(Settings.System.canWrite(mOwner)){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionSuccess();
-                                checkFinish();
                             }
                         }else{
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                                checkFinish();
                             }
                         }
+                        checkFinish();
                     }
                     break;
                 }
@@ -304,14 +366,13 @@ public class PermissionActivity extends AppCompatActivity{
                         if(Environment.isExternalStorageManager()){
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionSuccess();
-                                checkFinish();
                             }
                         }else{
                             if(mPermissionCallback!=null){
                                 mPermissionCallback.onPermissionFailure(getFailureHint(mFailureHint,mOwner,mPermissions));
-                                checkFinish();
                             }
                         }
+                        checkFinish();
                     }
                     break;
                 }
@@ -323,20 +384,33 @@ public class PermissionActivity extends AppCompatActivity{
     }
 
     @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        if(mAlertDialog!=null){
-            mAlertDialog = null;
+    protected void onPause(){
+        super.onPause();
+        if(DEBUG){
+            FastLog.d(TAG+"#onPause()");
         }
     }
 
-    public static void start(Context context,String[] permissions,String failureHint,String rationaleHint,OnPermissionCallback permissionCallback){
+    @Override
+    protected void onDestroy(){
+        mAlertDialog = null;
+        mPermissions = null;
+        mFailureHint = null;
+        mRationaleHint = null;
+        mPermissionCallback = null;
+        mIsNotFirstResume = false;
+        mSpecialPermissionRequestCode = -1;
+        super.onDestroy();
+        if(DEBUG){
+            FastLog.d(TAG+"#onDestroy()");
+        }
+    }
+
+    public static void start(Context context,String[] permissions,String failureHint,String rationaleHint){
         Intent intent = new Intent(context,PermissionActivity.class);
         intent.putExtra(ARG_PERMISSIONS,permissions);
         intent.putExtra(ARG_FAILURE_HINT,failureHint);
         intent.putExtra(ARG_RATIONALE_HINT,rationaleHint);
         context.startActivity(intent);
-
-        mPermissionCallback = permissionCallback;
     }
 }

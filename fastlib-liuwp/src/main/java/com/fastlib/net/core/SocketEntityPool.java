@@ -33,7 +33,7 @@ public class SocketEntityPool{
     }
 
     /**
-     * TODO 这里的同步是否可以优化
+     * TODO 这里的同步是否可以优化？
      * 从池中取一个socket实体(可能是新创建的)
      * @param url   统一资源定位符
      * @return      socket实体

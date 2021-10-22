@@ -1,7 +1,6 @@
 package com.fastlib.utils.permission;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,18 +9,18 @@ import androidx.annotation.Nullable;
 /***
  * Created by liuwp on 2020/8/5
  *
- * 使用FastPermission进行【危险权限单个多个、常见三个特殊权限单个】申请，说明：
+ * 使用FastPermission进行【危险权限单个多个、特殊权限单个】申请，说明：
  *
  *  ①问世背景：流行的几个第三方权限申请库各有优缺点而且修改起来不方便。
  *  ②设计原则：代码解耦、链式调用。
- *  ③使用范围：只要有Context的地方就可以使用。（4.4 - 11.0）
+ *  ③适配范围：android api（4.4 - 11.0）
  *  ②使用方式：链式调用。
  **/
 public class FastPermission{
 
-    private String[] mPermissions;
-    private String mFailureHint;
-    private String mRationaleHint;
+    private final String[] mPermissions;
+    private final String mFailureHint;
+    private final String mRationaleHint;
 
     private FastPermission(Builder builder){
         this.mPermissions = builder.mPermissions;
@@ -30,22 +29,24 @@ public class FastPermission{
     }
 
     private void request(Context context,OnPermissionCallback permissionCallback){
-        if(mPermissions==null || mPermissions.length==0){
-            Toast.makeText(context,"实际参与权限申请的权限个数为零",Toast.LENGTH_SHORT).show();
-        }else{
-            PermissionActivity.start(context,mPermissions,mFailureHint,mRationaleHint,permissionCallback);
+        if (mPermissions==null || mPermissions.length==0) {
+            throw new IllegalArgumentException("permissions can't be null");
         }
+        PermissionHelper.getInstance().setPermissionCallback(permissionCallback);
+        PermissionActivity.start(context,mPermissions,mFailureHint,mRationaleHint);
     }
+
 
     public static Builder with(Context context){
         return new Builder(context);
     }
 
     public static class Builder{
-        private Context context;
+        private final Context context;
         private String[] mPermissions;
         private String mFailureHint;
         private String mRationaleHint;
+
 
         Builder(Context context){
             this.context = context;
@@ -60,7 +61,6 @@ public class FastPermission{
             mFailureHint = hint;
             return this;
         }
-
 
         //原因提示,不设置则使用默认提示.
         public Builder setRationaleHint(@Nullable String hint){
