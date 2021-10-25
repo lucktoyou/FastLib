@@ -1,6 +1,5 @@
 package com.example.fastlibdemo;
 
-import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -43,12 +42,12 @@ import com.fastlib.utils.TimeUtil;
 import com.fastlib.utils.core.SaveUtil;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 
-@SuppressLint("NonConstantResourceId")
 @ContentView(R.layout.activity_main)
 public class MainActivity extends FastActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -64,8 +63,8 @@ public class MainActivity extends FastActivity {
         map.put(null, "我是null key的值");
         FastLog.e("测试:" + map.get(null));
 
-        FastLog.e("测试:" + Base64.encodeToString("你好".getBytes(), Base64.NO_WRAP));//5L2g5aW9
-        FastLog.e("测试:" + new String(Base64.decode("5L2g5aW9", Base64.NO_WRAP)));//你好
+        FastLog.e("测试:" + new String(EncryptUtil.base64Encode("你好".getBytes())));//5L2g5aW9
+        FastLog.e("测试:" + new String(EncryptUtil.base64Decode("5L2g5aW9".getBytes())));//你好
         FastLog.e("测试:" + EncryptUtil.encryptMD5ToString("你好世界"));//65396ee4aad0b4f17aacd1c6112ee364
         FastLog.e("测试:" + EncryptUtil.encryptSHA1ToString("你好世界"));//dabaa5fe7c47fb21be902480a13013f16a1ab6eb
 
@@ -80,9 +79,9 @@ public class MainActivity extends FastActivity {
         FastLog.e("手机设备厂商："+DeviceUtil.getManufacturer());//Xiaomi
         FastLog.e("手机设备型号："+DeviceUtil.getModel());//M2011K2C
         FastLog.e("手机设备系统版本："+ DeviceUtil.getSystemVersion());//11
+        FastLog.e("手机设备系统版本号："+ DeviceUtil.getSystemVersionCode());//30
         FastLog.e("手机设备ID："+DeviceUtil.getUniqueDeviceId());//286892be19e0c38f88325c343f83c7bf7
     }
-
 
     @Bind(R.id.btnProgress)
     public void progress() {

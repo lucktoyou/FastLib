@@ -46,29 +46,6 @@ public final class DeviceUtil {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
-    /**
-     * @return whether device is rooted. {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isDeviceRooted() {
-        String su = "su";
-        String[] locations = {"/system/bin/", "/system/xbin/", "/sbin/", "/system/sd/xbin/",
-                "/system/bin/failsafe/", "/data/local/xbin/", "/data/local/bin/", "/data/local/",
-                "/system/sbin/", "/usr/bin/", "/vendor/bin/"};
-        for (String location : locations) {
-            if (new File(location + su).exists()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @return whether ADB is enabled. {@code true}: yes<br>{@code false}: no
-     */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static boolean isAdbEnabled() {
-        return Settings.Secure.getInt(ContextHolder.getContext().getContentResolver(), Settings.Global.ADB_ENABLED, 0) > 0;
-    }
 
     /**
      * <p>e.g. Xiaomi</p>
@@ -100,9 +77,17 @@ public final class DeviceUtil {
      * @return the version name of device's system
      */
     public static String getSystemVersion() {
-        return android.os.Build.VERSION.RELEASE;
+        return Build.VERSION.RELEASE;
     }
 
+    /**
+     * <p>e.g. 30</p>
+     *
+     * @return the version code of device's system
+     */
+    public static int getSystemVersionCode() {
+        return Build.VERSION.SDK_INT;
+    }
 
     /**
      * @return the android id of device.
@@ -200,7 +185,7 @@ public final class DeviceUtil {
             if (wifi != null) {
                 final WifiInfo info = wifi.getConnectionInfo();
                 if (info != null) {
-                    @SuppressLint("HardwareIds")
+                    @SuppressLint({"HardwareIds","MissingPermission"})
                     String macAddress = info.getMacAddress();
                     if (!TextUtils.isEmpty(macAddress)) {
                         return macAddress;
@@ -295,74 +280,6 @@ public final class DeviceUtil {
         return "02:00:00:00:00:00";
     }
 
-
-    /**
-     * @return an ordered list of ABIs supported by this device.
-     * The most preferred ABI is the first element in the list.
-     */
-    public static String[] getABIs() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return Build.SUPPORTED_ABIS;
-        } else {
-            if (!TextUtils.isEmpty(Build.CPU_ABI2)) {
-                return new String[]{Build.CPU_ABI, Build.CPU_ABI2};
-            }
-            return new String[]{Build.CPU_ABI};
-        }
-    }
-
-    /**
-     * @return whether device is tablet. {@code true}: yes<br>{@code false}: no
-     */
-    public static boolean isTablet() {
-        return (Resources.getSystem().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK)
-                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
-    }
-
-    /**
-     * @return {whether device is emulator. @code true}: yes<br>{@code false}: no
-     */
-    public static boolean isEmulator() {
-        boolean checkProperty = Build.FINGERPRINT.startsWith("generic")
-                || Build.FINGERPRINT.toLowerCase().contains("vbox")
-                || Build.FINGERPRINT.toLowerCase().contains("test-keys")
-                || Build.MODEL.contains("google_sdk")
-                || Build.MODEL.contains("Emulator")
-                || Build.MODEL.contains("Android SDK built for x86")
-                || Build.MANUFACTURER.contains("Genymotion")
-                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || "google_sdk".equals(Build.PRODUCT);
-        if (checkProperty) return true;
-
-        String operatorName = "";
-        TelephonyManager tm = (TelephonyManager) ContextHolder.getContext().getSystemService(Context.TELEPHONY_SERVICE);
-        if (tm != null) {
-            String name = tm.getNetworkOperatorName();
-            if (name != null) {
-                operatorName = name;
-            }
-        }
-        boolean checkOperatorName = operatorName.toLowerCase().equals("android");
-        if (checkOperatorName) return true;
-
-        String url = "tel:" + "123456";
-        Intent intent = new Intent();
-        intent.setData(Uri.parse(url));
-        intent.setAction(Intent.ACTION_DIAL);
-        boolean checkDial = intent.resolveActivity(ContextHolder.getContext().getPackageManager()) == null;
-        return checkDial;
-    }
-
-    /**
-     * @return whether user has enabled development settings.
-     */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static boolean isDevelopmentSettingsEnabled() {
-        return Settings.Global.getInt(ContextHolder.getContext().getContentResolver(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) > 0;
-    }
-
-
     private static final String KEY_UDID = "KEY_UDID";
     private volatile static String udid;
 
@@ -451,7 +368,7 @@ public final class DeviceUtil {
         return prefix + UUID.nameUUIDFromBytes(id.getBytes()).toString().replace("-", "");
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//=========================================================================================
 
     private static final String LINE_SEP = System.getProperty("line.separator");
 

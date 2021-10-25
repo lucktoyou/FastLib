@@ -256,7 +256,7 @@ public class PermissionActivity extends AppCompatActivity{
         }
         switch(requestCode){
             case PermissionUtil.REQUEST_CODE_INSTALL:{
-                //选择允许安装未知应用权限mPermissionCallback=null.
+                //选择允许安装未知应用权限mPermissionCallback=null,反之正常.
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                     if(getPackageManager().canRequestPackageInstalls()){
                         if(mPermissionCallback!=null){

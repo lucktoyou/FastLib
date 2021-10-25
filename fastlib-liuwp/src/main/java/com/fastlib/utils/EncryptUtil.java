@@ -36,6 +36,28 @@ public final class EncryptUtil {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
+    /**
+     * Return Base64-encode bytes.
+     *
+     * @param input The input.
+     * @return Base64-encode bytes
+     */
+    public static byte[] base64Encode(final byte[] input) {
+        if (input == null || input.length == 0) return new byte[0];
+        return Base64.encode(input, Base64.NO_WRAP);
+    }
+
+    /**
+     * Return the bytes of decode Base64-encode bytes.
+     *
+     * @param input The input.
+     * @return the bytes of decode Base64-encode bytes
+     */
+    public static byte[] base64Decode(final byte[] input) {
+        if (input == null || input.length == 0) return new byte[0];
+        return Base64.decode(input, Base64.NO_WRAP);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // hash encryption
     ///////////////////////////////////////////////////////////////////////////
@@ -1232,27 +1254,5 @@ public final class EncryptUtil {
         } else {
             throw new IllegalArgumentException();
         }
-    }
-
-    /**
-     * Return Base64-encode bytes.
-     *
-     * @param input The input.
-     * @return Base64-encode bytes
-     */
-    private static byte[] base64Encode(final byte[] input) {
-        if (input == null || input.length == 0) return new byte[0];
-        return Base64.encode(input, Base64.NO_WRAP);
-    }
-
-    /**
-     * Return the bytes of decode Base64-encode bytes.
-     *
-     * @param input The input.
-     * @return the bytes of decode Base64-encode bytes
-     */
-    private static byte[] base64Decode(final byte[] input) {
-        if (input == null || input.length == 0) return new byte[0];
-        return Base64.decode(input, Base64.NO_WRAP);
     }
 }
