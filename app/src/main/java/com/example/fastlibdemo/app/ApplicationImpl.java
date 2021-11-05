@@ -26,7 +26,7 @@ public class ApplicationImpl extends Application {
     }
 
     private void initFastLib(){
-        FastLog.setDebug(true,false,0,"FAST_LOG");
+        FastLog.setDebug(true,true,2,"FASTER");
         FastDatabase.getConfig().setVersion(6);
         HttpGlobalConfig.getInstance().setRootAddress("https://www.xxx.com:443");
         HttpGlobalConfig.getInstance().setGlobalListener(new GlobalListener(){
