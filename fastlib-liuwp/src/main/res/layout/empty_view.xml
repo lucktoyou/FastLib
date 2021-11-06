@@ -6,14 +6,15 @@
 
     <ImageView
         android:id="@+id/empty_retry_view"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_centerInParent="true"
         android:src="@drawable/empty" />
 
     <TextView
         android:id="@+id/state_hint_content"
-        style="@style/StateLayout.Content"
+        style="@style/MultiStateFrameLayout.Content"
         android:layout_below="@id/empty_retry_view"
-        android:text="@string/empty_view_hint" />
+        android:text="@string/empty_view_hint"
+        android:textColor="#E0E0E0"/>
 </RelativeLayout>

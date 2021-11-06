@@ -58,10 +58,10 @@ public class MultiStateFrameLayout extends FrameLayout {
     public MultiStateFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MultiStateFrameLayout, defStyleAttr, 0);
-        mEmptyViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_emptyView, R.layout.view_empty);
-        mErrorViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_errorView, R.layout.view_error);
-        mLoadingViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_loadingView, R.layout.view_loading);
-        mNoNetworkViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_noNetworkView, R.layout.view_no_network);
+        mEmptyViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_emptyView, R.layout.empty_view);
+        mErrorViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_errorView, R.layout.error_view);
+        mLoadingViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_loadingView, R.layout.loading_view);
+        mNoNetworkViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_noNetworkView, R.layout.no_network_view);
         mContentViewResId = a.getResourceId(R.styleable.MultiStateFrameLayout_contentView, NULL_RESOURCE_ID);
         a.recycle();
     }

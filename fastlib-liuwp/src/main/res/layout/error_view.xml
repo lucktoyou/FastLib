@@ -13,7 +13,8 @@
 
     <TextView
         android:id="@+id/state_hint_content"
-        style="@style/StateLayout.Content"
+        style="@style/MultiStateFrameLayout.Content"
         android:layout_below="@id/error_retry_view"
-        android:text="@string/error_view_hint" />
+        android:text="@string/error_view_hint"
+        android:textColor="#E0E0E0"/>
 </RelativeLayout>
