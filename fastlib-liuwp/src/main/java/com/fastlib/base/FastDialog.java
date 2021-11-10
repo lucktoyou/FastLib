@@ -33,9 +33,9 @@ public class FastDialog extends DialogFragment{
     private static final String ARG_CANCELABLE = "cancelable";
     private DialogInterface.OnClickListener listener;
 
-    public static void showMessage(String title,String message,boolean cancelable,
+    public static void showMessage(String title,String message,
                                    FragmentManager fragmentManager,OnClickListener onClickListener){
-        showMessage(title,message,"取消","确定",cancelable,fragmentManager,onClickListener);
+        showMessage(title,message,"取消","确定",false,fragmentManager,onClickListener);
     }
 
     public static void showMessage(String title,String message,String negativeButtonText,String positiveButtonText,boolean cancelable,
@@ -53,13 +53,13 @@ public class FastDialog extends DialogFragment{
         dialog.show(fragmentManager,"messageDialog");
     }
 
-    public static void showList(String[] items,boolean cancelable,
+    public static void showList(String[] items,
                                 FragmentManager fragmentManager,OnClickListener onClickListener){
-        showList(null,items,cancelable,fragmentManager,onClickListener);
+        showList(null,items,false,fragmentManager,onClickListener);
     }
 
     public static void showList(String title,String[] items,boolean cancelable,
-                                      FragmentManager fragmentManager,OnClickListener onClickListener){
+                                FragmentManager fragmentManager,OnClickListener onClickListener){
         FastDialog dialog = new FastDialog();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_TYPE,TYPE_LIST);
