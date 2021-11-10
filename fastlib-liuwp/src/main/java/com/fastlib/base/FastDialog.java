@@ -54,10 +54,16 @@ public class FastDialog extends DialogFragment{
     }
 
     public static void showList(String[] items,boolean cancelable,
+                                FragmentManager fragmentManager,OnClickListener onClickListener){
+        showList(null,items,cancelable,fragmentManager,onClickListener);
+    }
+
+    public static void showList(String title,String[] items,boolean cancelable,
                                       FragmentManager fragmentManager,OnClickListener onClickListener){
         FastDialog dialog = new FastDialog();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_TYPE,TYPE_LIST);
+        bundle.putString(ARG_TITLE,title);
         bundle.putStringArray(ARG_LIST,items);
         bundle.putBoolean(ARG_CANCELABLE,cancelable);
         dialog.setArguments(bundle);
@@ -88,11 +94,13 @@ public class FastDialog extends DialogFragment{
                                 .create();
                     }
                     case TYPE_LIST:{
+                        String title = bundle.getString(ARG_TITLE);
                         String[] list = bundle.getStringArray(ARG_LIST);
                         ListView listView = new ListView(context);
                         ArrayAdapter<String> adapter = new ArrayAdapter<>(context,android.R.layout.simple_list_item_1,list!=null ? list : new String[0]);
                         listView.setAdapter(adapter);
                         final AlertDialog dialog = new AlertDialog.Builder(context)
+                                .setTitle(title)
                                 .setView(listView)
                                 .create();
                         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){

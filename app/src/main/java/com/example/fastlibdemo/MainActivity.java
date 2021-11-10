@@ -126,11 +126,18 @@ public class MainActivity extends FastActivity {
 
     @Bind(R.id.btnDialog)
     public void dialog() {
-        FastDialog.showMessage("提示","请打开这个盒子",true,getSupportFragmentManager(),new DialogInterface.OnClickListener(){
+//        FastDialog.showMessage("提示","请打开这个盒子",true,getSupportFragmentManager(),new DialogInterface.OnClickListener(){
+//            @Override
+//            public void onClick(DialogInterface dialog,int which){
+//                Button button = ((AlertDialog)dialog).getButton(which);
+//                N.showToast(MainActivity.this,button.getText().toString());
+//            }
+//        });
+        final String[] array = {"红米", "黑米", "薏米"};
+        FastDialog.showList("选择你喜欢的",array,true,getSupportFragmentManager(),new DialogInterface.OnClickListener(){
             @Override
             public void onClick(DialogInterface dialog,int which){
-                Button button = ((AlertDialog)dialog).getButton(which);
-                N.showToast(MainActivity.this,button.getText().toString());
+                N.showToast(MainActivity.this,array[which]);
             }
         });
     }
