@@ -13,7 +13,7 @@ public class PersonBeen {
         //私有构造
     }
 
-    public PersonBeen(String name, int age,String intro) {
+    public PersonBeen(String name, int age, String intro) {
         this.name = name;
         this.age = age;
         this.intro = intro;

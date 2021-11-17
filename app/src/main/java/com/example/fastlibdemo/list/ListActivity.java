@@ -23,7 +23,7 @@ public class ListActivity extends BindViewActivity<ActivityListBinding> {
 
         List<ColorBeen> data = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            data.add(new ColorBeen("") );
+            data.add(new ColorBeen(""));
         }
         mAdapter.setData(data);
     }

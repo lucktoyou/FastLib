@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.fastlib.annotation.Database;
 import com.fastlib.annotation.DbFileRef;
@@ -490,7 +491,7 @@ public class FastDatabase{
             FastLog.d("更新数据失败，表不存在");
             return false;
         }
-        if(!tableHadData(tableName)){
+        if(!tableHasData(tableName)){
             FastLog.d("更新数据失败，表中不含任何数据");
             return false;
         }
@@ -853,6 +854,10 @@ public class FastDatabase{
         return saveOrUpdate(objs);
     }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * 获取主键名
@@ -894,8 +899,7 @@ public class FastDatabase{
                 continue;
             if(column.columnName.contains("$"))
                 continue;
-            sb.append(column.columnName)
-                    .append(" "+column.type);
+            sb.append(column.columnName+" "+column.type);
             if(column.isPrimaryKey)
                 sb.append(" primary key");
             if(column.autoincrement){
@@ -915,33 +919,26 @@ public class FastDatabase{
         Field[] fields = cla.getDeclaredFields();
         dt.tableName = cla.getCanonicalName();
 
-        //如果是内嵌类，将$替换成点
-        dt.tableName = dt.tableName.replace("$",".");
-        for(Field f: fields){
-            Database fieldInject = f.getAnnotation(Database.class);
+        for(Field field: fields){
+            Database fieldInject = field.getAnnotation(Database.class);
             DatabaseTable.DatabaseColumn column = new DatabaseTable.DatabaseColumn();
-            String typeName = f.getGenericType().toString();
-
-            //修改点和破折号为转义字符，去掉class+空格
-            typeName = typeName.replace(".","_").replace("<","0lt").replace(">","0rt").replace("class ","").replace(";","").replace("[","");
-            if(f.getClass().isArray())
-                typeName = f.getType().getName();
-            column.columnName = f.getName();
-            column.type = Reflect.toSQLType(typeName);
+            String fieldType = getFieldTypeByConverted(field);
+            column.columnName = field.getName();
+            column.type = Reflect.toSQLType(fieldType);
             if(fieldInject!=null){
                 if(!TextUtils.isEmpty(fieldInject.columnName()))
                     column.columnName = fieldInject.columnName();
                 if(fieldInject.keyPrimary()){
                     dt.keyColumn = column;
-                    dt.keyFieldName = f.getName();
+                    dt.keyFieldName = field.getName();
                 }
                 column.isPrimaryKey = fieldInject.keyPrimary();
                 column.autoincrement = fieldInject.autoincrement();
                 column.isIgnore = fieldInject.ignore();
-                if(column.isPrimaryKey && !Reflect.isInteger(typeName) && !Reflect.isReal(typeName) && !Reflect.isVarchar(typeName))
-                    throw new UnsupportedOperationException("不支持数组或者引用类成为任何键");
+                if(column.isPrimaryKey && !Reflect.isInteger(fieldType) && !Reflect.isReal(fieldType) && !Reflect.isVarchar(fieldType))
+                    throw new UnsupportedOperationException("不支持成为主键的字段类型："+fieldType);
             }
-            dt.columnMap.put(f.getName(),column);
+            dt.columnMap.put(field.getName(),column);
         }
         return dt;
     }
@@ -976,7 +973,7 @@ public class FastDatabase{
             try{
                 database.execSQL(sql);
             }catch(SQLiteException e){
-                FastLog.e("prepare时异常:"+e.getMessage());
+                FastLog.e(e.getMessage());
             }
         }
         return database;
@@ -1010,19 +1007,21 @@ public class FastDatabase{
      * @param tableName 指定数据表
      */
     private void checkTableChanged(SQLiteDatabase db,String tableName){
-        boolean needRebuildTable = false;//列被删除或字段类型被修改时重置表
         Class<?> cla;
         Field[] fields;
         Map<String,Field> fieldMap = new HashMap<>();
-        List<String> convertDatas = new ArrayList<>(); //调整表结构时需要保留数据的列
-        Map<String,String> newColumn = new HashMap<>();
+        Map<String,String> newColumnMap = new HashMap<>();
+        List<String> retainColumns = new ArrayList<>(); //调整表结构时需要保留数据的列
+        DatabaseTable table;
+        Iterator<String> iter;
+        boolean needRebuildTable=false;
 
         try{
             //如果对象类不存在则删除这张表
             cla = Class.forName(tableName);
         }catch(ClassNotFoundException e){
             db.execSQL("drop table '"+tableName+"'");
-            FastLog.e("删除表"+tableName);
+            FastLog.d("删除表"+tableName);
             return;
         }
         fields = cla.getDeclaredFields();
@@ -1038,27 +1037,26 @@ public class FastDatabase{
             }
             fieldMap.put(columnName,field);
         }
-        DatabaseTable table = parse(db,tableName);
-        Iterator<String> iter = table.columnMap.keySet().iterator();
-
+        table = parse(db,tableName);
+        iter = table.columnMap.keySet().iterator();
         while(iter.hasNext()){
             String key = iter.next();
             DatabaseTable.DatabaseColumn column = table.columnMap.get(key);
             Database inject;
             Field field = fieldMap.remove(key);
-            convertDatas.add(column.columnName);
+            retainColumns.add(column.columnName);
 
             //也许类中某字段被删除了,重建表
             if(field==null){
                 needRebuildTable = true;
-                convertDatas.remove(column.columnName);
+                retainColumns.remove(column.columnName);
                 continue;
             }
             //判断注解是否被修改
             inject = field.getAnnotation(Database.class);
             if(!column.isPrimaryKey){
                 if(inject!=null && inject.keyPrimary()){
-                    convertDatas.remove(column.columnName);
+                    retainColumns.remove(column.columnName);
                     needRebuildTable = true; //不能保证某字段在成为主键之前数据唯一
                 }
             }else{
@@ -1067,7 +1065,7 @@ public class FastDatabase{
             }
             if(!column.autoincrement){
                 if(inject!=null && inject.autoincrement()){
-                    convertDatas.remove(column.columnName);
+                    retainColumns.remove(column.columnName);
                     needRebuildTable = true; //不能保证某字段在成为主键之前数据唯一
                 }
             }else{
@@ -1075,7 +1073,7 @@ public class FastDatabase{
                     needRebuildTable = true;
             }
             //判断类型是否被修改.integer改为任何类型都可以被兼容,real只被varchar兼容,varchar不兼容其他类型
-            String fieldType = field.getType().getSimpleName();
+            String fieldType = getFieldTypeByConverted(field);
             switch(column.type){
                 case "integer":
                     if(!Reflect.isInteger(fieldType))
@@ -1085,21 +1083,19 @@ public class FastDatabase{
                     if(!Reflect.isReal(fieldType)){
                         needRebuildTable = true;
                         if(!Reflect.isVarchar(fieldType))
-                            convertDatas.remove(column.columnName);
+                            retainColumns.remove(column.columnName);
                     }
                     break;
                 case "varchar":
                     if(!Reflect.isVarchar(fieldType)){
                         needRebuildTable = true;
-                        convertDatas.remove(column.columnName);
+                        retainColumns.remove(column.columnName);
                     }
                     break;
                 default:
-                    String typeName = field.getGenericType().toString();
-                    typeName = typeName.replace(".","_").replace("<","0lt").replace(">","0rt").replace("class ","");
-                    if(!typeName.equals(column.type)){
+                    if(!fieldType.equals(column.type)){
                         needRebuildTable = true;
-                        convertDatas.remove(column.columnName);
+                        retainColumns.remove(column.columnName);
                     }
                     break;
             }
@@ -1112,21 +1108,25 @@ public class FastDatabase{
                 continue;
             if(key.contains("$"))
                 continue;
-            Field value = fieldMap.get(key);
-            String fieldType = value.getType().getSimpleName();
-            newColumn.put(key,Reflect.toSQLType(fieldType));
+            Field field = fieldMap.get(key);
+            String fieldType = getFieldTypeByConverted(field);
+            newColumnMap.put(key,Reflect.toSQLType(fieldType));
         }
-        if(needRebuildTable || newColumn.size()>0)
-            alterTable(db,cla,convertDatas,newColumn,needRebuildTable);
-        else FastLog.d("表"+tableName+"不需要修改");
+        if(needRebuildTable || newColumnMap.size()>0){
+            alterTable(db,cla,retainColumns,newColumnMap,needRebuildTable);
+        } else {
+            FastLog.d("表"+tableName+"不需要修改");
+        }
     }
 
     private DatabaseTable parse(SQLiteDatabase db,String tableName){
         Cursor cursor = db.rawQuery("select name,sql from sqlite_master where name='"+tableName+"'",null);
         if(cursor!=null){
             cursor.moveToFirst();
-            final String name = cursor.getString(cursor.getColumnIndex("name"));
-            String sql = cursor.getString(cursor.getColumnIndex("sql"));
+            int nameIndex = cursor.getColumnIndex("name");
+            int sqlIndex = cursor.getColumnIndex("sql");
+            String name = cursor.getString(nameIndex);
+            String sql = cursor.getString(sqlIndex);
             DatabaseTable dt = new DatabaseTable(name);
             sql = sql.substring(sql.indexOf('(')+1,sql.length()-1);
             String[] ss = sql.split(",");
@@ -1146,6 +1146,24 @@ public class FastDatabase{
             return dt;
         }
         return null;
+    }
+
+    /**
+     * @param field 字段名
+     * @return 已处理的字段类型
+     */
+    private String getFieldTypeByConverted(@Nullable Field field) {
+        String fieldType = null;
+        if (field != null) {
+            fieldType = field.getClass().isArray() ? field.getType().getCanonicalName() : field.getGenericType().toString();
+            if (fieldType != null) {
+                fieldType = fieldType.replace("class ", "").replace(".", "_")
+//                        .replace("<", "0lt").replace(">", "0rt")
+//                        .replace("[", "").replace(";", "")
+                ;
+            }
+        }
+        return fieldType;
     }
 
     /**
@@ -1172,6 +1190,9 @@ public class FastDatabase{
         }
         return command.toString();
     }
+
+
+
 
     /**
      * 过滤要取的列
@@ -1233,7 +1254,6 @@ public class FastDatabase{
         SQLiteDatabase db = prepare(null);
         Cursor cursor = db.rawQuery("select name from sqlite_master where type='table' and name="+"'"+tableName+"'",null);
         boolean exists = !(cursor==null || cursor.getCount()<=0);
-
         if(cursor!=null)
             cursor.close();
         db.close();
@@ -1245,21 +1265,17 @@ public class FastDatabase{
      * @param tableName
      * @return
      */
-    private boolean tableHadData(String tableName){
-        if(!tableExists(tableName))
-            return false;
-        SQLiteDatabase db = prepare(null);
-        Cursor cursor = db.rawQuery("select rootpage from sqlite_master where type='table' and name='"+tableName+"'",null);
-        if(cursor!=null){
-            cursor.moveToFirst();
-            int page = cursor.getInt(cursor.getColumnIndex("rootpage"));
-            cursor.close();
+    private boolean tableHasData(String tableName) {
+        boolean hasData = false;
+        if (tableExists(tableName)) {
+            SQLiteDatabase db = prepare(null);
+            Cursor cursor = db.rawQuery("select * from '" + tableName + "'", null);
+            hasData = !(cursor == null || cursor.getCount() <= 0);
+            if (cursor != null)
+                cursor.close();
             db.close();
-            if(page>0)
-                return true;
         }
-        db.close();
-        return false;
+        return hasData;
     }
 
     /**
