@@ -29,7 +29,7 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
     @Bind({R.id.btnSave,R.id.btnUpdate,R.id.btnDelete,R.id.btnQuery,R.id.btnDataFromDb})
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.btnSave:
+            case R.id.btnSave:{
                 List<ProvinceBeen> list = new ArrayList<>();
 
                 ProvinceBeen bean = new ProvinceBeen();
@@ -44,18 +44,20 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 FastDatabase.getDefaultInstance(this).saveOrUpdate(list);
                 showText();
                 break;
-            case R.id.btnUpdate:
+            }
+            case R.id.btnUpdate:{
                 ProvinceBeen data= new ProvinceBeen();
                 data.id = 1;
                 data.name = "福建省";
                 data.score = scoree++;
-                List<ProvinceBeen.City> cityUpdate = new ArrayList<>();
-                cityUpdate.add(new ProvinceBeen.City("南平市"));
-                data.cities =cityUpdate;
+                List<ProvinceBeen.City> city = new ArrayList<>();
+                city.add(new ProvinceBeen.City("南平市"));
+                data.cities =city;
 
                 FastDatabase.getDefaultInstance(this).saveOrUpdate(data);
                 showText();
                 break;
+            }
             case R.id.btnDelete:
                 FastDatabase.getDefaultInstance(this)
                         .setFilter(And.condition(Condition.bigger("score",83)))
