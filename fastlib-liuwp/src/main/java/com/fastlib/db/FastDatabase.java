@@ -373,56 +373,44 @@ public class FastDatabase{
         return list;
     }
 
-//    /**
-//     * 删除对象(obj对象必需有主键)
-//     * @param obj 有主键的对象
-//     * @return 成功删除返回true，否则fase
-//     */
-//    public boolean delete(Object obj){
-//        Field[] fields = obj.getClass().getDeclaredFields();
-//        Field primaryField = null;
-//        String columnValue;
-//
-//        //是否有主键
-//        for(Field field: fields){
-//            field.setAccessible(true);
-//            Database tableInject = field.getAnnotation(Database.class);
-//            if(tableInject!=null && tableInject.keyPrimary()){
-//                primaryField = field;
-//                break;
-//            }
-//        }
-//
-//        if(primaryField!=null){
-//            Class<?> type = primaryField.getType();
-//            try{
-//                if(type==int.class)
-//                    columnValue = Integer.toString(primaryField.getInt(obj));
-//                else if(type==long.class)
-//                    columnValue = Long.toString(primaryField.getLong(obj));
-//                else if(type==float.class)
-//                    columnValue = Float.toString(primaryField.getFloat(obj));
-//                else if(type==double.class)
-//                    columnValue = Double.toString(primaryField.getDouble(obj));
-//                else if(type==short.class)
-//                    columnValue = Short.toString(primaryField.getShort(obj));
-//                else if(type==String.class)
-//                    columnValue = primaryField.get(obj).toString();
-//                else{
-//                    FastLog.d("不支持 short,int,long,String,float,double 之外的类型做为主键");
-//                    return false;
-//                }
-//            }catch(IllegalAccessException|IllegalArgumentException e){
-//                e.printStackTrace();
-//                return false;
-//            }
-//        }else{
-//            FastLog.d("错误的使用了delete(Object obj),obj没有注解主键");
-//            return false;
-//        }
-//        mAttribute.setFilterCommand(And.condition(Condition.equal(columnValue)));
-//        return delete(obj.getClass());
-//    }
+    /**
+     * 删除对象(obj对象必需有主键)
+     * @param obj 有主键的对象
+     * @return 成功删除返回true，否则fase
+     */
+    public boolean delete(Object obj){
+        Field[] fields = obj.getClass().getDeclaredFields();
+        Field keyField = null;
+        String keyFieldValue;
+
+        //是否有主键
+        for(Field field: fields){
+            field.setAccessible(true);
+            Database tableInject = field.getAnnotation(Database.class);
+            if(tableInject!=null && tableInject.keyPrimary()){
+                keyField = field;
+                break;
+            }
+        }
+        if(keyField ==null){
+            FastLog.d("错误的使用了delete(Object obj),obj没有注解主键");
+            return false;
+        }else{
+            String fieldType = getFieldTypeByConverted(keyField);
+            if(!Reflect.isInteger(fieldType) && !Reflect.isReal(fieldType) && !Reflect.isVarchar(fieldType)){
+                FastLog.d("不支持成为主键的字段类型："+fieldType);
+                return false;
+            }
+            try{
+                keyFieldValue = Reflect.objToStr(keyField.get(obj));
+            }catch(IllegalAccessException e){
+                FastLog.d(e.toString());
+                return false;
+            }
+        }
+        setFilter(And.condition(Condition.equal(keyFieldValue)));
+        return delete(obj.getClass());
+    }
 
     /**
      * 删除数据
@@ -453,6 +441,7 @@ public class FastDatabase{
             database.close();
             return false;
         }
+        int count = cursor.getCount();
         try{
             database.beginTransaction();
             String deleteCommand = "delete from '"+tableName+"' "+filters;
@@ -461,7 +450,7 @@ public class FastDatabase{
                     deleteCommand = deleteCommand.replaceFirst("[?]","'"+replaceStr+"'");
             database.execSQL(deleteCommand);
             database.setTransactionSuccessful();
-            FastLog.d(getCurrDatabaseNameComplete()+"--d--"+cursor.getCount()+"->"+tableName);
+            FastLog.d(getCurrDatabaseNameComplete()+"--d-"+count+"->"+tableName);
         }catch(SQLiteException e){
             FastLog.d("删除数据失败："+e.toString());
             return false;
@@ -475,10 +464,10 @@ public class FastDatabase{
 
     /**
      * 更新数据
-     * @param obj
+     * @param obj 更新对象
      * @return 是否成功更新
      */
-    private boolean update(@NonNull Object obj){
+    public boolean update(@NonNull Object obj){
         SQLiteDatabase database;
         String tableName;
         String filter;
@@ -507,6 +496,7 @@ public class FastDatabase{
             database.close();
             return false;
         }
+        int count = cursor.getCount();
         try{
             database.beginTransaction();
             fields = obj.getClass().getDeclaredFields();
@@ -587,7 +577,7 @@ public class FastDatabase{
             filter = filter.substring(6); //削掉前面的where
             database.update("'"+tableName+"'",cv,filter,ss);
             database.setTransactionSuccessful();
-            FastLog.d(getCurrDatabaseNameComplete()+"<--u-"+cursor.getCount()+"-"+tableName);
+            FastLog.d(getCurrDatabaseNameComplete()+"--u-"+count+"->"+tableName);
         }catch(SQLiteException|IllegalAccessException|IllegalArgumentException|IOException e){
             FastLog.d("更新数据失败："+e.toString());
             return false;
@@ -604,120 +594,131 @@ public class FastDatabase{
      * @param array 对象组
      * @return 如果存储成功返回true，否则为false
      */
-    private boolean save(Object[] array){
-        if(array==null || array.length<=0)
-            return false; //没什么对象可存应该返回false吗？
-        Object availableObj = null;
-
-        for(Object obj: array) //取首个非null对象
+    public boolean save(Object[] array){
+        if(array==null || array.length<=0){
+            return false;//没什么对象可存应该返回false吗？
+        }
+        Object firstObj = null;//首个非null对象
+        for(Object obj: array)
             if(obj!=null){
-                availableObj = obj;
+                firstObj = obj;
                 break;
             }
-        if(availableObj==null)
+        if(firstObj==null){
             return false;
-        SQLiteDatabase db = prepare(null);
+        }
+        SQLiteDatabase db;
         ContentValues cv = new ContentValues();
-        Field[] fields = availableObj.getClass().getDeclaredFields();
-        String tableName = availableObj.getClass().getCanonicalName();
+        Field[] fields = firstObj.getClass().getDeclaredFields();
+        String tableName = firstObj.getClass().getCanonicalName();
         Field autoIncreKeyField;//自动增长的主键
+        int totalCount = array.length;
+        int removeCount = 0;
+        int remainCount = 0;
 
+        if(!tableExists(tableName)){
+            FastLog.d("保存数据失败，表不存在");
+            return false;
+        }
+        db = prepare(null);
         try{
             db.beginTransaction();
             for(Object obj: array){
+                if(obj==null){
+                    removeCount++;
+                    continue;
+                }
                 autoIncreKeyField = null;
                 cv.clear();
-                if(obj!=null) {
-                    for(Field field: fields){
-                        field.setAccessible(true);
-                        Database fieldInject = field.getAnnotation(Database.class);
-                        DbFileRef fileRef = field.getAnnotation(DbFileRef.class);
-                        String columnName;
-                        Class<?> type = field.getType();
+                for(Field field: fields){
+                    field.setAccessible(true);
+                    Database fieldInject = field.getAnnotation(Database.class);
+                    DbFileRef fileRef = field.getAnnotation(DbFileRef.class);
+                    String columnName;
+                    Class<?> type = field.getType();
 
-                        if(fieldInject!=null && fieldInject.ignore())
-                            continue;
-                        if(fieldInject!=null && fieldInject.keyPrimary() && fieldInject.autoincrement()){
-                            if(type==int.class){
-                                int keyValue = field.getInt(obj);
-                                if(keyValue<=0){
-                                    autoIncreKeyField = field;
-                                    continue;
-                                }
-                            }else if(type==long.class){
-                                long keyValue = field.getLong(obj);
-                                if(keyValue<=0){
-                                    autoIncreKeyField = field;
-                                    continue;
-                                }
+                    if(fieldInject!=null && fieldInject.ignore())
+                        continue;
+                    if(fieldInject!=null && fieldInject.keyPrimary() && fieldInject.autoincrement()){
+                        if(type==int.class){
+                            int keyValue = field.getInt(obj);
+                            if(keyValue<=0){
+                                autoIncreKeyField = field;
+                                continue;
                             }
-                        }
-                        if(fieldInject!=null && !TextUtils.isEmpty(fieldInject.columnName()))
-                            columnName = fieldInject.columnName();
-                        else
-                            columnName = field.getName();
-                        if(columnName.contains("this"))
-                            continue;
-                        if(columnName.contains("$"))
-                            continue;
-                        if("serialVersionUID".equals(columnName))
-                            continue;
-                        if(type==boolean.class)
-                            cv.put(columnName,field.getBoolean(obj));
-                        else if(type==int.class)
-                            cv.put(columnName,field.getInt(obj));
-                        else if(type==long.class)
-                            cv.put(columnName,field.getLong(obj));
-                        else if(type==float.class)
-                            cv.put(columnName,field.getFloat(obj));
-                        else if(type==double.class)
-                            cv.put(columnName,field.getDouble(obj));
-                        else if(type==char.class){
-                            char c = field.getChar(obj);
-                            if(c==0)
-                                cv.putNull(columnName);
-                            else
-                                cv.put(columnName,String.valueOf(c));
-                        }else if(type==short.class)
-                            cv.put(columnName,field.getShort(obj));
-                        else if(type==byte.class)
-                            cv.put(columnName,field.getByte(obj));
-                        else if(type==byte[].class)
-                            cv.put(columnName,(byte[])field.get(obj));
-                        else if(type==String.class){
-                            String str = (String) field.get(obj);
-                            if(fileRef==null)
-                                if (str == null)
-                                    cv.putNull(columnName);
-                                else
-                                    cv.put(columnName,str);
-                            else{
-                                File file = new File(sConfig.getFileRefDir(),String.format(Locale.getDefault(),
-                                        "%s_%s_%s",availableObj.getClass().getSimpleName(),field.getName(),UUID.randomUUID()));
-                                file.createNewFile();
-                                SaveUtil.saveToFile(file, str != null ? str.getBytes() : new byte[0],false);
-                                cv.put(columnName,file.getAbsolutePath());
-                            }
-                        }else{
-                            Object pre = field.get(obj);
-                            String json = new Gson().toJson(pre);
-                            if(fileRef==null){
-                                if(pre==null)
-                                    cv.putNull(columnName);
-                                else
-                                    cv.put(columnName,json);
-                            }else {
-                                File file = new File(sConfig.getFileRefDir(),String.format(Locale.getDefault(),
-                                        "%s_%s_%s",availableObj.getClass().getSimpleName(),field.getName(),UUID.randomUUID()));
-                                file.createNewFile();
-                                SaveUtil.saveToFile(file,json.getBytes(),false);
-                                cv.put(columnName,file.getAbsolutePath());
+                        }else if(type==long.class){
+                            long keyValue = field.getLong(obj);
+                            if(keyValue<=0){
+                                autoIncreKeyField = field;
+                                continue;
                             }
                         }
                     }
+                    if(fieldInject!=null && !TextUtils.isEmpty(fieldInject.columnName()))
+                        columnName = fieldInject.columnName();
+                    else
+                        columnName = field.getName();
+                    if(columnName.contains("this"))
+                        continue;
+                    if(columnName.contains("$"))
+                        continue;
+                    if("serialVersionUID".equals(columnName))
+                        continue;
+                    if(type==boolean.class)
+                        cv.put(columnName,field.getBoolean(obj));
+                    else if(type==int.class)
+                        cv.put(columnName,field.getInt(obj));
+                    else if(type==long.class)
+                        cv.put(columnName,field.getLong(obj));
+                    else if(type==float.class)
+                        cv.put(columnName,field.getFloat(obj));
+                    else if(type==double.class)
+                        cv.put(columnName,field.getDouble(obj));
+                    else if(type==char.class){
+                        char c = field.getChar(obj);
+                        if(c==0)
+                            cv.putNull(columnName);
+                        else
+                            cv.put(columnName,String.valueOf(c));
+                    }else if(type==short.class)
+                        cv.put(columnName,field.getShort(obj));
+                    else if(type==byte.class)
+                        cv.put(columnName,field.getByte(obj));
+                    else if(type==byte[].class)
+                        cv.put(columnName,(byte[])field.get(obj));
+                    else if(type==String.class){
+                        String str = (String) field.get(obj);
+                        if(fileRef==null)
+                            if (str == null)
+                                cv.putNull(columnName);
+                            else
+                                cv.put(columnName,str);
+                        else{
+                            File file = new File(sConfig.getFileRefDir(),String.format(Locale.getDefault(),
+                                    "%s_%s_%s",firstObj.getClass().getSimpleName(),field.getName(),UUID.randomUUID()));
+                            file.createNewFile();
+                            SaveUtil.saveToFile(file, str != null ? str.getBytes() : new byte[0],false);
+                            cv.put(columnName,file.getAbsolutePath());
+                        }
+                    }else{
+                        Object pre = field.get(obj);
+                        String json = new Gson().toJson(pre);
+                        if(fileRef==null){
+                            if(pre==null)
+                                cv.putNull(columnName);
+                            else
+                                cv.put(columnName,json);
+                        }else {
+                            File file = new File(sConfig.getFileRefDir(),String.format(Locale.getDefault(),
+                                    "%s_%s_%s",firstObj.getClass().getSimpleName(),field.getName(),UUID.randomUUID()));
+                            file.createNewFile();
+                            SaveUtil.saveToFile(file,json.getBytes(),false);
+                            cv.put(columnName,file.getAbsolutePath());
+                        }
+                    }
                 }
-                //对自动增长的主键赋值
                 long rowId = db.insertWithOnConflict("'"+tableName+"'",null,cv,SQLiteDatabase.CONFLICT_NONE);
+                //对自动增长的主键赋值
                 if(rowId!=-1 && autoIncreKeyField!=null){
                     Class<?> fieldType = autoIncreKeyField.getType();
                     if(fieldType==int.class)
@@ -726,8 +727,9 @@ public class FastDatabase{
                         autoIncreKeyField.setLong(obj,rowId);
                 }
             }
-            FastLog.d(getCurrDatabaseNameComplete()+"<--"+array.length+"--"+tableName);
             db.setTransactionSuccessful();
+            remainCount = totalCount - removeCount;
+            FastLog.d(getCurrDatabaseNameComplete()+"--save-"+remainCount+"-("+totalCount+"-"+removeCount+")->"+tableName);
         }catch(SQLiteException|IllegalAccessException|IllegalArgumentException|IOException e){
             FastLog.e("保存数据失败:"+e.getMessage());
             return false;
@@ -772,22 +774,6 @@ public class FastDatabase{
                     field = obj.getClass().getDeclaredField(table.keyFieldName);
                     field.setAccessible(true);
                     Object keyValue = field.get(obj);
-//                    if(field.getType()==int.class || field.getType()==long.class){
-//                        long numKeyValue = field.getType()==int.class ? (int)keyValue : (long)keyValue;
-//                        if(numKeyValue>0){
-//                            Object oldData = FastDatabase.getInstance(mContext,mAttribute.getWhichDatabaseName()).setFilter(And.condition(Condition.equal(keyValue.toString()))).getFirst(obj.getClass());
-//                            if(oldData!=null){
-//                                isUpdate = true;
-//                                success = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).update(obj);
-//                            }
-//                        }
-//                    }else{
-//                        Object oldData = FastDatabase.getInstance(mContext,mAttribute.getWhichDatabaseName()).setFilter(And.condition(Condition.equal(keyValue.toString()))).getFirst(obj.getClass());
-//                        if(oldData!=null){
-//                            isUpdate = true;
-//                            success = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).update(obj);
-//                        }
-//                    }
                     Object oldData = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).getFirst(obj.getClass());
                     if(oldData!=null){
                         isUpdate = true;
@@ -799,11 +785,6 @@ public class FastDatabase{
                 }
             }else{ //如果主键不存在，查询是否有过滤条件，如果这个有并且这个条件能查询到数据，则修改首个数据的值
                 if(mAttribute.getFilterCommand()!=null){
-//                    List<?> oldData = get(obj.getClass());
-//                    if(oldData!=null && !oldData.isEmpty()){
-//                        isUpdate = true;
-//                        success = update(obj);
-//                    }
                     Object oldData = getFirst(obj.getClass());
                     if(oldData!=null){
                         isUpdate = true;
@@ -865,7 +846,11 @@ public class FastDatabase{
         for(Field f: fields){
             Database columnInject = f.getAnnotation(Database.class);
             if(columnInject!=null && columnInject.keyPrimary()){
-                key = f.getName();
+                if(!TextUtils.isEmpty(columnInject.columnName())){
+                    key = columnInject.columnName();
+                }else {
+                    key = f.getName();
+                }
                 break;
             }
         }
@@ -1155,9 +1140,8 @@ public class FastDatabase{
             fieldType = field.getClass().isArray() ? field.getType().getCanonicalName() : field.getGenericType().toString();
             if (fieldType != null) {
                 fieldType = fieldType.replace("class ", "").replace(".", "_")
-                        .replace("<", "[<]").replace(">", "[>]")
-//                        .replace("<", "0lt").replace(">", "0rt")
-//                        .replace("[", "").replace(";", "")
+                        .replace("<", "0lt").replace(">", "0rt")
+                        .replace("[", "").replace(";", "")
                 ;
             }
         }
