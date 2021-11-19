@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.fastlib.annotation.Database;
-import com.fastlib.annotation.DbFileRef;
+import com.fastlib.annotation.DatabaseFileRef;
 import com.fastlib.base.ThreadPoolManager;
 import com.fastlib.bean.DatabaseTable;
 import com.fastlib.utils.core.Reflect;
@@ -39,6 +39,7 @@ import java.util.UUID;
 /**
  * Created by sgfb on 17/7/10.
  * Modified by liuwp on 2021/6/23.
+ * Modified by liuwp on 2021/11/19.
  * 封装一些与数据库交互的基本操作。非orm数据库。
  * 在调用次数少或者响应要求不高的的场景可以直接调用增删改，否则应该使用xxxAsync，获取回调数据使用
  */
@@ -46,7 +47,7 @@ public class FastDatabase{
     private static final DatabaseConfig sConfig = getConfig();
     private final Context mContext;
     private final RuntimeAttribute mAttribute;
-    private final Map<String,FunctionCommand> mFunctionCommand; //字段-->函数
+    private final Map<String,FunctionCommand> mFunctionCommand; //列名-->功能函数
     private CustomUpdate mCustomUpdate;
 
     private FastDatabase(Context context){
@@ -194,23 +195,29 @@ public class FastDatabase{
         }
         SQLiteDatabase database;
         Cursor cursor;
-
-        String selectColumn = getSelectColumn(cla);
         String filters;
-        String order = "";
+        String order;
         String limit = "";
-        String key = getPrimaryKeyName(cla);
         List<String> selectionArgs = new ArrayList<>();
         List<T> list = new ArrayList<>();
+        String key = getPrimaryKeyName(cla);
+        String selectColumn = getSelectColumn(cla);
         //过滤条件
         filters = getFilters(key,mAttribute.getFilterCommand(),selectionArgs);
         //排序条件
-        if(!TextUtils.isEmpty(mAttribute.getOrderColumn()))
-            order = " order by "+mAttribute.getOrderColumn()+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
-        else{
-            //如果请求倒序并且没有指定属性，默认主键倒序(如果主键存在的话)
-            if(!mAttribute.getOrderAsc() && !TextUtils.isEmpty(key)){
-                order = " order by "+key+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
+        if (mAttribute.getOrderColumn() == null)
+            order = "";//不排序
+        else {
+            if(mAttribute.getOrderColumn().equals("")){
+                if(TextUtils.isEmpty(key))
+                    order = "";
+                else {
+                    //按主键排序
+                    order = " order by "+key+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
+                }
+            }else {
+                //按指定列排序
+                order = " order by "+mAttribute.getOrderColumn()+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
             }
         }
         //限制条件
@@ -234,49 +241,49 @@ public class FastDatabase{
                 Map<String,Object> params = new HashMap<>();
 
                 for(Field field: fields){
-                    Database inject = field.getAnnotation(Database.class);
-                    DbFileRef fileRef = field.getAnnotation(DbFileRef.class);
+                    Database fieldInject = field.getAnnotation(Database.class);
+                    DatabaseFileRef fileRef = field.getAnnotation(DatabaseFileRef.class);
                     field.setAccessible(true);
                     Class<?> type = field.getType();
-                    String typeName = field.getType().getSimpleName();
-                    int columnIndex = cursor.getColumnIndex(field.getName());
+                    String columnName = (fieldInject!=null && !TextUtils.isEmpty(fieldInject.columnName()))? fieldInject.columnName():field.getName();
+                    int columnIndex = cursor.getColumnIndex(columnName);
 
                     if(columnIndex==-1)
                         continue;
-                    if(inject!=null && inject.ignore()) //跳过忽视字段
+                    if(fieldInject!=null && fieldInject.ignore()) //跳过忽视字段
                         continue;
-                    if(typeName.contains("this"))
-                        continue;
-                    if(typeName.contains("$"))
-                        continue;
-                    if(type.isArray()){
-                        String json = cursor.getString(columnIndex);
-                        field.set(obj,gson.fromJson(json,field.getGenericType()));
-                        continue;
-                    }
-                    //函数命令,仅对第一个参数有效.-->
-                    if(mFunctionCommand.containsKey(field.getName())){
-                        FunctionCommand functionCommand = mFunctionCommand.get(field.getName());
+                    //函数命令.-->
+                    if(mFunctionCommand.containsKey(columnName)){
+                        FunctionCommand functionCommand = mFunctionCommand.get(columnName);
                         boolean functionSuccess = false;
-                        List<String> functionArgs = new ArrayList<>();
-                        Cursor functionCursor = database.rawQuery("select "+functionCommand.getType().getName()+"("+field.getName()+")"+" from '"+tableName+
-                                "'"+getFilters(key,functionCommand.getFilterCommand(),functionArgs),functionArgs.toArray(new String[]{}));
-                        if(functionCursor!=null){
-                            functionCursor.moveToFirst();
-                            if(type==int.class || type==long.class){
-                                long value = functionCursor.getLong(0);
-                                if(type==int.class) field.setInt(obj,(int)value);
-                                else field.setLong(obj,value);
-                                functionSuccess = true;
-                            }else if(type==float.class || type==double.class){
-                                double value = functionCursor.getDouble(0);
-                                if(type==float.class) field.setFloat(obj,(float)value);
-                                else field.setDouble(obj,value);
-                                functionSuccess = true;
-                            }else FastLog.d("数据库函数方法仅对数字类型有效 字段"+field.getName()+"类型为"+type);
-                            functionCursor.close();
+                        if(functionCommand!=null){
+                            List<String> functionArgs = new ArrayList<>();
+                            Cursor functionCursor = database.rawQuery("select "+functionCommand.getType().getName()+"("+columnName+")"+" from '"+tableName+
+                                    "'"+getFilters(key,functionCommand.getFilterCommand(),functionArgs),functionArgs.toArray(new String[]{}));
+                            if(functionCursor!=null){
+                                functionCursor.moveToFirst();
+                                if(type==short.class){
+                                    field.setShort(obj,functionCursor.getShort(0));
+                                    functionSuccess = true;
+                                } else if(type==int.class){
+                                    field.setInt(obj,functionCursor.getInt(0));
+                                    functionSuccess = true;
+                                }else if (type==long.class){
+                                    field.setLong(obj,functionCursor.getLong(0));
+                                    functionSuccess = true;
+                                }else if (type==float.class){
+                                    field.setFloat(obj,functionCursor.getFloat(0));
+                                    functionSuccess = true;
+                                }else if (type==double.class){
+                                    field.setDouble(obj,functionCursor.getDouble(0));
+                                    functionSuccess = true;
+                                }else {
+                                    FastLog.d("目前函数命令仅对数字类型的列有效");
+                                }
+                                functionCursor.close();
+                            }
                         }
-                        mFunctionCommand.remove(field.getName()); //清除掉函数命令
+                        mFunctionCommand.remove(field.getName());//清除掉函数命令
                         if(functionSuccess) continue;
                     }
                     //<--
@@ -420,7 +427,7 @@ public class FastDatabase{
     public boolean delete(Class<?> cla){
         String tableName = cla.getCanonicalName();
         if(!tableExists(tableName)){
-            FastLog.d("数据库"+getCurrDatabaseNameComplete()+"中不存在表"+tableName);
+            FastLog.d(getCurrDatabaseNameComplete()+"中不存在表"+tableName);
             return false;
         }
         Cursor cursor;
@@ -436,7 +443,7 @@ public class FastDatabase{
         cursor = database.rawQuery(complete,args);
         cursor.moveToFirst();
         if(cursor.isAfterLast()){
-            FastLog.d("表中不存在要删除的数据");
+            FastLog.d("表"+tableName+"中不存在要删除的数据");
             cursor.close();
             database.close();
             return false;
@@ -504,22 +511,12 @@ public class FastDatabase{
                 field.setAccessible(true);
                 Class<?> type = field.getType();
                 Database fieldInject = field.getAnnotation(Database.class);
-                DbFileRef fileRef = field.getAnnotation(DbFileRef.class);
-                String columnName;
+                DatabaseFileRef fileRef = field.getAnnotation(DatabaseFileRef.class);
+                String columnName = (fieldInject!=null && !TextUtils.isEmpty(fieldInject.columnName()))? fieldInject.columnName():field.getName();
 
                 if(fieldInject!=null && fieldInject.ignore())
                     continue;
                 if(fieldInject!=null && fieldInject.keyPrimary() && fieldInject.autoincrement())
-                    continue;
-                if(fieldInject!=null && !TextUtils.isEmpty(fieldInject.columnName()))
-                    columnName = fieldInject.columnName();
-                else
-                    columnName = field.getName();
-                if(columnName.contains("this"))
-                    continue;
-                if(columnName.contains("$"))
-                    continue;
-                if("serialVersionUID".equals(columnName))
                     continue;
                 if(type==boolean.class)
                     cv.put(columnName,field.getBoolean(obj));
@@ -632,10 +629,10 @@ public class FastDatabase{
                 cv.clear();
                 for(Field field: fields){
                     field.setAccessible(true);
-                    Database fieldInject = field.getAnnotation(Database.class);
-                    DbFileRef fileRef = field.getAnnotation(DbFileRef.class);
-                    String columnName;
                     Class<?> type = field.getType();
+                    Database fieldInject = field.getAnnotation(Database.class);
+                    DatabaseFileRef fileRef = field.getAnnotation(DatabaseFileRef.class);
+                    String columnName = (fieldInject!=null && !TextUtils.isEmpty(fieldInject.columnName()))? fieldInject.columnName():field.getName();
 
                     if(fieldInject!=null && fieldInject.ignore())
                         continue;
@@ -654,16 +651,6 @@ public class FastDatabase{
                             }
                         }
                     }
-                    if(fieldInject!=null && !TextUtils.isEmpty(fieldInject.columnName()))
-                        columnName = fieldInject.columnName();
-                    else
-                        columnName = field.getName();
-                    if(columnName.contains("this"))
-                        continue;
-                    if(columnName.contains("$"))
-                        continue;
-                    if("serialVersionUID".equals(columnName))
-                        continue;
                     if(type==boolean.class)
                         cv.put(columnName,field.getBoolean(obj));
                     else if(type==int.class)
@@ -844,17 +831,31 @@ public class FastDatabase{
         Field[] fields = cla.getDeclaredFields();
         String key = null;
         for(Field f: fields){
-            Database columnInject = f.getAnnotation(Database.class);
-            if(columnInject!=null && columnInject.keyPrimary()){
-                if(!TextUtils.isEmpty(columnInject.columnName())){
-                    key = columnInject.columnName();
-                }else {
-                    key = f.getName();
-                }
+            Database fieldInject = f.getAnnotation(Database.class);
+            if(fieldInject!=null && fieldInject.keyPrimary()){
+                key = (!TextUtils.isEmpty(fieldInject.columnName()))?fieldInject.columnName():f.getName();
                 break;
             }
         }
         return TextUtils.isEmpty(key) ? null : key;
+    }
+
+    /**
+     * @param field 字段名
+     * @return 转换后的字段类型
+     */
+    private String getFieldTypeByConverted(@Nullable Field field) {
+        String fieldType = null;
+        if (field != null) {
+            fieldType = field.getType().getCanonicalName();
+            if (fieldType != null) {
+                fieldType = fieldType
+                        .replace(".", "_")
+                        .replace("[]", "_array")
+                ;
+            }
+        }
+        return fieldType;
     }
 
     /**
@@ -874,10 +875,6 @@ public class FastDatabase{
             DatabaseTable.DatabaseColumn column = table.columnMap.get(key);
 
             if(column.isIgnore)
-                continue;
-            if(column.columnName.contains("this"))
-                continue;
-            if(column.columnName.contains("$"))
                 continue;
             sb.append(column.columnName+" "+column.type);
             if(column.isPrimaryKey)
@@ -1086,10 +1083,6 @@ public class FastDatabase{
         iter = fieldMap.keySet().iterator();
         while(iter.hasNext()){
             String key = iter.next();
-            if(key.contains("this"))
-                continue;
-            if(key.contains("$"))
-                continue;
             Field field = fieldMap.get(key);
             String fieldType = getFieldTypeByConverted(field);
             newColumnMap.put(key,Reflect.toSQLType(fieldType));
@@ -1130,23 +1123,6 @@ public class FastDatabase{
         return null;
     }
 
-    /**
-     * @param field 字段名
-     * @return 已处理的字段类型，例：class java.lang.String -> java_lang_String
-     */
-    private String getFieldTypeByConverted(@Nullable Field field) {
-        String fieldType = null;
-        if (field != null) {
-            fieldType = field.getClass().isArray() ? field.getType().getCanonicalName() : field.getGenericType().toString();
-            if (fieldType != null) {
-                fieldType = fieldType.replace("class ", "").replace(".", "_")
-                        .replace("<", "0lt").replace(">", "0rt")
-                        .replace("[", "").replace(";", "")
-                ;
-            }
-        }
-        return fieldType;
-    }
 
     /**
      * 编译过滤语句
@@ -1189,11 +1165,29 @@ public class FastDatabase{
                     sb.append(s).append(",");
             }
         }else{
-            List<String> fieldsName = getFieldsNameWithoutIgnore(cla); //在需要时使用反射,提高性能
-            if(fieldsName!=null && !fieldsName.isEmpty()){
+            List<String> columnNames = new ArrayList<>();
+            Field[] fields = cla.getDeclaredFields();
+            if(fields.length>0){
+                for (Field field : fields) {
+                    Database inject = field.getAnnotation(Database.class);
+                    if (inject != null) {
+                        if (inject.ignore()) {
+                            continue;
+                        }
+                        String cm;
+                        if (!TextUtils.isEmpty(inject.columnName())) {
+                            cm = inject.columnName();
+                        } else {
+                            cm = field.getName();
+                        }
+                        columnNames.add(cm);
+                    }
+                }
+            }
+            if(!columnNames.isEmpty()){
                 for(String filter: unSelect)
-                    fieldsName.remove(filter);
-                for(String s: fieldsName)
+                    columnNames.remove(filter);
+                for(String s:columnNames)
                     sb.append(s).append(",");
             }
         }
@@ -1202,26 +1196,6 @@ public class FastDatabase{
         else
             sb.append("*");
         return sb.toString();
-    }
-
-    /**
-     * 获取没有注解Ignore的所有字段
-     * @param cla
-     * @return 没有注解Ignore的所有字段
-     */
-    private static List<String> getFieldsNameWithoutIgnore(Class<?> cla){
-        Field[] fields = cla.getDeclaredFields();
-
-        if(fields==null || fields.length==0)
-            return null;
-        List<String> fieldsName = new ArrayList<>(fields.length);
-        for(int i = 0;i<fields.length;i++){
-            Database inject = fields[i].getAnnotation(Database.class);
-            if(inject!=null && inject.ignore())
-                continue;
-            fieldsName.add(fields[i].getName());
-        }
-        return fieldsName;
     }
 
     /**
@@ -1344,12 +1318,12 @@ public class FastDatabase{
 
     /**
      * sql函数过滤
-     * @param field 字段名
+     * @param column 列名
      * @param functionCommand sql函数命令
      * @return
      */
-    public FastDatabase putFunctionCommand(String field,FunctionCommand functionCommand){
-        mFunctionCommand.put(field,functionCommand);
+    public FastDatabase putFunctionCommand(@NonNull String column,@NonNull FunctionCommand functionCommand){
+        mFunctionCommand.put(column,functionCommand);
         return this;
     }
 

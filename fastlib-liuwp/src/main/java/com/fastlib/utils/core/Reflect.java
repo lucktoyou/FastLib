@@ -73,7 +73,8 @@ public class Reflect {
     ////////////////////////////////////////////////////////////////////////////
 
     public static boolean isInteger(String type) {
-        return type.equals("byte")|| type.equals("short") || type.equals("int") || type.equals("long");
+        //不考虑type.equals("byte")
+        return type.equals("short") || type.equals("int") || type.equals("long");
     }
 
     public static boolean isInteger(Field field) {
@@ -89,7 +90,8 @@ public class Reflect {
     }
 
     public static boolean isVarchar(String type) {
-        return type.equals("char") || type.equals("java_lang_String") || type.equals("String");
+        //不考虑type.equals("String")
+        return type.equals("char") || type.equals("java_lang_String");
     }
 
     public static boolean isVarchar(Field field) {
