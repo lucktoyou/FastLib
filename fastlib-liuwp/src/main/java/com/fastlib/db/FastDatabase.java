@@ -427,7 +427,7 @@ public class FastDatabase{
     public boolean delete(Class<?> cla){
         String tableName = cla.getCanonicalName();
         if(!tableExists(tableName)){
-            FastLog.d(getCurrDatabaseNameComplete()+"中不存在表"+tableName);
+            FastLog.d(getCurrDatabaseNameComplete()+"不存在表"+tableName);
             return false;
         }
         Cursor cursor;
@@ -443,7 +443,7 @@ public class FastDatabase{
         cursor = database.rawQuery(complete,args);
         cursor.moveToFirst();
         if(cursor.isAfterLast()){
-            FastLog.d("表"+tableName+"中不存在要删除的数据");
+            FastLog.d(getCurrDatabaseNameComplete()+"表"+tableName+"中不存在要删除的数据");
             cursor.close();
             database.close();
             return false;
@@ -485,11 +485,11 @@ public class FastDatabase{
 
         tableName = obj.getClass().getCanonicalName();
         if(!tableExists(tableName)){
-            FastLog.d("更新数据失败，表不存在");
+            FastLog.d("更新数据失败，"+getCurrDatabaseNameComplete()+"表"+tableName+"不存在");
             return false;
         }
         if(!tableHasData(tableName)){
-            FastLog.d("更新数据失败，表中不含任何数据");
+            FastLog.d("更新数据失败，"+getCurrDatabaseNameComplete()+"表"+tableName+"中不含任何数据");
             return false;
         }
         database = prepare(null);
@@ -614,7 +614,7 @@ public class FastDatabase{
         int remainCount = 0;
 
         if(!tableExists(tableName)){
-            FastLog.d("保存数据失败，表不存在");
+            FastLog.d("保存数据失败，"+getCurrDatabaseNameComplete()+"表"+tableName+"不存在");
             return false;
         }
         db = prepare(null);
