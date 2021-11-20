@@ -73,7 +73,7 @@ public class Reflect {
     ////////////////////////////////////////////////////////////////////////////
 
     public static boolean isInteger(String type) {
-        //不考虑type.equals("byte")
+        //type.equals("byte")
         return type.equals("short") || type.equals("int") || type.equals("long");
     }
 
@@ -90,7 +90,7 @@ public class Reflect {
     }
 
     public static boolean isVarchar(String type) {
-        //不考虑type.equals("String")
+        //type.equals("String")
         return type.equals("char") || type.equals("java_lang_String");
     }
 
@@ -115,9 +115,10 @@ public class Reflect {
      * @return
      */
     public static String objToStr(Object obj) {
-        if (obj instanceof Byte)
-            return Byte.toString((byte)obj);
-        else if (obj instanceof Short)
+//        if (obj instanceof Byte)
+//            return Byte.toString((byte)obj);
+//        else
+        if (obj instanceof Short)
             return Short.toString((short) obj);
         else if (obj instanceof Integer)
             return Integer.toString((int) obj);

@@ -188,12 +188,14 @@ public class FastDatabase{
      * @return 根据过滤条件返回的数据（如果没有过滤条件返回指定表的所有数据）
      */
     public <T> List<T> get(Class<T> cla){
+        SQLiteDatabase db = prepare(null);
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = cla.getCanonicalName();
-        if(!tableExists(tableName)){
-            FastLog.d(getCurrDatabaseNameComplete()+"不存在表"+tableName);
+        if(!tableExists(db,tableName)){
+            FastLog.d(databaseName+"不存在表"+tableName);
+            db.close();
             return null;
         }
-        SQLiteDatabase database;
         Cursor cursor;
         String filters;
         String order;
@@ -218,13 +220,12 @@ public class FastDatabase{
         }
         //限制条件
         limit = " limit "+mAttribute.getStart()+","+mAttribute.getEnd();
-        database = prepare(null);
         String complete = "select "+selectColumn+" from '"+tableName+"'"+filters+order+limit;
         String[] args = selectionArgs.isEmpty() ? null : selectionArgs.toArray(new String[]{});
-        cursor = database.rawQuery(complete,args);
+        cursor = db.rawQuery(complete,args);
         if(cursor==null){
             FastLog.d("请求的数据不存在数据库");
-            database.close();
+            db.close();
             return null;
         }
         Gson gson = new Gson();
@@ -254,7 +255,7 @@ public class FastDatabase{
                         boolean functionSuccess = false;
                         if(functionCommand!=null){
                             List<String> functionArgs = new ArrayList<>();
-                            Cursor functionCursor = database.rawQuery("select "+functionCommand.getType().getName()+"("+columnName+")"+" from '"+tableName+
+                            Cursor functionCursor = db.rawQuery("select "+functionCommand.getType().getName()+"("+columnName+")"+" from '"+tableName+
                                     "'"+getFilters(key,functionCommand.getFilterCommand(),functionArgs),functionArgs.toArray(new String[]{}));
                             if(functionCursor!=null){
                                 functionCursor.moveToFirst();
@@ -367,12 +368,12 @@ public class FastDatabase{
                 cursor.moveToNext();
             }catch(Exception e){
                 FastLog.e("数据库在取数据时发生异常:"+e.toString());
-                database.close();
+                db.close();
                 return null;
             }
         }
         cursor.close();
-        database.close();
+        db.close();
         return list;
     }
 
@@ -421,46 +422,47 @@ public class FastDatabase{
      * @return 成功删除返回true，否则为false
      */
     public boolean delete(Class<?> cla){
+        SQLiteDatabase db = prepare(null);
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = cla.getCanonicalName();
-        if(!tableExists(tableName)){
-            FastLog.d(getCurrDatabaseNameComplete()+"不存在表"+tableName);
+        if(!tableExists(db,tableName)){
+            FastLog.d(databaseName+"不存在表"+tableName);
+            db.close();
             return false;
         }
         Cursor cursor;
-        SQLiteDatabase database;
         String filters;
         String key = getPrimaryKeyName(cla);
         List<String> selectionArgs = new ArrayList<>();
 
         filters = getFilters(key,mAttribute.getFilterCommand(),selectionArgs);
-        database = prepare(null);
         String complete = "select *from '"+tableName+"'"+filters;
         String[] args = selectionArgs.isEmpty() ? null : selectionArgs.toArray(new String[]{});
-        cursor = database.rawQuery(complete,args);
+        cursor = db.rawQuery(complete,args);
         cursor.moveToFirst();
         if(cursor.isAfterLast()){
-            FastLog.d(getCurrDatabaseNameComplete()+"表"+tableName+"中不存在要删除的数据");
+            FastLog.d(databaseName+"表"+tableName+"中不存在要删除的数据");
             cursor.close();
-            database.close();
+            db.close();
             return false;
         }
         int count = cursor.getCount();
         try{
-            database.beginTransaction();
+            db.beginTransaction();
             String deleteCommand = "delete from '"+tableName+"' "+filters;
             if(args!=null)
                 for(String replaceStr: args)
                     deleteCommand = deleteCommand.replaceFirst("[?]","'"+replaceStr+"'");
-            database.execSQL(deleteCommand);
-            database.setTransactionSuccessful();
-            FastLog.d(getCurrDatabaseNameComplete()+"--d-"+count+"->"+tableName);
+            db.execSQL(deleteCommand);
+            db.setTransactionSuccessful();
+            FastLog.d(databaseName+"--d-"+count+"->"+tableName);
         }catch(SQLiteException e){
             FastLog.d("删除数据失败："+e.toString());
             return false;
         }finally{
-            database.endTransaction();
+            db.endTransaction();
             cursor.close();
-            database.close();
+            db.close();
         }
         return true;
     }
@@ -471,42 +473,44 @@ public class FastDatabase{
      * @return 是否成功更新
      */
     public boolean update(@NonNull Object obj){
-        SQLiteDatabase database;
-        String tableName;
-        String filter;
+        SQLiteDatabase db = prepare(null);
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
+        String tableName = obj.getClass().getCanonicalName();
+        Field[] fields = obj.getClass().getDeclaredFields();
         ContentValues cv = new ContentValues();
-        Field[] fields;
         List<String> args = new ArrayList<>();
+        String filter;
         String[] ss;
 
-        tableName = obj.getClass().getCanonicalName();
-        if(!tableExists(tableName)){
-            FastLog.d("更新数据失败，"+getCurrDatabaseNameComplete()+"表"+tableName+"不存在");
+        if(!tableExists(db,tableName)){
+            FastLog.d("更新数据失败，"+databaseName+"表"+tableName+"不存在");
+            db.close();
             return false;
         }
-        if(!tableHasData(tableName)){
-            FastLog.d("更新数据失败，"+getCurrDatabaseNameComplete()+"表"+tableName+"中不含任何数据");
+        if(!tableHasData(db,tableName)){
+            FastLog.d("更新数据失败，"+databaseName+"表"+tableName+"中不含任何数据");
+            db.close();
             return false;
         }
-        database = prepare(null);
         //先检测数据是否存在
         filter = getFilters(getPrimaryKeyName(obj.getClass()),mAttribute.getFilterCommand(),args);
-        Cursor cursor = database.rawQuery("select *from '"+tableName+"'"+filter,ss = args.toArray(new String[]{}));
+        Cursor cursor = db.rawQuery("select *from '"+tableName+"'"+filter,ss = args.toArray(new String[]{}));
         cursor.moveToFirst();
         if(cursor.isAfterLast()){
             FastLog.d("更新数据失败,没有找到要更新的数据");
             cursor.close();
-            database.close();
+            db.close();
             return false;
         }
         int count = cursor.getCount();
         if(count>1){
             FastLog.d("更新数据失败,不支持多条数据同时更新");
+            cursor.close();
+            db.close();
             return false;
         }
         try{
-            database.beginTransaction();
-            fields = obj.getClass().getDeclaredFields();
+            db.beginTransaction();
             for(Field field: fields){
                 field.setAccessible(true);
                 Class<?> type = field.getType();
@@ -572,16 +576,16 @@ public class FastDatabase{
                 }
             }
             filter = filter.substring(6); //削掉前面的where
-            database.update("'"+tableName+"'",cv,filter,ss);
-            database.setTransactionSuccessful();
-            FastLog.d(getCurrDatabaseNameComplete()+"--u-"+count+"->"+tableName);
+            db.update("'"+tableName+"'",cv,filter,ss);
+            db.setTransactionSuccessful();
+            FastLog.d(databaseName+"--u-"+count+"->"+tableName);
         }catch(SQLiteException|IllegalAccessException|IllegalArgumentException|IOException e){
             FastLog.d("更新数据失败："+e.toString());
             return false;
         }finally{
-            database.endTransaction();
+            db.endTransaction();
             cursor.close();
-            database.close();
+            db.close();
         }
         return true;
     }
@@ -604,20 +608,20 @@ public class FastDatabase{
         if(firstObj==null){
             return false;
         }
-        SQLiteDatabase db;
-        ContentValues cv = new ContentValues();
-        Field[] fields = firstObj.getClass().getDeclaredFields();
+        SQLiteDatabase db = prepare(null);
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = firstObj.getClass().getCanonicalName();
+        Field[] fields = firstObj.getClass().getDeclaredFields();
+        ContentValues cv = new ContentValues();
         Field autoIncreKeyField;//自动增长的主键
         int totalCount = array.length;
         int removeCount = 0;
         int remainCount = 0;
-
-        if(!tableExists(tableName)){
-            FastLog.d("保存数据失败，"+getCurrDatabaseNameComplete()+"表"+tableName+"不存在");
+        if(!tableExists(db,tableName)){
+            FastLog.d("保存数据失败，"+databaseName+"表"+tableName+"不存在");
+            db.close();
             return false;
         }
-        db = prepare(null);
         try{
             db.beginTransaction();
             for(Object obj: array){
@@ -716,7 +720,7 @@ public class FastDatabase{
             }
             db.setTransactionSuccessful();
             remainCount = totalCount - removeCount;
-            FastLog.d(getCurrDatabaseNameComplete()+"--save-"+remainCount+"-("+totalCount+"-"+removeCount+")->"+tableName);
+            FastLog.d(databaseName+"--save-"+remainCount+"-(total="+totalCount+" remove="+removeCount+")->"+tableName);
         }catch(SQLiteException|IllegalAccessException|IllegalArgumentException|IOException e){
             FastLog.e("保存数据失败:"+e.getMessage());
             return false;
@@ -733,59 +737,63 @@ public class FastDatabase{
      * @return
      */
     private boolean saveOrUpdate(Object[] objs){
-        Object obj = null;
-        String tableName;
+        Object firstObj = null;
         boolean isUpdate = false;
-        boolean success = true;
+        boolean success = false;
 
         if(objs==null || objs.length<=0)
             return false;
         //取第一个非null的对象
         for(Object object: objs){
             if(object!=null){
-                obj = object;
+                firstObj = object;
                 break;
             }
         }
         //有可能一个数组全是null,这种情况直接跳出
-        if(obj==null)
+        if(firstObj==null)
             return false;
-        DatabaseTable table = loadAttribute(obj.getClass());
-        tableName = table.tableName;
-        //如果表存在并且有主键，尝试获取这个对象
-        if(tableExists(tableName)){
-            DatabaseTable.DatabaseColumn keyColumn = table.keyColumn;
-            if(keyColumn!=null){
-                Field field;
+        SQLiteDatabase db = prepare(null);
+        String tableName = firstObj.getClass().getCanonicalName();
+        Field[] fields = firstObj.getClass().getDeclaredFields();
+        Field keyField = null;//主键
+
+        if(tableExists(db,tableName)){
+            for(Field field: fields){
+                field.setAccessible(true);
+                Database tableInject = field.getAnnotation(Database.class);
+                if(tableInject!=null && tableInject.keyPrimary()){
+                    keyField = field;
+                    break;
+                }
+            }
+            if(keyField!=null){
                 try{
-                    field = obj.getClass().getDeclaredField(table.keyFieldName);
-                    field.setAccessible(true);
-                    Object keyValue = field.get(obj);
-                    Object oldData = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).getFirst(obj.getClass());
+                    Object keyValue = keyField.get(firstObj);
+                    Object oldData = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).getFirst(firstObj.getClass());
                     if(oldData!=null){
                         isUpdate = true;
-                        success = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).update(obj);
+                        success = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).update(firstObj);
                     }
-                }catch(NoSuchFieldException|IllegalAccessException e){
+                }catch(IllegalAccessException e){
                     FastLog.e("数据库saveOrUpdate时出现异常:"+e.toString());
-                    return false;
+                    success = false;
                 }
             }else{ //如果主键不存在，查询是否有过滤条件，如果这个有并且这个条件能查询到数据，则修改首个数据的值
                 if(mAttribute.getFilterCommand()!=null){
-                    Object oldData = getFirst(obj.getClass());
+                    Object oldData = getFirst(firstObj.getClass());
                     if(oldData!=null){
                         isUpdate = true;
-                        success = update(obj);
+                        success = update(firstObj);
                     }
                 }
             }
         }
         if(!isUpdate){
-            final String sql = generateCreateTableSql(obj.getClass());
-            SQLiteDatabase db = prepare(sql);
-            db.close();
+            db = prepare(generateCreateTableSql(firstObj.getClass()));
             success = save(objs);
         }
+        db.close();
         return success;
     }
 
@@ -888,9 +896,8 @@ public class FastDatabase{
         }
         sb.deleteCharAt(sb.length()-1);
         sb.append(")");
-        String sql = sb.toString();
-        FastLog.d(getCurrDatabaseNameComplete()+"建表SQL语句:"+sql);
-        return sql;
+        //FastLog.d("建表SQL语句:"+sb.toString());
+        return sb.toString();
     }
 
     private DatabaseTable loadAttribute(Class<?> cla){
@@ -924,12 +931,12 @@ public class FastDatabase{
 
     private SQLiteDatabase prepare(final String sql) throws SQLiteException{
         SQLiteDatabase database;
-        String databaseName = getCurrDatabaseNameComplete();
-        SQLiteOpenHelper helper = new SQLiteOpenHelper(mContext,databaseName,null,sConfig.getVersion()){
+        SQLiteOpenHelper helper = new SQLiteOpenHelper(mContext,getCurrDatabaseNameComplete(),null,sConfig.getVersion()){
 
             @Override
             public void onCreate(SQLiteDatabase db){
-                FastLog.d("创建数据库:"+db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1));
+                String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
+                FastLog.d("创建数据库:"+databaseName);
             }
 
             @Override
@@ -940,7 +947,7 @@ public class FastDatabase{
                     FastLog.d("使用自定义升级方案");
                     mCustomUpdate.update(db,oldVersion,newVersion);
                 }else{
-                    FastLog.d("使用自动升级方案");
+                    FastLog.d("使用内置升级方案");
                     updateDatabase(db);
                 }
                 FastLog.d("数据库升级完毕");
@@ -986,6 +993,7 @@ public class FastDatabase{
      * @param tableName 指定数据表
      */
     private void checkTableChanged(SQLiteDatabase db,String tableName){
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         Class<?> cla;
         Field[] fields;
         Map<String,Field> fieldMap = new HashMap<>();
@@ -1000,7 +1008,7 @@ public class FastDatabase{
             cla = Class.forName(tableName);
         }catch(ClassNotFoundException e){
             db.execSQL("drop table '"+tableName+"'");
-            FastLog.d("删除表"+tableName);
+            FastLog.d(databaseName+"删除表"+tableName);
             return;
         }
         fields = cla.getDeclaredFields();
@@ -1090,7 +1098,7 @@ public class FastDatabase{
         if(needRebuildTable || newColumnMap.size()>0){
             alterTable(db,cla,retainColumns,newColumnMap,needRebuildTable);
         } else {
-            FastLog.d("表"+tableName+"不需要修改");
+            FastLog.d(databaseName+"表"+tableName+"不需要修改");
         }
     }
 
@@ -1200,33 +1208,33 @@ public class FastDatabase{
 
     /**
      * 判断表是否存在
-     * @param tableName
-     * @return
+     * @param db 某数据库
+     * @param tableName 表名
+     * @return true某数据库存在指定表 false不存在
      */
-    private boolean tableExists(String tableName){
-        SQLiteDatabase db = prepare(null);
+    private boolean tableExists(SQLiteDatabase db,String tableName){
+        @SuppressLint("Recycle")
         Cursor cursor = db.rawQuery("select name from sqlite_master where type='table' and name="+"'"+tableName+"'",null);
         boolean exists = !(cursor==null || cursor.getCount()<=0);
-        if(cursor!=null)
-            cursor.close();
-        db.close();
+        //if(cursor!=null) cursor.close();
+        //db.close();
         return exists;
     }
 
     /**
      * 判断表中是否有数据
-     * @param tableName
-     * @return
+     * @param db 某数据库
+     * @param tableName 表名
+     * @return true某数据库指定表有数据 false没有数据
      */
-    private boolean tableHasData(String tableName) {
+    private boolean tableHasData(SQLiteDatabase db,String tableName) {
         boolean hasData = false;
-        if (tableExists(tableName)) {
-            SQLiteDatabase db = prepare(null);
+        if (tableExists(db,tableName)) {
+            @SuppressLint("Recycle")
             Cursor cursor = db.rawQuery("select * from '" + tableName + "'", null);
             hasData = !(cursor == null || cursor.getCount() <= 0);
-            if (cursor != null)
-                cursor.close();
-            db.close();
+            //if (cursor != null) cursor.close();
+            //db.close();
         }
         return hasData;
     }
@@ -1239,6 +1247,7 @@ public class FastDatabase{
      * @param needRebuildTable 是否需要重建表
      */
     public void alterTable(SQLiteDatabase db,Class<?> cla,List<String> valueToValue,Map<String,String> newColumn,boolean needRebuildTable){
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = cla.getCanonicalName();
         String tempName = "temp_table_"+Long.toString(System.currentTimeMillis()); //数据转移用临时表
         Iterator<String> iter;
@@ -1251,7 +1260,7 @@ public class FastDatabase{
                     String type = newColumn.get(column);
                     db.execSQL("alter table '"+tableName+"' add "+column+" "+type);
                 }
-                FastLog.d("表"+tableName+"增加"+Integer.toString(newColumn.size())+"列");
+                FastLog.d(databaseName+"表"+tableName+"增加"+Integer.toString(newColumn.size())+"列");
             }
         }else{
             if(valueToValue!=null && valueToValue.size()>0){
@@ -1269,7 +1278,7 @@ public class FastDatabase{
                 db.execSQL("drop table '"+tableName+"'");
                 db.execSQL(generateCreateTableSql(cla));
             }
-            FastLog.d("表"+tableName+"被调整");
+            FastLog.d(databaseName+"表"+tableName+"被调整");
         }
     }
 
@@ -1278,38 +1287,14 @@ public class FastDatabase{
      * @param cla
      */
     public void dropTable(Class<?> cla){
-        String databaseName = getCurrDatabaseNameComplete();
-        dropTable(databaseName,cla);
-    }
-
-    /**
-     * 根据对象类删除表
-     * @param database 某数据库
-     * @param cla 对象类
-     */
-    public void dropTable(String database,Class<?> cla){
-        String table = cla.getCanonicalName();
-        dropTable(database,table);
-    }
-
-    /**
-     * 删除表
-     * @param database 某数据库
-     * @param table 表名
-     */
-    public void dropTable(String database,String table){
-        SQLiteDatabase db = mContext.openOrCreateDatabase(database,Context.MODE_PRIVATE,null);
-        if(tableExists(table)){
-            db.execSQL("drop table '"+table+"'");
-            FastLog.d("删除表"+table);
+        SQLiteDatabase db = mContext.openOrCreateDatabase(getCurrDatabaseNameComplete(),Context.MODE_PRIVATE,null);
+        String tableName = cla.getCanonicalName();
+        if(tableExists(db,tableName)){
+            db.execSQL("drop table '"+tableName+"'");
+            FastLog.d(db+"删除表"+tableName);
         }else{
-            FastLog.d("表"+table+"不存在");
+            FastLog.d(db+"表"+tableName+"不存在");
         }
-    }
-
-    public SQLiteDatabase getCurrDatabase(){
-        String databaseName = getCurrDatabaseNameComplete();
-        return mContext.openOrCreateDatabase(databaseName,Context.MODE_PRIVATE,null);
     }
 
     public String getCurrDatabaseNameComplete(){
