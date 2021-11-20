@@ -205,19 +205,15 @@ public class FastDatabase{
         //过滤条件
         filters = getFilters(key,mAttribute.getFilterCommand(),selectionArgs);
         //排序条件
-        if (mAttribute.getOrderColumn() == null)
-            order = "";//不排序
-        else {
-            if(mAttribute.getOrderColumn().equals("")){
-                if(TextUtils.isEmpty(key))
-                    order = "";
-                else {
-                    //按主键排序
-                    order = " order by "+key+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
-                }
+        if(!TextUtils.isEmpty(mAttribute.getOrderColumn())){
+            //按指定列排序
+            order = " order by "+mAttribute.getOrderColumn()+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
+        }else {
+            if(!TextUtils.isEmpty(key)){
+                //按主键排序
+                order = " order by "+key+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
             }else {
-                //按指定列排序
-                order = " order by "+mAttribute.getOrderColumn()+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
+                order = "";//不排序
             }
         }
         //限制条件
@@ -470,7 +466,7 @@ public class FastDatabase{
     }
 
     /**
-     * 更新数据
+     * 更新单条数据
      * @param obj 更新对象
      * @return 是否成功更新
      */
@@ -504,6 +500,10 @@ public class FastDatabase{
             return false;
         }
         int count = cursor.getCount();
+        if(count>1){
+            FastLog.d("更新数据失败,不支持多条数据同时更新");
+            return false;
+        }
         try{
             database.beginTransaction();
             fields = obj.getClass().getDeclaredFields();
