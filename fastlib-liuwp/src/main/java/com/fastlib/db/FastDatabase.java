@@ -1295,6 +1295,7 @@ public class FastDatabase{
         }else{
             FastLog.d(db+"表"+tableName+"不存在");
         }
+        db.close();
     }
 
     public String getCurrDatabaseNameComplete(){
