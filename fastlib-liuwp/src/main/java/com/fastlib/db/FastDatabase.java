@@ -383,6 +383,14 @@ public class FastDatabase{
      * @return 成功删除返回true，否则fase
      */
     public boolean delete(Object obj){
+        SQLiteDatabase db = prepare(null);
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
+        String tableName = obj.getClass().getCanonicalName();
+        if(!tableExists(db,tableName)){
+            FastLog.d("删除数据失败，"+databaseName+"不存在表"+tableName);
+            db.close();
+            return false;
+        }
         Field[] fields = obj.getClass().getDeclaredFields();
         Field keyField = null;
         String keyFieldValue;
@@ -440,7 +448,7 @@ public class FastDatabase{
         cursor = db.rawQuery(complete,args);
         cursor.moveToFirst();
         if(cursor.isAfterLast()){
-            FastLog.d(databaseName+"表"+tableName+"中不存在要删除的数据");
+            FastLog.d("删除数据失败，"+databaseName+"表"+tableName+"中不存在要删除的数据");
             cursor.close();
             db.close();
             return false;
@@ -456,7 +464,7 @@ public class FastDatabase{
             db.setTransactionSuccessful();
             FastLog.d(databaseName+"--d-"+count+"->"+tableName);
         }catch(SQLiteException e){
-            FastLog.d("删除数据失败："+e.toString());
+            FastLog.d("数据库删除数据时发生异常："+e.toString());
             return false;
         }finally{
             db.endTransaction();
@@ -579,7 +587,7 @@ public class FastDatabase{
             db.setTransactionSuccessful();
             FastLog.d(databaseName+"--u-"+count+"->"+tableName);
         }catch(SQLiteException|IllegalAccessException|IllegalArgumentException|IOException e){
-            FastLog.d("更新数据失败："+e.toString());
+            FastLog.d("数据库更新数据时发生异常："+e.toString());
             return false;
         }finally{
             db.endTransaction();
@@ -721,7 +729,7 @@ public class FastDatabase{
             remainCount = totalCount - removeCount;
             FastLog.d(databaseName+"--save-"+remainCount+"-(total="+totalCount+" remove="+removeCount+")->"+tableName);
         }catch(SQLiteException|IllegalAccessException|IllegalArgumentException|IOException e){
-            FastLog.e("保存数据失败:"+e.getMessage());
+            FastLog.e("数据库在保存数据时出现异常:"+e.getMessage());
             return false;
         }finally{
             db.endTransaction();
