@@ -45,15 +45,20 @@ import java.util.UUID;
  */
 public class FastDatabase{
     private static final DatabaseConfig sConfig = getConfig();
+    private final RuntimeAttribute mAttribute = new RuntimeAttribute();
+    private final Map<String,FunctionCommand> mFunctionCommand = new HashMap<>();
     private final Context mContext;
-    private final RuntimeAttribute mAttribute;
-    private final Map<String,FunctionCommand> mFunctionCommand; //列名-->功能函数
     private CustomUpdate mCustomUpdate;
 
     private FastDatabase(Context context){
         mContext = context.getApplicationContext();
-        mAttribute = new RuntimeAttribute();
-        mFunctionCommand = new HashMap<>();
+    }
+
+    public FastDatabase clear(){
+        mAttribute.setDefaultAttribute();
+        mFunctionCommand.clear();
+        mCustomUpdate = null;
+        return this;
     }
 
     /**
@@ -1347,13 +1352,13 @@ public class FastDatabase{
     }
 
     /**
-     * 取数据时根据主键排序
+     * 取数据时,如果主键存在，根据主键排序
      * @param asc
      * @return current database
      */
     public FastDatabase orderBy(boolean asc){
         mAttribute.setOrderAsc(asc);
-        mAttribute.setOrderColumn(""); //空字符串代表使用主键字段
+        mAttribute.setOrderColumn(null);
         return this;
     }
 

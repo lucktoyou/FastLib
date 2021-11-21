@@ -7,26 +7,30 @@ package com.fastlib.db;
  */
 public final class RuntimeAttribute{
     private boolean mOrderAsc;//排序升序
+    private String mOrderColumn; //根据这个字段排序
+    private String mWhichDatabase;//仅本次操作,保存数据到指定数据库.如果这个数据库不存在,尝试创建数据库，如果异常这条语句将被丢弃不会抛出异常
     private int mSaveMax;//最大保存数,如果超出了这个值删除历史直到符合这个值
     private int mStart, mSize;//合起来就是limit
     private String[] mSelectColumn;
     private String[] mUnselectColumn;//如果这个字段为空取再判断selectColumn，如果selectColumn也是空，取所有列。如果这个字段不为空将不使用selectColumn字段
-    private String mOrderColumn; //根据这个字段排序
-    private String mWhichDatabase;//仅本次操作,保存数据到指定数据库.如果这个数据库不存在,尝试创建数据库，如果异常这条语句将被丢弃不会抛出异常
     private FilterCommand mFilterCommand;//过滤命令
     private Object[] mConstructorParams;//使用自定义构造对象时定义.如果元素为DataFromDatabase尝试从数据库中对应域获取值并且替换
 
     public RuntimeAttribute(){
-        defaultAttribute();
+        setDefaultAttribute();
     }
 
-    public void defaultAttribute(){
+    public void setDefaultAttribute(){
         mOrderAsc = true;
         mOrderColumn = null;
-        mWhichDatabase = null;
+        //mWhichDatabase不需要置空.
         mSaveMax = Integer.MAX_VALUE;
         mStart = 0;
         mSize = Integer.MAX_VALUE;
+        mSelectColumn = null;
+        mUnselectColumn = null;
+        mFilterCommand = null;
+        mConstructorParams = null;
     }
 
     /**

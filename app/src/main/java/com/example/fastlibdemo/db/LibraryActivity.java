@@ -43,7 +43,8 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 bean.cities =city;
                 list.add(bean);
 
-                fastDatabase.saveOrUpdate(list);
+                fastDatabase.clear()
+                        .saveOrUpdate(list);
                 showText();
                 break;
             }
@@ -56,12 +57,14 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 city.add(new ProvinceBeen.City("南平市"));
                 data.cities =city;
 
-                fastDatabase.saveOrUpdate(data);
+                fastDatabase.clear()
+                        .saveOrUpdate(data);
                 showText();
                 break;
             }
             case R.id.btnDelete:
-                fastDatabase.setFilter(And.condition(Condition.bigger("score",83)))
+                fastDatabase.clear()
+                        .setFilter(And.condition(Condition.bigger("score",83)))
                         .delete(ProvinceBeen.class);
                 showText();
                 break;
@@ -77,7 +80,7 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
     private void showText() {
         //同步获取数据库数据.
         StringBuilder sb = new StringBuilder();
-        List<ProvinceBeen> list = fastDatabase
+        List<ProvinceBeen> list = fastDatabase.clear()
                 .setFilter(And.condition(Condition.bigger("score", 60)))
                 .orderBy(true)//默认true
                 .limit(0, Integer.MAX_VALUE)//默认Integer.MAX_VALUE
@@ -87,8 +90,8 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 sb.append(gson.toJson(p)).append("\n");
             }
         }
-        //获取某列总值(不常用，目前FastDatabase支持short、int、long、float、long这五个数值类型)
-        ProvinceBeen been = fastDatabase
+        //获取表中某列总值(不常用，目前FastDatabase支持short、int、long、float、long这五个数值类型)
+        ProvinceBeen been = fastDatabase.clear()
                 .putFunctionCommand("score", FunctionCommand.sum())
                 .getFirst(ProvinceBeen.class);
         if(been!=null){
@@ -99,8 +102,8 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
 
     private void showTextFormDB() {
         PersonBeen rawData = new PersonBeen("明兰", 28, "柔弱的外表下，有颗坚毅勇敢的心");
-        fastDatabase.delete(PersonBeen.class);
-        fastDatabase.saveOrUpdateAsync(FastUtil.listOf(rawData), new DatabaseNoDataResultCallback() {
+        fastDatabase.clear().delete(PersonBeen.class);
+        fastDatabase.clear().saveOrUpdateAsync(FastUtil.listOf(rawData), new DatabaseNoDataResultCallback() {
             @Override
             public void onResult(boolean success) {
                 if (success) {
