@@ -6,14 +6,14 @@ package com.fastlib.db;
  * 从FastDatabase中取数据时，如果遇到自定义构造生成的对象时，作为指定数据库数据替换对象.
  * 例：
  * FastDatabase.getDefaultInstance(LibraryActivity.this)
- * .setConstructorParams(new Object[]{DataFromDatabase.from("name"), DataFromDatabase.from("age"),DataFromDatabase.from("intro")})
+ * .setConstructorParams(new String[]{DataFromDatabase.from("name"), DataFromDatabase.from("age"),DataFromDatabase.from("intro")})
  * .get(PersonBeen.class);
  */
 public final class DataFromDatabase{
-    private String mField;
+    private final String field;
 
     private DataFromDatabase(String field){
-        mField = field;
+        this.field = field;
     }
 
     public static DataFromDatabase from(String field){
@@ -21,10 +21,6 @@ public final class DataFromDatabase{
     }
 
     public String getField(){
-        return mField;
-    }
-
-    public void setField(String field){
-        mField = field;
+        return field;
     }
 }

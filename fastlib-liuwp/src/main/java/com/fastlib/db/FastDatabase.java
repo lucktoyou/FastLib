@@ -192,14 +192,14 @@ public class FastDatabase{
         String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = cla.getCanonicalName();
         if(!tableExists(db,tableName)){
-            FastLog.d(databaseName+"不存在表"+tableName);
+            FastLog.d("获取数据失败，"+databaseName+"不存在表"+tableName);
             db.close();
             return null;
         }
         Cursor cursor;
         String filters;
         String order;
-        String limit = "";
+        String limit;
         List<String> selectionArgs = new ArrayList<>();
         List<T> list = new ArrayList<>();
         String key = getPrimaryKeyName(cla);
@@ -280,7 +280,7 @@ public class FastDatabase{
                                 functionCursor.close();
                             }
                         }
-                        mFunctionCommand.remove(field.getName());//清除掉函数命令
+                        mFunctionCommand.remove(columnName);//清除掉函数命令
                         if(functionSuccess) continue;
                     }
                     //<--
@@ -336,7 +336,7 @@ public class FastDatabase{
                         if(raw instanceof DataFromDatabase)
                             constructorParams[i] = params.remove(((DataFromDatabase)raw).getField());
                     }
-                    Class<?> clas[] = new Class[constructorParams.length];
+                    Class<?>[] clas = new Class[constructorParams.length];
                     for(int i = 0;i<constructorParams.length;i++)
                         clas[i] = constructorParams[i].getClass();
                     Constructor<?>[] constructors = cla.getDeclaredConstructors();
@@ -356,7 +356,7 @@ public class FastDatabase{
                     }
                     Constructor<T> constructor = cla.getDeclaredConstructor(clas);
                     obj = constructor.newInstance(constructorParams);
-                    //参数注入.这一块有优化可能
+                    //参数注入.
                     for(String fieldName: params.keySet()){
                         Field field = cla.getDeclaredField(fieldName);
                         field.setAccessible(true);
@@ -400,7 +400,7 @@ public class FastDatabase{
             FastLog.d("错误的使用了delete(Object obj),obj没有注解主键");
             return false;
         }else{
-            String fieldType = getFieldTypeByConverted(keyField);
+            String fieldType = getConvertedFieldTypeName(keyField);
             if(!Reflect.isInteger(fieldType) && !Reflect.isReal(fieldType) && !Reflect.isVarchar(fieldType)){
                 FastLog.d("不支持成为主键的字段类型："+fieldType);
                 return false;
@@ -426,16 +426,15 @@ public class FastDatabase{
         String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = cla.getCanonicalName();
         if(!tableExists(db,tableName)){
-            FastLog.d(databaseName+"不存在表"+tableName);
+            FastLog.d("删除数据失败，"+databaseName+"不存在表"+tableName);
             db.close();
             return false;
         }
         Cursor cursor;
         String filters;
-        String key = getPrimaryKeyName(cla);
         List<String> selectionArgs = new ArrayList<>();
 
-        filters = getFilters(key,mAttribute.getFilterCommand(),selectionArgs);
+        filters = getFilters(getPrimaryKeyName(cla),mAttribute.getFilterCommand(),selectionArgs);
         String complete = "select *from '"+tableName+"'"+filters;
         String[] args = selectionArgs.isEmpty() ? null : selectionArgs.toArray(new String[]{});
         cursor = db.rawQuery(complete,args);
@@ -850,20 +849,18 @@ public class FastDatabase{
 
     /**
      * @param field 字段名
-     * @return 转换后的字段类型
+     * @return 转换后的字段类型名称
      */
-    private String getFieldTypeByConverted(@Nullable Field field) {
-        String fieldType = null;
+    private String getConvertedFieldTypeName(@Nullable Field field) {
+        String cftm = null;
         if (field != null) {
-            fieldType = field.getType().getCanonicalName();
-            if (fieldType != null) {
-                fieldType = fieldType
-                        .replace(".", "_")
-                        .replace("[]", "_array")
-                ;
+            cftm = field.getType().getCanonicalName();
+            if (cftm != null) {
+                cftm = cftm.replace(".", "_")
+                        .replace("[]", "_array");
             }
         }
-        return fieldType;
+        return cftm;
     }
 
     /**
@@ -908,7 +905,7 @@ public class FastDatabase{
         for(Field field: fields){
             Database fieldInject = field.getAnnotation(Database.class);
             DatabaseTable.DatabaseColumn column = new DatabaseTable.DatabaseColumn();
-            String fieldType = getFieldTypeByConverted(field);
+            String fieldType = getConvertedFieldTypeName(field);
             column.columnName = field.getName();
             column.type = Reflect.toSQLType(fieldType);
             if(fieldInject!=null){
@@ -1028,9 +1025,9 @@ public class FastDatabase{
         iter = table.columnMap.keySet().iterator();
         while(iter.hasNext()){
             String key = iter.next();
-            DatabaseTable.DatabaseColumn column = table.columnMap.get(key);
             Database inject;
             Field field = fieldMap.remove(key);
+            DatabaseTable.DatabaseColumn column = table.columnMap.get(key);
             retainColumns.add(column.columnName);
 
             //也许类中某字段被删除了,重建表
@@ -1060,7 +1057,7 @@ public class FastDatabase{
                     needRebuildTable = true;
             }
             //判断类型是否被修改.integer改为任何类型都可以被兼容,real只被varchar兼容,varchar不兼容其他类型
-            String fieldType = getFieldTypeByConverted(field);
+            String fieldType = getConvertedFieldTypeName(field);
             switch(column.type){
                 case "integer":
                     if(!Reflect.isInteger(fieldType))
@@ -1080,7 +1077,7 @@ public class FastDatabase{
                     }
                     break;
                 default:
-                    if(!fieldType.equals(column.type)){
+                    if(!column.type.equals(fieldType)){
                         needRebuildTable = true;
                         retainColumns.remove(column.columnName);
                     }
@@ -1092,7 +1089,7 @@ public class FastDatabase{
         while(iter.hasNext()){
             String key = iter.next();
             Field field = fieldMap.get(key);
-            String fieldType = getFieldTypeByConverted(field);
+            String fieldType = getConvertedFieldTypeName(field);
             newColumnMap.put(key,Reflect.toSQLType(fieldType));
         }
         if(needRebuildTable || newColumnMap.size()>0){

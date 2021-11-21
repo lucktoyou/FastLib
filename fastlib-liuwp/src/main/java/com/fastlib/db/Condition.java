@@ -13,34 +13,34 @@ public final class Condition{
     public static final int TYPE_SMALLER = 3;
     public static final int TYPE_EQUAL = 4;
     public static final int TYPE_UNEQUAL = 5;
-    private int mType;
-    private String mField;
-    private String mValue;
+    private final int mType;
+    private final String mColumn;//列名
+    private final String mValue;//列值
 
-    private Condition(int type,String field,String value){
+    private Condition(int type,String column,String value){
         mType = type;
-        mField = field;
+        mColumn = column;
         mValue = value;
     }
 
-    public static Condition bigger(String field,String value){
-        return new Condition(TYPE_BIGGER,field,value);
+    public static Condition bigger(String column,String value){
+        return new Condition(TYPE_BIGGER,column,value);
     }
 
-    public static Condition bigger(String field,int value){
-        return bigger(field,Integer.toString(value));
+    public static Condition bigger(String column,int value){
+        return bigger(column,Integer.toString(value));
     }
 
-    public static Condition bigger(String field,long value){
-        return bigger(field,Long.toString(value));
+    public static Condition bigger(String column,long value){
+        return bigger(column,Long.toString(value));
     }
 
-    public static Condition bigger(String field,float value){
-        return bigger(field,Float.toString(value));
+    public static Condition bigger(String column,float value){
+        return bigger(column,Float.toString(value));
     }
 
-    public static Condition bigger(String field,double value){
-        return bigger(field,Double.toString(value));
+    public static Condition bigger(String column,double value){
+        return bigger(column,Double.toString(value));
     }
 
     public static Condition bigger(String value){
@@ -63,24 +63,24 @@ public final class Condition{
         return bigger(null,Double.toString(value));
     }
 
-    public static Condition smaller(String field,String value){
-        return new Condition(TYPE_SMALLER,field,value);
+    public static Condition smaller(String column,String value){
+        return new Condition(TYPE_SMALLER,column,value);
     }
 
-    public static Condition smaller(String field,int value){
-        return smaller(field,Integer.toString(value));
+    public static Condition smaller(String column,int value){
+        return smaller(column,Integer.toString(value));
     }
 
-    public static Condition smaller(String field,long value){
-        return smaller(field,Long.toString(value));
+    public static Condition smaller(String column,long value){
+        return smaller(column,Long.toString(value));
     }
 
-    public static Condition smaller(String field,float value){
-        return smaller(field,Float.toString(value));
+    public static Condition smaller(String column,float value){
+        return smaller(column,Float.toString(value));
     }
 
-    public static Condition smaller(String field,double value){
-        return smaller(field,Double.toString(value));
+    public static Condition smaller(String column,double value){
+        return smaller(column,Double.toString(value));
     }
 
     public static Condition smaller(String value){
@@ -103,40 +103,40 @@ public final class Condition{
         return smaller(null,Double.toString(value));
     }
 
-    public static Condition emptyValue(String field){
-        return new Condition(TYPE_NULL,field,null);
+    public static Condition emptyValue(String column){
+        return new Condition(TYPE_NULL,column,null);
     }
 
     public static Condition emptyValue(){
         return emptyValue(null);
     }
 
-    public static Condition notEmptyValue(String field){
-        return new Condition(TYPE_NOT_NULL,field,null);
+    public static Condition notEmptyValue(String column){
+        return new Condition(TYPE_NOT_NULL,column,null);
     }
 
     public static Condition notEmptyValue(){
         return notEmptyValue(null);
     }
 
-    public static Condition equal(String field,String value){
-        return new Condition(TYPE_EQUAL,field,value);
+    public static Condition equal(String column,String value){
+        return new Condition(TYPE_EQUAL,column,value);
     }
 
-    public static Condition equal(String field,int value){
-        return equal(field,Integer.toString(value));
+    public static Condition equal(String column,int value){
+        return equal(column,Integer.toString(value));
     }
 
-    public static Condition equal(String field,long value){
-        return equal(field,Long.toString(value));
+    public static Condition equal(String column,long value){
+        return equal(column,Long.toString(value));
     }
 
-    public static Condition equal(String field,float value){
-        return equal(field,Float.toString(value));
+    public static Condition equal(String column,float value){
+        return equal(column,Float.toString(value));
     }
 
-    public static Condition equal(String field,double value){
-        return equal(field,Double.toString(value));
+    public static Condition equal(String column,double value){
+        return equal(column,Double.toString(value));
     }
 
     public static Condition equal(String value){
@@ -159,24 +159,24 @@ public final class Condition{
         return equal(null,Double.toString(value));
     }
 
-    public static Condition unequal(String field,String value){
-        return new Condition(TYPE_UNEQUAL,field,value);
+    public static Condition unequal(String column,String value){
+        return new Condition(TYPE_UNEQUAL,column,value);
     }
 
-    public static Condition unequal(String field,int value){
-        return unequal(field,Integer.toString(value));
+    public static Condition unequal(String column,int value){
+        return unequal(column,Integer.toString(value));
     }
 
-    public static Condition unequal(String field,long value){
-        return unequal(field,Long.toString(value));
+    public static Condition unequal(String column,long value){
+        return unequal(column,Long.toString(value));
     }
 
-    public static Condition unequal(String field,float value){
-        return unequal(field,Float.toString(value));
+    public static Condition unequal(String column,float value){
+        return unequal(column,Float.toString(value));
     }
 
-    public static Condition unequal(String field,double value){
-        return unequal(field,Double.toString(value));
+    public static Condition unequal(String column,double value){
+        return unequal(column,Double.toString(value));
     }
 
     public static Condition unequal(String value){
@@ -213,20 +213,20 @@ public final class Condition{
      * @return 表达式字符串
      */
     public String getExpression(String key){
-        String fieldName = TextUtils.isEmpty(mField) ? key : mField;
+        String columnName = TextUtils.isEmpty(mColumn) ? key : mColumn;
         switch(mType){
             case TYPE_BIGGER:
-                return fieldName+">?";
+                return columnName+">?";
             case TYPE_EQUAL:
-                return fieldName+"=?";
+                return columnName+"=?";
             case TYPE_SMALLER:
-                return fieldName+"<?";
+                return columnName+"<?";
             case TYPE_UNEQUAL:
-                return fieldName+"!=?";
+                return columnName+"!=?";
             case TYPE_NULL:
-                return fieldName+" is null";
+                return columnName+" is null";
             case TYPE_NOT_NULL:
-                return fieldName+" not null";
+                return columnName+" not null";
             default:
                 return "";
         }

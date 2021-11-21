@@ -17,10 +17,12 @@ import com.fastlib.utils.FastLog;
  * Created by liuwp on 2020/3/28.
  */
 public class ApplicationImpl extends Application {
+    public static Application instance;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
         initFastLib();
         initWebView();
     }

@@ -3,6 +3,7 @@ package com.example.fastlibdemo.db;
 import android.view.View;
 
 import com.example.fastlibdemo.R;
+import com.example.fastlibdemo.app.ApplicationImpl;
 import com.example.fastlibdemo.base.BindViewActivity;
 import com.example.fastlibdemo.databinding.ActivityLibraryBinding;
 import com.fastlib.annotation.Bind;
@@ -23,7 +24,8 @@ import java.util.List;
  */
 public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
 
-    private  Gson gson = new Gson();
+    private final FastDatabase fastDatabase = FastDatabase.getDefaultInstance(ApplicationImpl.instance);
+    private final Gson gson = new Gson();
     private int scoree = 80;
 
     @Bind({R.id.btnSave,R.id.btnUpdate,R.id.btnDelete,R.id.btnQuery,R.id.btnDataFromDb})
@@ -41,7 +43,7 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 bean.cities =city;
                 list.add(bean);
 
-                FastDatabase.getDefaultInstance(this).saveOrUpdate(list);
+                fastDatabase.saveOrUpdate(list);
                 showText();
                 break;
             }
@@ -54,13 +56,12 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 city.add(new ProvinceBeen.City("南平市"));
                 data.cities =city;
 
-                FastDatabase.getDefaultInstance(this).saveOrUpdate(data);
+                fastDatabase.saveOrUpdate(data);
                 showText();
                 break;
             }
             case R.id.btnDelete:
-                FastDatabase.getDefaultInstance(this)
-                        .setFilter(And.condition(Condition.bigger("score",83)))
+                fastDatabase.setFilter(And.condition(Condition.bigger("score",83)))
                         .delete(ProvinceBeen.class);
                 showText();
                 break;
@@ -76,18 +77,18 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
     private void showText() {
         //同步获取数据库数据.
         StringBuilder sb = new StringBuilder();
-        List<ProvinceBeen> list = FastDatabase.getDefaultInstance(this)
-                .setFilter(And.condition(Condition.bigger("score",60)))
+        List<ProvinceBeen> list = fastDatabase
+                .setFilter(And.condition(Condition.bigger("score", 60)))
                 .orderBy(true)//默认true
-                .limit(0,Integer.MAX_VALUE)//默认Integer.MAX_VALUE
+                .limit(0, Integer.MAX_VALUE)//默认Integer.MAX_VALUE
                 .get(ProvinceBeen.class);
         if(list != null && !list.isEmpty()){
             for(ProvinceBeen p :list){
                 sb.append(gson.toJson(p)).append("\n");
             }
         }
-        //获取某列名下数据总值(不常用，一般为数值类型数据)
-        ProvinceBeen been = FastDatabase.getDefaultInstance(this)
+        //获取某列总值(不常用，目前FastDatabase支持short、int、long、float、long这五个数值类型)
+        ProvinceBeen been = fastDatabase
                 .putFunctionCommand("score", FunctionCommand.sum())
                 .getFirst(ProvinceBeen.class);
         if(been!=null){
@@ -97,18 +98,16 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
     }
 
     private void showTextFormDB() {
-        FastDatabase.getDefaultInstance(LibraryActivity.this).delete(PersonBeen.class);
-
-        PersonBeen rawData = new PersonBeen("明兰",28,"柔弱的外表下，有颗坚毅勇敢的心");
-
-        FastDatabase.getDefaultInstance(this).saveOrUpdateAsync(FastUtil.listOf(rawData), new DatabaseNoDataResultCallback() {
+        PersonBeen rawData = new PersonBeen("明兰", 28, "柔弱的外表下，有颗坚毅勇敢的心");
+        fastDatabase.delete(PersonBeen.class);
+        fastDatabase.saveOrUpdateAsync(FastUtil.listOf(rawData), new DatabaseNoDataResultCallback() {
             @Override
             public void onResult(boolean success) {
-                if(success){
+                if (success) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("非空构造时，从数据库获取数据 | 数据库版本:" + FastDatabase.getConfig().getVersion() + "\n");
                     List<PersonBeen> result = FastDatabase.getDefaultInstance(LibraryActivity.this)
-                            .setConstructorParams(new Object[]{DataFromDatabase.from("name"), DataFromDatabase.from("age"),DataFromDatabase.from("intro")})
+                            .setConstructorParams(new Object[]{DataFromDatabase.from("name"), DataFromDatabase.from("age"), DataFromDatabase.from("intro")})
                             .get(PersonBeen.class);
                     if (result != null && !result.isEmpty()) {
                         for (PersonBeen p : result) {
