@@ -403,8 +403,8 @@ public class FastDatabase{
         //是否有主键
         for(Field field: fields){
             field.setAccessible(true);
-            Database tableInject = field.getAnnotation(Database.class);
-            if(tableInject!=null && tableInject.keyPrimary()){
+            Database fieldInject = field.getAnnotation(Database.class);
+            if(fieldInject!=null && fieldInject.keyPrimary()){
                 keyField = field;
                 break;
             }
@@ -413,9 +413,9 @@ public class FastDatabase{
             FastLog.d("错误的使用了delete(Object obj),obj没有注解主键");
             return false;
         }else{
-            String fieldType = getConvertedFieldTypeName(keyField);
+            String fieldType = getCustomFieldTypeName(keyField);
             if(!Reflect.isInteger(fieldType) && !Reflect.isReal(fieldType) && !Reflect.isVarchar(fieldType)){
-                FastLog.d("不支持成为主键的字段类型："+fieldType);
+                FastLog.d("不支持成为主键的自定义字段类型："+fieldType);
                 return false;
             }
             try{
@@ -773,8 +773,8 @@ public class FastDatabase{
         if(tableExists(db,tableName)){
             for(Field field: fields){
                 field.setAccessible(true);
-                Database tableInject = field.getAnnotation(Database.class);
-                if(tableInject!=null && tableInject.keyPrimary()){
+                Database fieldInject = field.getAnnotation(Database.class);
+                if(fieldInject!=null && fieldInject.keyPrimary()){
                     keyField = field;
                     break;
                 }
@@ -861,10 +861,11 @@ public class FastDatabase{
     }
 
     /**
+     * 获取自定义字段类型名
      * @param field 字段名
-     * @return 转换后的字段类型名称
+     * @return 自定义字段类型名
      */
-    private String getConvertedFieldTypeName(@Nullable Field field) {
+    private String getCustomFieldTypeName(@Nullable Field field) {
         String cftm = null;
         if (field != null) {
             cftm = field.getType().getCanonicalName();
@@ -887,18 +888,16 @@ public class FastDatabase{
 
         sb.append("create table if not exists '"+table.tableName+"' (");
 
-        Iterator<String> iter = table.columnMap.keySet().iterator();
-        while(iter.hasNext()){
-            String key = iter.next();
+        for (String key : table.columnMap.keySet()) {
             DatabaseTable.DatabaseColumn column = table.columnMap.get(key);
 
-            if(column.isIgnore)
+            if (column.isIgnore)
                 continue;
-            sb.append(column.columnName+" "+column.type);
-            if(column.isPrimaryKey)
+            sb.append(column.columnName + " " + column.type);
+            if (column.isPrimaryKey)
                 sb.append(" primary key");
-            if(column.autoincrement){
-                if(!column.type.equals("integer"))
+            if (column.autoincrement) {
+                if (!column.type.equals("integer"))
                     throw new RuntimeException("自动增长只能用于整型数据");
                 sb.append(" autoincrement");
             }
@@ -918,7 +917,7 @@ public class FastDatabase{
         for(Field field: fields){
             Database fieldInject = field.getAnnotation(Database.class);
             DatabaseTable.DatabaseColumn column = new DatabaseTable.DatabaseColumn();
-            String fieldType = getConvertedFieldTypeName(field);
+            String fieldType = getCustomFieldTypeName(field);
             column.columnName = field.getName();
             column.type = Reflect.toSQLType(fieldType);
             if(fieldInject!=null){
@@ -932,7 +931,7 @@ public class FastDatabase{
                 column.autoincrement = fieldInject.autoincrement();
                 column.isIgnore = fieldInject.ignore();
                 if(column.isPrimaryKey && !Reflect.isInteger(fieldType) && !Reflect.isReal(fieldType) && !Reflect.isVarchar(fieldType))
-                    throw new UnsupportedOperationException("不支持成为主键的字段类型："+fieldType);
+                    throw new UnsupportedOperationException("不支持成为主键的自定义字段类型："+fieldType);
             }
             dt.columnMap.put(field.getName(),column);
         }
@@ -1070,7 +1069,7 @@ public class FastDatabase{
                     needRebuildTable = true;
             }
             //判断类型是否被修改.integer改为任何类型都可以被兼容,real只被varchar兼容,varchar不兼容其他类型
-            String fieldType = getConvertedFieldTypeName(field);
+            String fieldType = getCustomFieldTypeName(field);
             switch(column.type){
                 case "integer":
                     if(!Reflect.isInteger(fieldType))
@@ -1102,7 +1101,7 @@ public class FastDatabase{
         while(iter.hasNext()){
             String key = iter.next();
             Field field = fieldMap.get(key);
-            String fieldType = getConvertedFieldTypeName(field);
+            String fieldType = getCustomFieldTypeName(field);
             newColumnMap.put(key,Reflect.toSQLType(fieldType));
         }
         if(needRebuildTable || newColumnMap.size()>0){
