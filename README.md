@@ -28,9 +28,10 @@ dependencies {
 + utils         非常通用的工具类包
 + widget        基本上都是继承View或者相关的功能模块
 
-### 第三方依赖
+### 第三方依赖库
 + Gson 
 + androidx兼容包
 + google material
 + LocalBroadcastManager
 + com.orhanobut:logger
++ com.github.ybq:Android-SpinKit

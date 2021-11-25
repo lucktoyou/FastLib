@@ -1,39 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:minWidth="100dp"
+    android:minHeight="100dp"
+    app:cardBackgroundColor="#cc000000"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="0dp">
 
-    <!--需嵌套一外层,否则设置的固定宽高无效-->
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#424242"
-        android:minWidth="100dp"
-        android:minHeight="100dp"
-        android:padding="8dp">
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <com.github.ybq.android.spinkit.SpinKitView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:SpinKit_Color="@android:color/white"
+            app:SpinKit_Style="Circle"/>
+
+        <TextView
+            android:id="@+id/tv_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/img_progress"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center_horizontal"
-                android:src="@drawable/loading" />
-
-            <TextView
-                android:id="@+id/tv_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/loading"
-                android:textColor="@android:color/white"
-                android:textSize="13sp" />
-        </LinearLayout>
-    </RelativeLayout>
-</FrameLayout>
-
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/loading"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

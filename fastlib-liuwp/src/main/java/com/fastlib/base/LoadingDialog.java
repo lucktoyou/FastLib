@@ -33,12 +33,23 @@ import java.lang.reflect.Field;
 public class LoadingDialog extends DialogFragment {
 
     private TextView tvHint;
-    private ImageView imgProgress;
     private String content;
 
     public LoadingDialog(){
-        setStyle(STYLE_NO_TITLE,0);
+        setStyle(STYLE_NO_FRAME,0);
     }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.dialog_loading,container,false);
+        tvHint = view.findViewById(R.id.tv_hint);
+        if(!TextUtils.isEmpty(content)){
+            tvHint.setText(content);
+        }
+        return view;
+    }
+
 
     public void showAllowingStateLoss(FragmentManager manager){
         showAllowingStateLoss(manager,"loading dialog",false);
@@ -63,59 +74,6 @@ public class LoadingDialog extends DialogFragment {
         }
     }
 
-    @Override
-    public void dismiss() {
-        //防止横竖屏切换时 getFragmentManager置空引起的问题：
-        //Attempt to invoke virtual method 'android.app.FragmentTransaction
-        //android.app.FragmentManager.beginTransaction()' on a null object reference
-        if (getFragmentManager() == null) return;
-        super.dismissAllowingStateLoss();
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_loading,container,false);
-        imgProgress = view.findViewById(R.id.img_progress);
-        tvHint = view.findViewById(R.id.tv_hint);
-        setRotateAnim(imgProgress);
-        if(!TextUtils.isEmpty(content)){
-            tvHint.setText(content);
-        }
-        return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        //设置对话框外部的背景设为透明
-        Window window = getDialog().getWindow();
-        if(window!=null){
-            WindowManager.LayoutParams windowParams = window.getAttributes();
-            windowParams.dimAmount = 0.5f;
-            window.setAttributes(windowParams);
-        }
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-        if(loadingStateListener!=null){
-            loadingStateListener.onLoadingDialogDismiss();
-        }
-    }
-
-    //旋转动画
-    private void setRotateAnim(View view) {
-        RotateAnimation rotateAnimation = new RotateAnimation(0,360, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
-        rotateAnimation.setInterpolator(new LinearInterpolator());//匀速旋转
-        rotateAnimation.setRepeatMode(Animation.RESTART);
-        rotateAnimation.setRepeatCount(Animation.INFINITE);
-        rotateAnimation.setFillAfter(true);
-        rotateAnimation.setDuration(1000);
-        view.setAnimation(rotateAnimation);
-    }
-
     //设置提示文字
     public void setHint(String hint){
         content = hint;
@@ -126,6 +84,23 @@ public class LoadingDialog extends DialogFragment {
                 tvHint.setVisibility(View.VISIBLE);
                 tvHint.setText(content);
             }
+        }
+    }
+
+    @Override
+    public void dismiss() {
+        //防止横竖屏切换时 getFragmentManager置空引起的问题：
+        //Attempt to invoke virtual method 'android.app.FragmentTransaction
+        //android.app.FragmentManager.beginTransaction()' on a null object reference
+        if (getFragmentManager() == null) return;
+        super.dismissAllowingStateLoss();
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if(loadingStateListener!=null){
+            loadingStateListener.onLoadingDialogDismiss();
         }
     }
 
