@@ -50,7 +50,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                             N.showToast(NetActivity.this,"result=null");
                         }else {
                             N.showToast(NetActivity.this,result);
-                            FastLog.e(result);
                         }
                     }
                 })
@@ -70,7 +69,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                             N.showToast(NetActivity.this,"result=null");
                         }else {
                             N.showToast(NetActivity.this,result);
-                            FastLog.e(result);
                         }
                     }
                 })
@@ -91,7 +89,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                                 N.showToast(NetActivity.this,"result=null");
                             }else {
                                 N.showToast(NetActivity.this,result);
-                                FastLog.e(result);
                             }
                         }
                     })
@@ -209,7 +206,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                             N.showToast(NetActivity.this,"result=null");
                         }else {
                             N.showToast(NetActivity.this,result);
-                            FastLog.e(result);
                         }
                     }
                 })

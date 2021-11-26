@@ -40,7 +40,7 @@ public class ApplicationImpl extends Application {
 
             @Override
             public byte[] onRawData(Request request, byte[] data) {
-                request.printRequestAndResponse(data,true);
+                request.printRequestAndResponse(data);
                 return super.onRawData(request,data);
             }
 
