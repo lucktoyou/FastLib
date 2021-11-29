@@ -22,4 +22,15 @@
         <item name="android:windowNoDisplay">false</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
+
+    <style name="LoadDialogStyle" parent="@android:style/Theme.Dialog">
+        <item name="android:windowAnimationStyle">@style/LoadDialogWindowAnim</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="LoadDialogWindowAnim" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/pivot_enter</item>
+        <item name="android:windowExitAnimation">@anim/pivot_exit</item>
+    </style>
 </resources>

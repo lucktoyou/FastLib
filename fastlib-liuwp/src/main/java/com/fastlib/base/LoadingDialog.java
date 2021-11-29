@@ -6,12 +6,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,54 +24,30 @@ import java.lang.reflect.Field;
  * Created by liuwp on 2018/12/11.
  * 进度提示,默认居中
  */
-public class LoadingDialog extends DialogFragment {
+public class LoadingDialog extends DialogFragment{
 
     private TextView tvHint;
     private String content;
 
     public LoadingDialog(){
-        setStyle(STYLE_NO_FRAME,0);
+        setStyle(STYLE_NORMAL,R.style.LoadDialogStyle);
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_loading,container,false);
-        tvHint = view.findViewById(R.id.tv_hint);
+    public View onCreateView(@NonNull LayoutInflater inflater,@Nullable ViewGroup container,@Nullable Bundle savedInstanceState){
+        View contentView = inflater.inflate(R.layout.dialog_loading,container,false);
+        tvHint = contentView.findViewById(R.id.tv_hint);
         if(!TextUtils.isEmpty(content)){
             tvHint.setText(content);
         }
-        return view;
-    }
-
-
-    public void showAllowingStateLoss(FragmentManager manager){
-        showAllowingStateLoss(manager,"loading dialog",false);
-    }
-
-    //解决异常java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState.
-    public void showAllowingStateLoss(FragmentManager manager, String tag, boolean cancelable) {
-        try {
-            Class cls = DialogFragment.class;
-            Field dismissed = cls.getDeclaredField("mDismissed");
-            dismissed.setAccessible(true);
-            dismissed.set(this, false);
-            Field shownByMe = cls.getDeclaredField("mShownByMe");
-            shownByMe.setAccessible(true);
-            shownByMe.set(this, true);
-            FragmentTransaction transaction = manager.beginTransaction();
-            transaction.add(this, tag);
-            transaction.commitAllowingStateLoss();
-            setCancelable(cancelable);
-        } catch (Exception e) {
-            Toast.makeText(getContext(), "loading dialog not can normal show", Toast.LENGTH_SHORT).show();
-        }
+        return contentView;
     }
 
     //设置提示文字
     public void setHint(String hint){
         content = hint;
-        if(tvHint!=null) {
+        if(tvHint != null){
             if(TextUtils.isEmpty(content))
                 tvHint.setVisibility(View.GONE);
             else{
@@ -87,19 +57,42 @@ public class LoadingDialog extends DialogFragment {
         }
     }
 
+    public void showAllowingStateLoss(FragmentManager manager){
+        showAllowingStateLoss(manager,"loading dialog",false);
+    }
+
+    //解决异常java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState.
+    public void showAllowingStateLoss(FragmentManager manager,String tag,boolean cancelable){
+        try{
+            Class cls = DialogFragment.class;
+            Field dismissed = cls.getDeclaredField("mDismissed");
+            dismissed.setAccessible(true);
+            dismissed.set(this,false);
+            Field shownByMe = cls.getDeclaredField("mShownByMe");
+            shownByMe.setAccessible(true);
+            shownByMe.set(this,true);
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(this,tag);
+            transaction.commitAllowingStateLoss();
+            setCancelable(cancelable);
+        }catch(Exception e){
+            Toast.makeText(getContext(),"loading dialog not can normal show",Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
-    public void dismiss() {
+    public void dismiss(){
         //防止横竖屏切换时 getFragmentManager置空引起的问题：
         //Attempt to invoke virtual method 'android.app.FragmentTransaction
         //android.app.FragmentManager.beginTransaction()' on a null object reference
-        if (getFragmentManager() == null) return;
+        if(getFragmentManager() == null) return;
         super.dismissAllowingStateLoss();
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
+    public void onDismiss(@NonNull DialogInterface dialog){
         super.onDismiss(dialog);
-        if(loadingStateListener!=null){
+        if(loadingStateListener != null){
             loadingStateListener.onLoadingDialogDismiss();
         }
     }
@@ -110,7 +103,7 @@ public class LoadingDialog extends DialogFragment {
 
     private OnLoadingStateListener loadingStateListener;
 
-    public void setOnLoadingStateListener(OnLoadingStateListener loadingStateListener) {
+    public void setOnLoadingStateListener(OnLoadingStateListener loadingStateListener){
         this.loadingStateListener = loadingStateListener;
     }
 }

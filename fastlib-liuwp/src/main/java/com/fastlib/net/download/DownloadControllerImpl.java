@@ -17,17 +17,17 @@ import java.io.InputStream;
  * Modified by liuwp on 2020\10\9.
  * 单线程下载.
  */
-public class SingleDownloadController implements DownloadController {
+public class DownloadControllerImpl implements DownloadController {
     private boolean useServerFilename;
     private boolean supportAppend;//是否支持断点续传
     private File mTargetFile;
     private DownloadMonitor mMonitor;
 
-    public SingleDownloadController(@NonNull File targetFile) {
+    public DownloadControllerImpl(@NonNull File targetFile) {
         this(targetFile,false,false);
     }
 
-    public SingleDownloadController(@NonNull File targetFile, boolean useServerFilename,boolean supportAppend) {
+    public DownloadControllerImpl(@NonNull File targetFile,boolean useServerFilename,boolean supportAppend) {
         this.useServerFilename = useServerFilename;
         this.supportAppend = supportAppend;
         this.mTargetFile = targetFile;

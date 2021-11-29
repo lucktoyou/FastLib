@@ -46,7 +46,7 @@ public class Request{
     private Map<String,List<String>> mHeader = new HashMap<>();
     private RequestParam mParam = new RequestParam();
     private UploadingListener mUploadingListener;       //上传监听
-    private DownloadController mDownloadable;           //下载控制器
+    private DownloadController mDownloadController;     //下载控制器
     private Listener mListener;                         //监听回调
     private Type mCustomType;                           //一个自定义回调类型，优先使用这个参数其次才是解析mListener中方法参数
     private Statistical mStatistical;
@@ -232,13 +232,13 @@ public class Request{
         return mResponseHeader;
     }
 
-    public Request setDownloadable(DownloadController downloadable){
-        mDownloadable=downloadable;
+    public Request setDownloadController(DownloadController controller){
+        mDownloadController=controller;
         return this;
     }
 
-    public DownloadController getDownloadable(){
-        return mDownloadable;
+    public DownloadController getDownloadController(){
+        return mDownloadController;
     }
 
     public Request setUploadingListener(UploadingListener listener){
@@ -323,7 +323,7 @@ public class Request{
     }
 
     /**
-     * 如果指定结果类型为void或Void就返回null,null或Object或byte[]返回原始字节数组,String返回字符串,File则联合{@link Request#mDownloadable}来做处理,其它类型就尝试使用gson解析。
+     * 如果指定结果类型为void或Void就返回null,null或Object或byte[]返回原始字节数组,String返回字符串,File则联合{@link Request#mDownloadController}来做处理,其它类型就尝试使用gson解析。
      * @return 指定结果类型.
      */
     public Type getResultType(){
@@ -423,7 +423,7 @@ public class Request{
         } else if(resultType == null || resultType == Object.class || resultType == byte[].class){
             sb.append("【响应结果("+(resultType==null?null:resultType.toString())+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
         } else if (resultType == File.class){
-            sb.append("【响应结果("+resultType.toString()+")】\n").append(getDownloadable().getTargetFile().getAbsoluteFile());
+            sb.append("【响应结果("+resultType.toString()+")】\n").append(getDownloadController().getTargetFile().getAbsoluteFile());
         } else if (resultType == String.class){
             sb.append("【响应结果("+resultType.toString()+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
         } else {

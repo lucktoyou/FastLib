@@ -76,8 +76,8 @@ public class HttpProcessor implements Runnable, Cancelable {
                 urlWithParam = urlWithParam.concat(concatUrlParam());
             httpCore = new HttpCoreImpl(urlWithParam, method);
             httpCore.setCancelable(this);
-            if(mRequest.getDownloadable()!=null)
-                mRequest.getDownloadable().prepare(mRequest);
+            if(mRequest.getDownloadController()!=null)
+                mRequest.getDownloadController().prepare(mRequest);
 
             //判断发送体或返回体是否空
             boolean needClientBody = Method.POST.equals(method) || Method.PUT.equals(method);
@@ -118,7 +118,7 @@ public class HttpProcessor implements Runnable, Cancelable {
             if (needServerBody) {
                 InputStream in = httpCore.getInputStream();
                 mCallbackType = mRequest.getResultType();
-                DownloadController downloadController = mRequest.getDownloadable();
+                DownloadController downloadController = mRequest.getDownloadController();
 
                 if (downloadController == null && mCallbackType == File.class)
                     throw new IllegalStateException("未设置下载控制器");

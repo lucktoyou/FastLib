@@ -10,7 +10,7 @@ import com.example.fastlibdemo.databinding.ActivityNetBinding;
 import com.fastlib.annotation.Bind;
 import com.fastlib.net.Request;
 import com.fastlib.net.download.DownloadMonitor;
-import com.fastlib.net.download.SingleDownloadController;
+import com.fastlib.net.download.DownloadControllerImpl;
 import com.fastlib.net.listener.SimpleListener;
 import com.fastlib.net.upload.UploadingListener;
 import com.fastlib.utils.AppUtil;
@@ -101,23 +101,18 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
         File file = FastUtil.createEmptyFile(this,null,"E家保呗呗.apk");
         Request request = new Request( "https://file.wanlibaoxian.com/App/Android/wlbx.apk");
         request.setSkipRootAddress(true);
-        SingleDownloadController controller = new SingleDownloadController(file);
-        controller.setDownloadMonitor(new DownloadMonitor(1000) {
+        DownloadControllerImpl controller = new DownloadControllerImpl(file);
+        controller.setDownloadMonitor(new DownloadMonitor(1000){
             @Override
-            protected void onDownloading(long downloadedOneInterval) {
-                String speed = Formatter.formatFileSize(NetActivity.this,downloadedOneInterval)+"/s";
-                String total = Formatter.formatFileSize(NetActivity.this,mExpectDownloadSize);
-                String current = Formatter.formatFileSize(NetActivity.this,downloadedSize());
+            protected void onDownloading(long downloadsOneInterval,long doneDownloads,long expectDownloads,File file){
+                String speed = Formatter.formatFileSize(NetActivity.this,downloadsOneInterval)+"/s";
+                String current = Formatter.formatFileSize(NetActivity.this,doneDownloads);
+                String total = Formatter.formatFileSize(NetActivity.this,expectDownloads);
                 loading("安装包："+current+"/"+total+"\n下载速度："+speed);
-            }
-
-            @Override
-            protected long downloadedSize() {
-                return mFile.length();
             }
         });
         controller.prepare(request);
-        request.setDownloadable(controller);
+        request.setDownloadController(controller);
         request.setListener(new SimpleListener<File>() {
             @Override
             public void onError(Request request, Exception error) {
