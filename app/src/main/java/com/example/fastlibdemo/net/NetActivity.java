@@ -12,7 +12,7 @@ import com.fastlib.net.Request;
 import com.fastlib.net.download.DownloadMonitor;
 import com.fastlib.net.download.DownloadControllerImpl;
 import com.fastlib.net.listener.SimpleListener;
-import com.fastlib.net.upload.UploadingListener;
+import com.fastlib.net.upload.UploadMonitor;
 import com.fastlib.utils.AppUtil;
 import com.fastlib.utils.FastLog;
 import com.fastlib.utils.FastUtil;
@@ -98,9 +98,10 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
 
     @Bind(R.id.btnNetDownload)
     public void download() {
-        File file = FastUtil.createEmptyFile(this,null,"E家保呗呗.apk");
         Request request = new Request( "https://file.wanlibaoxian.com/App/Android/wlbx.apk");
         request.setSkipRootAddress(true);
+        request.setSkipGlobalListener(true);
+        File file = FastUtil.createEmptyFile(this,null,"E家保呗呗.apk");
         DownloadControllerImpl controller = new DownloadControllerImpl(file);
         controller.setDownloadMonitor(new DownloadMonitor(1000){
             @Override
@@ -149,6 +150,7 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
     public void uploadQRCode(String path) {
         Request request = new Request("POST", "https://ceshi.wanlibaoxian.com/wlbx01/activity/uploadAgentOrCusImage");
         request.setSkipRootAddress(true);
+        request.setSkipGlobalListener(true);
         request.put("requestParam", "{\"riskAppHeader\":{\"signMsg\":\"341f3d74dab41066acba025bd8996e84\"},\"riskAppContent\":{\"agentId\":\"208321\"}}");
         try {
 
@@ -163,11 +165,12 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        request.setUploadingListener(new UploadingListener() {
+        request.setUploadMonitor(new UploadMonitor() {
+
             @Override
-            public void uploading(String key, long wrote, long count) {
-                String current = Formatter.formatFileSize(NetActivity.this,wrote);
-                String total = Formatter.formatFileSize(NetActivity.this,count);
+            public void uploading(String key,long wroteSize,long rawSize){
+                String current = Formatter.formatFileSize(NetActivity.this,wroteSize);
+                String total = Formatter.formatFileSize(NetActivity.this,rawSize);
                 loading(" 已上传：" + current + "/" + total);
             }
         });

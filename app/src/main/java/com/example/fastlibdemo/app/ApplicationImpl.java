@@ -11,6 +11,7 @@ import com.fastlib.net.Request;
 import com.fastlib.net.listener.GlobalListener;
 import com.fastlib.utils.AppUtil;
 import com.fastlib.utils.FastLog;
+import com.fastlib.utils.N;
 
 
 /**
@@ -51,7 +52,7 @@ public class ApplicationImpl extends Application {
 
             @Override
             public Exception onErrorListener(Request request, Exception error) {
-                FastLog.e(error.toString());
+                N.showToast(instance,error.toString());
                 return super.onErrorListener(request, error);
             }
 

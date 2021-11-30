@@ -41,7 +41,7 @@ enum Checker {
     boolean needCompress(int leastCompressSize, String path) {
         if (leastCompressSize > 0) {
             File source = new File(path);
-            return source.exists() && source.length() > (leastCompressSize << 10);
+            return source.exists() && source.length() > ((long)leastCompressSize << 10);
         }
         return true;
     }

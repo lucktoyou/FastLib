@@ -6,7 +6,8 @@ import java.io.File;
 
 /**
  * Created by sgfb on 2020\02\24.
- * 监控下载速度等状态
+ * Modified by liuwp on 2021\11\30.
+ * 下载监视器。
  */
 public abstract class DownloadMonitor{
 

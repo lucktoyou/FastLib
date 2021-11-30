@@ -5,6 +5,8 @@ import android.os.Looper;
 
 import androidx.core.util.Pair;
 
+import com.fastlib.net.core.ResponseCodeDefinition;
+import com.fastlib.net.exception.NetException;
 import com.fastlib.utils.core.SaveUtil;
 import com.fastlib.net.core.HeaderDefinition;
 import com.fastlib.net.core.Method;
@@ -47,6 +49,7 @@ public class HttpProcessor implements Runnable, Cancelable {
     private Executor mCallbackExecutor;
     private Object mResultData;
     private File mDownloadFile;
+    private int mStatusCode;
 
     public HttpProcessor(Request request) {
         mRequest = request;
@@ -101,7 +104,7 @@ public class HttpProcessor implements Runnable, Cancelable {
                 List<InputStream> inputStreamList = interpreter.interpreter(mRequest.getRequestParam(),valuePositions);
                 for (InputStream inputStream : inputStreamList)
                     httpCore.addPendingInputStream(inputStream);
-                httpCore.buildUploadListenerProxy(mRequest.getUploadingListener(),valuePositions);
+                httpCore.buildUploadMonitorProxy(mRequest.getUploadingMonitor(),valuePositions);
             }
 
             //开始连接
@@ -145,6 +148,7 @@ public class HttpProcessor implements Runnable, Cancelable {
             } else mRawDataInputStream = new ByteArrayInputStream(new byte[]{});
             httpCore.end();
 
+            mStatusCode = httpCore.getResponseHeader().getCode();
             int sendLength = httpCore.getSendHeaderLength() + httpCore.getSendBodyLength();
             int receivedLength = httpCore.getReceivedHeaderLength() + httpCore.getReceivedBodyLength();
             mRequest.setStatistical(new SimpleStatistical(0, httpCore.getHttpTimer(), new Statistical.ContentLength(sendLength, receivedLength)));
@@ -243,24 +247,22 @@ public class HttpProcessor implements Runnable, Cancelable {
             try {
                 byte[] bytes = SaveUtil.loadInputStream(mRawDataInputStream, false);
                 wrapperListener.onRawCallback(mRequest,bytes);
-                if (mCallbackType == void.class || mCallbackType == Void.class)
-                    wrapperListener.onResponseSuccess(mRequest,null);
-                else if(mCallbackType == null || mCallbackType == Object.class || mCallbackType == byte[].class)
-                    wrapperListener.onResponseSuccess(mRequest, bytes);
-                else if (mCallbackType == File.class)
-                    wrapperListener.onResponseSuccess(mRequest, mDownloadFile);
-                else if (mCallbackType == String.class)
-                    wrapperListener.onResponseSuccess(mRequest, new String(bytes));
-                else {
-                    Gson gson = new Gson();
-                    String json = new String(bytes);
-                    try {
+                if(mStatusCode == ResponseCodeDefinition.OK){
+                    if (mCallbackType == void.class || mCallbackType == Void.class)
+                        wrapperListener.onResponseSuccess(mRequest,null);
+                    else if(mCallbackType == null || mCallbackType == Object.class || mCallbackType == byte[].class)
+                        wrapperListener.onResponseSuccess(mRequest, bytes);
+                    else if (mCallbackType == File.class)
+                        wrapperListener.onResponseSuccess(mRequest, mDownloadFile);
+                    else if (mCallbackType == String.class)
+                        wrapperListener.onResponseSuccess(mRequest, new String(bytes));
+                    else {
+                        Gson gson = new Gson();
+                        String json = new String(bytes);
                         Object obj = gson.fromJson(json, mCallbackType);
                         wrapperListener.onResponseSuccess(mRequest, obj);
-                    } catch (JsonSyntaxException e) {
-                        wrapperListener.onError(mRequest, e);
                     }
-                }
+                }else wrapperListener.onError(mRequest,new NetException("网络请求失败，状态码："+mStatusCode));
             } catch (IOException e) {
                 //这里仅关闭流时可能出现的异常，不处理
             } finally {

@@ -11,7 +11,7 @@ import com.fastlib.net.core.ResponseHeader;
 import com.fastlib.net.download.DownloadController;
 import com.fastlib.net.listener.Listener;
 import com.fastlib.net.param.RequestParam;
-import com.fastlib.net.upload.UploadingListener;
+import com.fastlib.net.upload.UploadMonitor;
 import com.fastlib.net.tool.Statistical;
 import com.fastlib.utils.core.Reflect;
 import com.fastlib.utils.FastLog;
@@ -45,8 +45,8 @@ public class Request{
     private String mUrl;
     private Map<String,List<String>> mHeader = new HashMap<>();
     private RequestParam mParam = new RequestParam();
-    private UploadingListener mUploadingListener;       //上传监听
-    private DownloadController mDownloadController;     //下载控制器
+    private UploadMonitor mUploadMonitor;               //上传监视器
+    private DownloadController mDownloadController;     //下载控制器(内含下载监视器)
     private Listener mListener;                         //监听回调
     private Type mCustomType;                           //一个自定义回调类型，优先使用这个参数其次才是解析mListener中方法参数
     private Statistical mStatistical;
@@ -241,13 +241,13 @@ public class Request{
         return mDownloadController;
     }
 
-    public Request setUploadingListener(UploadingListener listener){
-        mUploadingListener=listener;
+    public Request setUploadMonitor(UploadMonitor monitor){
+        mUploadMonitor =monitor;
         return this;
     }
 
-    public UploadingListener getUploadingListener(){
-        return mUploadingListener;
+    public UploadMonitor getUploadingMonitor(){
+        return mUploadMonitor;
     }
 
     public Request setSkipRootAddress(boolean skipRootAddress){
@@ -386,18 +386,18 @@ public class Request{
         for(Map.Entry<String,List<String>> surfaceParamEntry:getRequestParam().getSurfaceParam().entrySet()){
             for (String surfaceParamValue : surfaceParamEntry.getValue()) {
                 if(TextUtils.isEmpty(surfaceParamEntry.getKey())){
-                    sb.append("【请求参数(SurfaceParam)】").append(surfaceParamValue).append("\n");
+                    sb.append("【请求参数(SP)】").append(surfaceParamValue).append("\n");
                 }else {
-                    sb.append("【请求参数(SurfaceParam)】").append(surfaceParamEntry.getKey()+"="+surfaceParamValue).append("\n");
+                    sb.append("【请求参数(SP)】").append(surfaceParamEntry.getKey()+"="+surfaceParamValue).append("\n");
                 }
 
             }
         }
         for(Pair<String,Object> bottomParamPair:getRequestParam().getBottomParam()){
             if(TextUtils.isEmpty(bottomParamPair.first)){
-                sb.append("【请求参数(BottomParam)】").append(bottomParamPair.second).append("\n");
+                sb.append("【请求参数(BP)】").append(bottomParamPair.second).append("\n");
             }else {
-                sb.append("【请求参数(BottomParam)】").append(bottomParamPair.first+"="+bottomParamPair.second).append("\n");
+                sb.append("【请求参数(BP)】").append(bottomParamPair.first+"="+bottomParamPair.second).append("\n");
             }
         }
 
