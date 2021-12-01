@@ -31,65 +31,79 @@ import java.util.ArrayList;
 public class NetActivity extends BindViewActivity<ActivityNetBinding>{
 
     @Override
-    public void alreadyPrepared() {
+    public void alreadyPrepared(){
 
     }
 
     @Bind(R.id.btnNetGet)
-    public void get() {
+    public void get(){
         net(new Request("http://tjgl.gongriver.com/api/v1/NewsClass/news/classNamesLists")
                 .setSkipRootAddress(true)
                 .put("page",1)
-                .put("size", 10)
-                .put("className", "病虫害识别")
-                .setListener(new SimpleListener<String>() {
-
+                .put("size",10)
+                .put("className","病虫害识别")
+                .setListener(new SimpleListener<String>(){
                     @Override
-                    public void onResponseSuccess(Request request, String result) {
+                    public void onResponseSuccess(Request request,String result){
                         if(result == null){
                             N.showToast(NetActivity.this,"result=null");
-                        }else {
+                        }else{
                             N.showToast(NetActivity.this,result);
                         }
+                    }
+
+                    @Override
+                    public void onError(Request request,Exception error){
+
                     }
                 })
         );
     }
 
     @Bind(R.id.btnNetPost)
-    public void post() {
+    public void post(){
         net(new Request("POST","https://www.wanandroid.com/article/query/1/json")
                 .setSkipRootAddress(true)
                 .put("k","异常")
-                .setListener(new SimpleListener<String>() {
+                .setListener(new SimpleListener<String>(){
 
                     @Override
-                    public void onResponseSuccess(Request request, String result) {
+                    public void onResponseSuccess(Request request,String result){
                         if(result == null){
                             N.showToast(NetActivity.this,"result=null");
-                        }else {
+                        }else{
                             N.showToast(NetActivity.this,result);
                         }
+                    }
+
+                    @Override
+                    public void onError(Request request,Exception error){
+
                     }
                 })
         );
     }
 
     @Bind(R.id.btnNetPost5)
-    public void post5() {
-        for (int i = 1; i <= 5; i++) {
-            net(new Request("POST","https://www.wanandroid.com/article/query/"+i+"/json")
+    public void post5(){
+        for(int i = 1;i <= 5;i++){
+            net(new Request("POST","https://www.wanandroid.com/article/query/" + i + "/json")
                     .setSkipRootAddress(true)
                     .put("k","异常")
-                    .setListener(new SimpleListener<String>() {
+                    .setListener(new SimpleListener<String>(){
 
                         @Override
-                        public void onResponseSuccess(Request request, String result) {
+                        public void onResponseSuccess(Request request,String result){
                             if(result == null){
                                 N.showToast(NetActivity.this,"result=null");
-                            }else {
+                            }else{
                                 N.showToast(NetActivity.this,result);
                             }
+                        }
+
+                        @Override
+                        public void onError(Request request,Exception error){
+
                         }
                     })
             );
@@ -97,8 +111,8 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
     }
 
     @Bind(R.id.btnNetDownload)
-    public void download() {
-        Request request = new Request( "https://file.wanlibaoxian.com/App/Android/wlbx.apk");
+    public void download(){
+        Request request = new Request("https://file.wanlibaoxian.com/App/Android/wlbx.apk");
         request.setSkipRootAddress(true);
         request.setSkipGlobalListener(true);
         File file = FastUtil.createEmptyFile(this,null,"E家保呗呗.apk");
@@ -106,26 +120,25 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
         controller.setDownloadMonitor(new DownloadMonitor(1000){
             @Override
             protected void onDownloading(long downloadsOneInterval,long doneDownloads,long expectDownloads,File file){
-                String speed = Formatter.formatFileSize(NetActivity.this,downloadsOneInterval)+"/s";
+                String speed = Formatter.formatFileSize(NetActivity.this,downloadsOneInterval) + "/s";
                 String current = Formatter.formatFileSize(NetActivity.this,doneDownloads);
                 String total = Formatter.formatFileSize(NetActivity.this,expectDownloads);
-                loading("安装包："+current+"/"+total+"\n下载速度："+speed);
+                loading("安装包：" + current + "/" + total + "\n下载速度：" + speed);
             }
         });
         controller.prepare(request);
         request.setDownloadController(controller);
-        request.setListener(new SimpleListener<File>() {
+        request.setListener(new SimpleListener<File>(){
             @Override
-            public void onError(Request request, Exception error) {
-                super.onError(request, error);
+            public void onResponseSuccess(Request request,File result){
                 dismissLoading();
-                N.showToast(NetActivity.this,"下载失败");
+                AppUtil.installApk(NetActivity.this,result);
             }
 
             @Override
-            public void onResponseSuccess(Request request, File result) {
+            public void onError(Request request,Exception error){
                 dismissLoading();
-                AppUtil.installApk(NetActivity.this,result);
+                N.showToast(NetActivity.this,"下载失败");
             }
         });
         net(request);
@@ -139,33 +152,33 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                 .mimeTypes(MimeType.JPEG,MimeType.PNG)
                 .setPreview(true)
                 .showCamera(true)
-                .pick(this, new OnImagePickCompleteListener() {
+                .pick(this,new OnImagePickCompleteListener(){
                     @Override
-                    public void onImagePickComplete(ArrayList<ImageItem> items) {
+                    public void onImagePickComplete(ArrayList<ImageItem> items){
                         uploadQRCode(items.get(0).getPath());
                     }
                 });
     }
 
-    public void uploadQRCode(String path) {
-        Request request = new Request("POST", "https://ceshi.wanlibaoxian.com/wlbx01/activity/uploadAgentOrCusImage");
+    public void uploadQRCode(String path){
+        Request request = new Request("POST","https://ceshi.wanlibaoxian.com/wlbx01/activity/uploadAgentOrCusImage");
         request.setSkipRootAddress(true);
         request.setSkipGlobalListener(true);
-        request.put("requestParam", "{\"riskAppHeader\":{\"signMsg\":\"341f3d74dab41066acba025bd8996e84\"},\"riskAppContent\":{\"agentId\":\"208321\"}}");
-        try {
+        request.put("requestParam","{\"riskAppHeader\":{\"signMsg\":\"341f3d74dab41066acba025bd8996e84\"},\"riskAppContent\":{\"agentId\":\"208321\"}}");
+        try{
 
             File compressFile = FastLuban.with(this).targetDir(getCacheDir().getAbsolutePath()).ignore(100).get(path);
-            String text ="压缩前:" + Formatter.formatFileSize(this, new File(path).length()) +" 路径："+path
-                    + " 压缩后:" + Formatter.formatFileSize(this, compressFile.length()) +" 路径："+compressFile.getAbsolutePath();
+            String text = "压缩前:" + Formatter.formatFileSize(this,new File(path).length()) + " 路径：" + path
+                    + " 压缩后:" + Formatter.formatFileSize(this,compressFile.length()) + " 路径：" + compressFile.getAbsolutePath();
             FastLog.d(text);
             mViewBinding.imgSource.setImageBitmap(BitmapFactory.decodeFile(path));
             mViewBinding.imgCompress.setImageBitmap(BitmapFactory.decodeFile(compressFile.getAbsolutePath()));
             mViewBinding.text.setText(text);
-            request.put("image", compressFile);
-        } catch (IOException e) {
+            request.put("image",compressFile);
+        }catch(IOException e){
             e.printStackTrace();
         }
-        request.setUploadMonitor(new UploadMonitor() {
+        request.setUploadMonitor(new UploadMonitor(){
 
             @Override
             public void uploading(String key,long wroteSize,long rawSize){
@@ -174,37 +187,42 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                 loading(" 已上传：" + current + "/" + total);
             }
         });
-        request.setListener(new SimpleListener<ResponseEHome<Object>>() {
+        request.setListener(new SimpleListener<ResponseEHome<Object>>(){
             @Override
-            public void onError(Request request, Exception error) {
-                super.onError(request, error);
+            public void onResponseSuccess(Request request,ResponseEHome<Object> result){
+                dismissLoading();
+                if(result.success){
+                    N.showToast(NetActivity.this,result.msg);
+                }
+            }
+
+            @Override
+            public void onError(Request request,Exception error){
                 dismissLoading();
                 N.showToast(NetActivity.this,"上传失败");
-            }
-            @Override
-            public void onResponseSuccess(Request request, ResponseEHome<Object> result) {
-                dismissLoading();
-                if (result.success) {
-                    N.showToast(NetActivity.this, result.msg);
-                }
             }
         });
         net(request);
     }
 
     @Bind(R.id.btnNetLocation)
-    public void location() {
+    public void location(){
         net(new Request("https://www.zhihu.com/")
                 .setSkipRootAddress(true)
-                .setListener(new SimpleListener<String>() {
+                .setListener(new SimpleListener<String>(){
 
                     @Override
-                    public void onResponseSuccess(Request request, String result) {
+                    public void onResponseSuccess(Request request,String result){
                         if(result == null){
                             N.showToast(NetActivity.this,"result=null");
-                        }else {
+                        }else{
                             N.showToast(NetActivity.this,result);
                         }
+                    }
+
+                    @Override
+                    public void onError(Request request,Exception error){
+
                     }
                 })
         );

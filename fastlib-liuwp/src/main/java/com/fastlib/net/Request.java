@@ -9,7 +9,7 @@ import com.fastlib.base.ThreadPoolManager;
 import com.fastlib.net.core.RequestHeader;
 import com.fastlib.net.core.ResponseHeader;
 import com.fastlib.net.download.DownloadController;
-import com.fastlib.net.listener.Listener;
+import com.fastlib.net.listener.SimpleListener;
 import com.fastlib.net.param.RequestParam;
 import com.fastlib.net.upload.UploadMonitor;
 import com.fastlib.net.tool.Statistical;
@@ -47,17 +47,17 @@ public class Request{
     private RequestParam mParam = new RequestParam();
     private UploadMonitor mUploadMonitor;               //上传监视器
     private DownloadController mDownloadController;     //下载控制器(内含下载监视器)
-    private Listener mListener;                         //监听回调
+    private SimpleListener mListener;                   //监听回调
     private Type mCustomType;                           //一个自定义回调类型，优先使用这个参数其次才是解析mListener中方法参数
     private Statistical mStatistical;
     private RequestHeader mRequestHeader;
     private ResponseHeader mResponseHeader;
 
-    public Request(String url) {
+    public Request(String url){
         this("GET",url);
     }
 
-    public Request(String method,String url) {
+    public Request(String method,String url){
         mMethod = method;
         mUrl = url;
     }
@@ -66,7 +66,7 @@ public class Request{
         mParam.put(value);
     }
 
-    private void putObject(String key, Object value){
+    private void putObject(String key,Object value){
         mParam.put(key,value);
     }
 
@@ -75,48 +75,47 @@ public class Request{
         return this;
     }
 
-    public Request put(String key, boolean value){
+    public Request put(String key,boolean value){
         putObject(key,value);
         return this;
     }
 
-    public Request put(String key, int value){
+    public Request put(String key,int value){
         putObject(key,value);
         return this;
     }
 
-    public Request put(String key, long value){
+    public Request put(String key,long value){
         putObject(key,value);
         return this;
     }
 
-    public Request put(String key, float value){
+    public Request put(String key,float value){
         putObject(key,value);
         return this;
     }
 
-    public Request put(String key, double value){
+    public Request put(String key,double value){
         putObject(key,value);
         return this;
     }
 
-    public Request put(String key, String value){
+    public Request put(String key,String value){
         putObject(key,value);
         return this;
     }
 
-    public Request put(String key, File value){
+    public Request put(String key,File value){
         putObject(key,value);
         return this;
     }
 
-    public Request putHeader(String key, String value){
-        List<String> values=mHeader.get(key);
-        if(values==null){
-            values=new ArrayList<>();
+    public Request putHeader(String key,String value){
+        List<String> values = mHeader.get(key);
+        if(values == null){
+            values = new ArrayList<>();
             mHeader.put(key,values);
-        }
-        else values.clear();
+        }else values.clear();
         values.add(value);
         return this;
     }
@@ -125,49 +124,49 @@ public class Request{
         mParam.add(value);
     }
 
-    private void addObject(String key, Object value){
+    private void addObject(String key,Object value){
         mParam.add(key,value);
     }
 
-    public Request add(String key, boolean value){
+    public Request add(String key,boolean value){
         addObject(key,value);
         return this;
     }
 
-    public Request add(String key, int value){
+    public Request add(String key,int value){
         addObject(key,value);
         return this;
     }
 
-    public Request add(String key, long value){
+    public Request add(String key,long value){
         addObject(key,value);
         return this;
     }
 
-    public Request add(String key, float value){
+    public Request add(String key,float value){
         addObject(key,value);
         return this;
     }
 
-    public Request add(String key, double value){
+    public Request add(String key,double value){
         addObject(key,value);
         return this;
     }
 
-    public Request add(String key, String value){
+    public Request add(String key,String value){
         addObject(key,value);
         return this;
     }
 
-    public Request add(String key, File value){
+    public Request add(String key,File value){
         addObject(key,value);
         return this;
     }
 
-    public Request addHeader(String key, String value){
-        List<String> values=mHeader.get(key);
-        if(values==null){
-            values=new ArrayList<>();
+    public Request addHeader(String key,String value){
+        List<String> values = mHeader.get(key);
+        if(values == null){
+            values = new ArrayList<>();
             mHeader.put(key,values);
         }
         values.add(value);
@@ -179,7 +178,7 @@ public class Request{
     }
 
     public Request setMethod(String method){
-        mMethod=method;
+        mMethod = method;
         return this;
     }
 
@@ -196,17 +195,17 @@ public class Request{
     }
 
 
-    public Request setListener(Listener listener){
-        mListener=listener;
+    public Request setListener(SimpleListener listener){
+        mListener = listener;
         return this;
     }
 
-    public Listener getListener(){
+    public SimpleListener getListener(){
         return mListener;
     }
 
     public Request setStatistical(Statistical statistical){
-        mStatistical=statistical;
+        mStatistical = statistical;
         return this;
     }
 
@@ -215,7 +214,7 @@ public class Request{
     }
 
     public Request setRequestHeader(RequestHeader requestHeader){
-        mRequestHeader=requestHeader;
+        mRequestHeader = requestHeader;
         return this;
     }
 
@@ -224,7 +223,7 @@ public class Request{
     }
 
     public Request setResponseHeader(ResponseHeader responseHeader){
-        mResponseHeader=responseHeader;
+        mResponseHeader = responseHeader;
         return this;
     }
 
@@ -233,7 +232,7 @@ public class Request{
     }
 
     public Request setDownloadController(DownloadController controller){
-        mDownloadController=controller;
+        mDownloadController = controller;
         return this;
     }
 
@@ -242,7 +241,7 @@ public class Request{
     }
 
     public Request setUploadMonitor(UploadMonitor monitor){
-        mUploadMonitor =monitor;
+        mUploadMonitor = monitor;
         return this;
     }
 
@@ -251,7 +250,7 @@ public class Request{
     }
 
     public Request setSkipRootAddress(boolean skipRootAddress){
-        isSkipRootAddress=skipRootAddress;
+        isSkipRootAddress = skipRootAddress;
         return this;
     }
 
@@ -260,7 +259,7 @@ public class Request{
     }
 
     public Request setSkipGlobalListener(boolean skipGlobalListener){
-        isSkipGlobalListener=skipGlobalListener;
+        isSkipGlobalListener = skipGlobalListener;
         return this;
     }
 
@@ -270,7 +269,7 @@ public class Request{
 
 
     public Request setCallbackOnWorkThread(boolean callbackOnWorkThread){
-        isCallbackOnWorkThread=callbackOnWorkThread;
+        isCallbackOnWorkThread = callbackOnWorkThread;
         return this;
     }
 
@@ -279,7 +278,7 @@ public class Request{
     }
 
     public Request setConnectionTimeout(int connectionTimeout){
-        mConnectionTimeout=connectionTimeout;
+        mConnectionTimeout = connectionTimeout;
         return this;
     }
 
@@ -288,7 +287,7 @@ public class Request{
     }
 
     public Request setReadTimeout(int readTimeout){
-        mReadTimeout=readTimeout;
+        mReadTimeout = readTimeout;
         return this;
     }
 
@@ -297,25 +296,25 @@ public class Request{
     }
 
     public void start(){
-        isCanceled=false;
+        isCanceled = false;
         ThreadPoolManager.sSlowPool.execute(new HttpProcessor(this));
     }
 
-    public void startSync()throws Exception{
+    public void startSync() throws Exception{
         startSync(void.class);
     }
 
-    public Object startSync(Type type)throws Exception{
-        isCanceled=false;
-        mCustomType=type;
+    public Object startSync(Type type) throws Exception{
+        isCanceled = false;
+        mCustomType = type;
         setCallbackOnWorkThread(true);
-        HttpProcessor hp=new HttpProcessor(this);
+        HttpProcessor hp = new HttpProcessor(this);
         hp.run();
         return hp.getResultData();
     }
 
     public void cancel(){
-        isCanceled=true;
+        isCanceled = true;
     }
 
     boolean isCanceled(){
@@ -324,21 +323,23 @@ public class Request{
 
     /**
      * 如果指定结果类型为void或Void就返回null,null或Object或byte[]返回原始字节数组,String返回字符串,File则联合{@link Request#mDownloadController}来做处理,其它类型就尝试使用gson解析。
+     *
      * @return 指定结果类型.
      */
     public Type getResultType(){
-        if(mCustomType!=null)
+        if(mCustomType != null)
             return mCustomType;
-        else if(mListener!=null){
-            NetCallback netCallback=Reflect.findAnnotation(mListener.getClass(), NetCallback.class,true);
-            if(netCallback==null) throw new IllegalStateException("NetCallback annotation can't be null!");
-            Method[] ms=mListener.getClass().getDeclaredMethods();
-            for (Method m:ms) {
-                String methodFullDescription=m.toString();
-                if (netCallback.value().equals(m.getName())&&!methodFullDescription.contains("volatile")){
-                    Type[] paramsType=m.getGenericParameterTypes();
-                    for (Type type:paramsType) {
-                        if(type==Request.class || type==Object.class) continue;
+        else if(mListener != null){
+            NetCallback netCallback = Reflect.findAnnotation(mListener.getClass(),NetCallback.class);
+            if(netCallback == null)
+                throw new IllegalStateException("NetCallback annotation can't be null!");
+            Method[] ms = mListener.getClass().getDeclaredMethods();
+            for(Method m : ms){
+                String methodFullDescription = m.toString();
+                if(netCallback.value().equals(m.getName()) && !methodFullDescription.contains("volatile")){
+                    Type[] paramsType = m.getGenericParameterTypes();
+                    for(Type type : paramsType){
+                        if(type == Request.class || type == Object.class) continue;
                         return type;
                     }
                 }
@@ -361,7 +362,7 @@ public class Request{
     /**
      * 打印请求信息和响应结果
      *
-     * @param rawBytes 网络请求结束后返回的原始字节流
+     * @param rawBytes  网络请求结束后返回的原始字节流
      * @param prettyLog 是否格式化日志
      */
     public void printRequestAndResponse(byte[] rawBytes,boolean prettyLog){
@@ -377,27 +378,27 @@ public class Request{
                 .append(requestHeaderEntity.getProtocol())//协议版本
                 .append("\n");
         //请求头部
-        for (Map.Entry<String, List<String>> requestHEntry :requestHeaderEntity.getHeaders().entrySet()) {
-            for (String requestHeader : requestHEntry.getValue()) {
-                sb.append("【请求头部】").append(requestHEntry.getKey()+":"+requestHeader).append("\n");
+        for(Map.Entry<String,List<String>> requestHEntry : requestHeaderEntity.getHeaders().entrySet()){
+            for(String requestHeader : requestHEntry.getValue()){
+                sb.append("【请求头部】").append(requestHEntry.getKey() + ":" + requestHeader).append("\n");
             }
         }
         //请求参数
-        for(Map.Entry<String,List<String>> surfaceParamEntry:getRequestParam().getSurfaceParam().entrySet()){
-            for (String surfaceParamValue : surfaceParamEntry.getValue()) {
+        for(Map.Entry<String,List<String>> surfaceParamEntry : getRequestParam().getSurfaceParam().entrySet()){
+            for(String surfaceParamValue : surfaceParamEntry.getValue()){
                 if(TextUtils.isEmpty(surfaceParamEntry.getKey())){
                     sb.append("【请求参数(SP)】").append(surfaceParamValue).append("\n");
-                }else {
-                    sb.append("【请求参数(SP)】").append(surfaceParamEntry.getKey()+"="+surfaceParamValue).append("\n");
+                }else{
+                    sb.append("【请求参数(SP)】").append(surfaceParamEntry.getKey() + "=" + surfaceParamValue).append("\n");
                 }
 
             }
         }
-        for(Pair<String,Object> bottomParamPair:getRequestParam().getBottomParam()){
+        for(Pair<String,Object> bottomParamPair : getRequestParam().getBottomParam()){
             if(TextUtils.isEmpty(bottomParamPair.first)){
                 sb.append("【请求参数(BP)】").append(bottomParamPair.second).append("\n");
-            }else {
-                sb.append("【请求参数(BP)】").append(bottomParamPair.first+"="+bottomParamPair.second).append("\n");
+            }else{
+                sb.append("【请求参数(BP)】").append(bottomParamPair.first + "=" + bottomParamPair.second).append("\n");
             }
         }
 
@@ -411,23 +412,23 @@ public class Request{
                 .append(rh.getMessage())//状态码描述
                 .append("\n");
         //响应头部
-        for (Map.Entry<String, List<String>> responseHeaderEntry : rh.getHeaders().entrySet()) {
-            for (String responseHeader : responseHeaderEntry.getValue()) {
-                sb.append("【响应头部】").append(responseHeaderEntry.getKey()+":"+responseHeader).append("\n");
+        for(Map.Entry<String,List<String>> responseHeaderEntry : rh.getHeaders().entrySet()){
+            for(String responseHeader : responseHeaderEntry.getValue()){
+                sb.append("【响应头部】").append(responseHeaderEntry.getKey() + ":" + responseHeader).append("\n");
             }
         }
         //响应结果
         Type resultType = getResultType();
-        if (resultType == void.class || resultType == Void.class){
-            sb.append("【响应结果("+resultType.toString()+")】\n"+ null);
-        } else if(resultType == null || resultType == Object.class || resultType == byte[].class){
-            sb.append("【响应结果("+(resultType==null?null:resultType.toString())+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
-        } else if (resultType == File.class){
-            sb.append("【响应结果("+resultType.toString()+")】\n").append(getDownloadController().getTargetFile().getAbsoluteFile());
-        } else if (resultType == String.class){
-            sb.append("【响应结果("+resultType.toString()+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
-        } else {
-            sb.append("【响应结果("+resultType.toString()+")】\n").append(prettyLog?prettyLog(rawBytes):new String(rawBytes));
+        if(resultType == void.class || resultType == Void.class){
+            sb.append("【响应结果(" + resultType.toString() + ")】\n" + null);
+        }else if(resultType == null || resultType == Object.class || resultType == byte[].class){
+            sb.append("【响应结果(" + (resultType == null ? null : resultType.toString()) + ")】\n").append(prettyLog ? prettyLog(rawBytes) : new String(rawBytes));
+        }else if(resultType == File.class){
+            sb.append("【响应结果(" + resultType.toString() + ")】\n").append(getDownloadController().getTargetFile().getAbsoluteFile());
+        }else if(resultType == String.class){
+            sb.append("【响应结果(" + resultType.toString() + ")】\n").append(prettyLog ? prettyLog(rawBytes) : new String(rawBytes));
+        }else{
+            sb.append("【响应结果(" + resultType.toString() + ")】\n").append(prettyLog ? prettyLog(rawBytes) : new String(rawBytes));
         }
 
         FastLog.i(sb.toString());
@@ -443,19 +444,19 @@ public class Request{
         String str = new String(bytes);
         if(TextUtils.isEmpty(str)){
             return str;
-        }else {
+        }else{
             Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
             boolean isValidJSON;//是否是有效json字符串
-            try {
-                gson.fromJson(str, Object.class);
+            try{
+                gson.fromJson(str,Object.class);
                 isValidJSON = true;
-            } catch(JsonSyntaxException ex) {
+            }catch(JsonSyntaxException ex){
                 isValidJSON = false;
             }
             if(isValidJSON){
                 JsonElement jsonElement = JsonParser.parseString(str);
                 return gson.toJson(jsonElement);
-            }else {
+            }else{
                 return str;
             }
         }
