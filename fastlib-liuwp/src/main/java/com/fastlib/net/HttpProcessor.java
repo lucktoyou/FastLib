@@ -42,10 +42,10 @@ import java.util.concurrent.Executor;
  */
 public class HttpProcessor implements Runnable, Cancelable{
     private Request mRequest;
-    private Type mCallbackType;
     private InputStream mRawDataInputStream;
-    private Exception mException;
     private Executor mCallbackExecutor;
+    private Exception mException;
+    private Type mResultType;
     private Object mResultData;
     private File mDownloadFile;
     private int mStatusCode;
@@ -117,10 +117,10 @@ public class HttpProcessor implements Runnable, Cancelable{
             mRequest.setResponseHeader(httpCore.getResponseHeader());
             if(needServerBody){
                 InputStream in = httpCore.getInputStream();
-                mCallbackType = mRequest.getResultType();
+                mResultType = mRequest.getResultType();
                 DownloadController downloadController = mRequest.getDownloadController();
 
-                if(downloadController == null && mCallbackType == File.class)
+                if(downloadController == null && mResultType == File.class)
                     throw new IllegalStateException("未设置下载控制器");
 
                 //下载类型
@@ -245,20 +245,20 @@ public class HttpProcessor implements Runnable, Cancelable{
         if(mException == null){
             try{
                 byte[] bytes = SaveUtil.loadInputStream(mRawDataInputStream,false);
-                bytes = wrapperListener.onRawData(mRequest,bytes,mCallbackType);
+                bytes = wrapperListener.onRawData(mRequest,bytes,mResultType);
                 if(mStatusCode == ResponseCodeDefinition.OK){
-                    if(mCallbackType == void.class || mCallbackType == Void.class)
+                    if(mResultType == void.class || mResultType == Void.class)
                         wrapperListener.onResponseSuccess(mRequest,null);
-                    else if(mCallbackType == null || mCallbackType == Object.class || mCallbackType == byte[].class)
+                    else if(mResultType == null || mResultType == Object.class || mResultType == byte[].class)
                         wrapperListener.onResponseSuccess(mRequest,bytes);
-                    else if(mCallbackType == File.class)
+                    else if(mResultType == File.class)
                         wrapperListener.onResponseSuccess(mRequest,mDownloadFile);
-                    else if(mCallbackType == String.class)
+                    else if(mResultType == String.class)
                         wrapperListener.onResponseSuccess(mRequest,new String(bytes));
                     else{
                         Gson gson = new Gson();
                         String json = new String(bytes);
-                        Object obj = gson.fromJson(json,mCallbackType);
+                        Object obj = gson.fromJson(json,mResultType);
                         wrapperListener.onResponseSuccess(mRequest,obj);
                     }
                 }else
