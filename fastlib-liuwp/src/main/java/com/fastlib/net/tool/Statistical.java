@@ -4,6 +4,7 @@ import com.fastlib.net.core.HttpTimer;
 
 /**
  * Created by sgfb on 2020\01\04.
+ * Modified by liuwp on 2021\11\30.
  * 一些网络请求和交互中的统计
  */
 public interface Statistical{
@@ -33,12 +34,6 @@ public interface Statistical{
                     '}';
         }
     }
-
-    /**
-     * 错误后重试次数
-     * TODO 待实现功能
-     */
-    int getRetryCount();
 
     /**
      * 获取时间统计

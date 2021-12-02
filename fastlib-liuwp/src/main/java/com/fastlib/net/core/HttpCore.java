@@ -2,7 +2,6 @@ package com.fastlib.net.core;
 
 import android.text.TextUtils;
 
-import com.fastlib.net.exception.NetException;
 import com.fastlib.net.tool.URLUtil;
 import com.fastlib.utils.FastLog;
 
@@ -184,7 +183,7 @@ public abstract class HttpCore {
                 FastLog.d(String.format(Locale.getDefault(), "code:%d message:%s", mResponseHeader.getCode(), mResponseHeader.getMessage()));
             }
         } catch (NumberFormatException e) {
-            throw new IOException("服务器返回状态码异常,状态码为:" + status[1]);
+            throw new IOException("服务器返回状态码异常,状态码:" + status[1]);
         }
     }
 
@@ -193,7 +192,7 @@ public abstract class HttpCore {
      */
     private void handleResponseStatus() throws IOException {
         if (mResponseHeader == null || mResponseHeader.getCode() == 0) {
-            throw new NetException("未能处理的返回协议");
+            throw new IOException("未能处理的返回协议");
         }
         int code = mResponseHeader.getCode();
 

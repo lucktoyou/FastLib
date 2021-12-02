@@ -5,7 +5,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.fastlib.net.exception.CancelException;
+import com.fastlib.net.CustomException;
 import com.fastlib.net.upload.UploadMonitorProxy;
 import com.fastlib.net.upload.UploadMonitor;
 import com.fastlib.net.upload.ValuePosition;
@@ -83,7 +83,7 @@ public class HttpCoreImpl extends HttpCore{
                         mSendBodyLength += len;
                         mUploadMonitorProxy.wrote(len);
                         if(mCancelable.isCanceled())
-                            throw new CancelException();
+                            throw new CustomException("手动取消");
                     }
                 }
                 inputStream.close();
@@ -168,7 +168,7 @@ public class HttpCoreImpl extends HttpCore{
                 }else if(mRemain == -2)
                     throw new IOException("读取不到Http内容长度");
                 if(mCancelable.isCanceled())
-                    throw new CancelException();
+                    throw new CustomException("手动取消");
                 return mRemain;
             }
 

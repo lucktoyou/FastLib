@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 
 /**
  * Created by sgfb on 2019\12\23.
+ * Modified by liuwp on 2021\11\30.
  */
 public class HttpGlobalConfig{
     private static HttpGlobalConfig mInstance;

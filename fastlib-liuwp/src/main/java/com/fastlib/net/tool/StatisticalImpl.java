@@ -4,21 +4,15 @@ import com.fastlib.net.core.HttpTimer;
 
 /**
  * Created by sgfb on 2020\01\05.
+ * Modified by liuwp on 2021\11\30.
  */
-public class SimpleStatistical implements Statistical{
-    private int mRetryCount;
+public class StatisticalImpl implements Statistical{
     private HttpTimer mHttpTimer;
     private ContentLength mContentLength;
 
-    public SimpleStatistical(int mRetryCount, HttpTimer mHttpTimer, ContentLength mContentLength) {
-        this.mRetryCount = mRetryCount;
+    public StatisticalImpl(HttpTimer mHttpTimer,ContentLength mContentLength) {
         this.mHttpTimer = mHttpTimer;
         this.mContentLength = mContentLength;
-    }
-
-    @Override
-    public int getRetryCount() {
-        return mRetryCount;
     }
 
     @Override

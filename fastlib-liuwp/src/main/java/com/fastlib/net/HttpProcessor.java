@@ -6,13 +6,10 @@ import android.os.Looper;
 import androidx.core.util.Pair;
 
 import com.fastlib.net.core.ResponseCodeDefinition;
-import com.fastlib.net.exception.NetException;
-import com.fastlib.utils.core.SaveUtil;
 import com.fastlib.net.core.HeaderDefinition;
 import com.fastlib.net.core.Method;
 import com.fastlib.net.core.HttpCoreImpl;
 import com.fastlib.net.download.DownloadController;
-import com.fastlib.net.exception.CancelException;
 import com.fastlib.net.listener.GlobalListener;
 import com.fastlib.net.listener.SimpleListener;
 import com.fastlib.net.param.interpreter.ParamInterpreter;
@@ -20,8 +17,9 @@ import com.fastlib.net.param.interpreter.ParamInterpreterFactor;
 import com.fastlib.net.param.interpreter.type.FormDataInterpreter;
 import com.fastlib.net.upload.ValuePosition;
 import com.fastlib.net.tool.Cancelable;
-import com.fastlib.net.tool.SimpleStatistical;
+import com.fastlib.net.tool.StatisticalImpl;
 import com.fastlib.net.tool.Statistical;
+import com.fastlib.utils.core.SaveUtil;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +35,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Created by sgfb on 2019/12/10
- * E-mail:602687446@qq.com
+ * Modified by liuwp on 2021\11\30.
  * 此类对Http进行请求.通过{@link Request}给定的参数经过解释调用{@link HttpCoreImpl}达到请求和回调
  */
 public class HttpProcessor implements Runnable, Cancelable{
@@ -110,7 +108,7 @@ public class HttpProcessor implements Runnable, Cancelable{
             if(mRequest.getReadTimeout() > 0)
                 httpCore.setReadTimeout(mRequest.getReadTimeout());
             if(mRequest.isCanceled())
-                throw new CancelException();
+                throw new CustomException("手动取消");
             httpCore.begin();
 
             mRequest.setRequestHeader(httpCore.getRequestHeader());
@@ -148,7 +146,7 @@ public class HttpProcessor implements Runnable, Cancelable{
             mStatusCode = httpCore.getResponseHeader().getCode();
             int sendLength = httpCore.getSendHeaderLength() + httpCore.getSendBodyLength();
             int receivedLength = httpCore.getReceivedHeaderLength() + httpCore.getReceivedBodyLength();
-            mRequest.setStatistical(new SimpleStatistical(0,httpCore.getHttpTimer(),new Statistical.ContentLength(sendLength,receivedLength)));
+            mRequest.setStatistical(new StatisticalImpl(httpCore.getHttpTimer(),new Statistical.ContentLength(sendLength,receivedLength)));
         }catch(Exception e){
             mException = e;
             if(httpCore != null)
@@ -262,7 +260,7 @@ public class HttpProcessor implements Runnable, Cancelable{
                         wrapperListener.onResponseSuccess(mRequest,obj);
                     }
                 }else
-                    wrapperListener.onError(mRequest,new NetException("网络请求失败，状态码：" + mStatusCode));
+                    wrapperListener.onError(mRequest,new CustomException("网络请求异常状态码：" + mStatusCode));
             }catch(IOException e){
                 //这里仅关闭流时可能出现的异常，不处理
             }finally{

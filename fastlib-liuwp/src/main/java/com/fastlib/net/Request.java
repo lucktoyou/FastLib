@@ -31,7 +31,7 @@ import java.util.Map;
 
 /**
  * Created by sgfb on 2019/12/10
- * E-mail:602687446@qq.com
+ * Modified by liuwp on 2021\11\30.
  * Http请求交互窗口
  */
 public class Request{
