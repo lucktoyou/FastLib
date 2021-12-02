@@ -26,6 +26,8 @@ import com.ypx.imagepicker.data.OnImagePickCompleteListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class NetActivity extends BindViewActivity<ActivityNetBinding>{
@@ -60,33 +62,10 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
         );
     }
 
+
     @Bind(R.id.btnNetPost)
     public void post(){
-        net(new Request("POST","https://www.wanandroid.com/article/query/1/json")
-                .setSkipRootAddress(true)
-                .put("k","异常")
-                .setListener(new SimpleListener<String>(){
-
-                    @Override
-                    public void onResponseSuccess(Request request,String result){
-                        if(result == null){
-                            N.showToast(NetActivity.this,"result=null");
-                        }else{
-                            N.showToast(NetActivity.this,result);
-                        }
-                    }
-
-                    @Override
-                    public void onError(Request request,Exception error){
-
-                    }
-                })
-        );
-    }
-
-    @Bind(R.id.btnNetPost5)
-    public void post5(){
-        for(int i = 1;i <= 5;i++){
+        for(int i = 1;i <= 1;i++){
             net(new Request("POST","https://www.wanandroid.com/article/query/" + i + "/json")
                     .setSkipRootAddress(true)
                     .put("k","异常")
@@ -108,6 +87,34 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                     })
             );
         }
+
+    }
+
+    @Bind(R.id.btnNetSendJson)
+    public void sendJson(){
+        Map<String,Object> map = new HashMap<>();
+        map.put("type", 0);
+        map.put("pageNum", 1);
+        map.put("pageSize", 10);
+        net(new Request("POST","http://101.200.51.39/wuyou/shop/listProd")
+                .setSkipRootAddress(true)
+                .json(map)
+                .setListener(new SimpleListener<String>(){
+                    @Override
+                    public void onResponseSuccess(Request request,String result){
+                        if(result == null){
+                            N.showToast(NetActivity.this,"result=null");
+                        }else{
+                            N.showToast(NetActivity.this,result);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Request request,Exception error){
+
+                    }
+                })
+        );
     }
 
     @Bind(R.id.btnNetDownload)

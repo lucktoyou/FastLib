@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:layout_marginTop="31dp"
-        android:text="网络请求get"
+        android:text="网络请求，GET"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,19 +23,19 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:layout_marginTop="112dp"
-        android:text="网络请求POST"
+        android:text="网络请求，POST"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 
     <Button
-        android:id="@+id/btnNetPost5"
+        android:id="@+id/btnNetSendJson"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:layout_marginTop="188dp"
-        android:text="网络请求POST 并发5次"
+        android:text="网络请求，发送json数据"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginTop="116dp"
-        android:text="网络请求download"
+        android:text="网络请求，下载"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnNetPost" />
@@ -57,18 +57,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:layout_marginTop="36dp"
-        android:text="网络请求upload"
+        android:text="网络请求，上传"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnNetDownload" />
 
     <Button
         android:id="@+id/btnNetLocation"
-        android:layout_width="157dp"
-        android:layout_height="79dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginTop="40dp"
-        android:text="重定向（未完善,关闭自动重定向功能）"
+        android:text="网络请求，重定向（未完善,关闭自动重定向功能）"
         android:textAllCaps="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnNetUpload" />

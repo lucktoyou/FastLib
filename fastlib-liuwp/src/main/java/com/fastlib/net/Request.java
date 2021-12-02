@@ -70,8 +70,13 @@ public class Request{
         mParam.put(key,value);
     }
 
-    public Request put(String json){
-        putObject(json);
+    public Request json(Map<String,Object> map){
+        putObject(map);
+        return this;
+    }
+
+    public Request json(List<Object> list){
+        putObject(list);
         return this;
     }
 

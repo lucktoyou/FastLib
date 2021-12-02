@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 public abstract class SimpleListener<T>{
 
     /**
-     * 原始字节流数据回调
+     * 原始字节数据回调，网络请求成功后执行
      *
      * @param request 网络请求
      * @param data    源字节
@@ -26,7 +26,7 @@ public abstract class SimpleListener<T>{
     }
 
     /**
-     * 数据指定类型回调
+     * 数据指定类型回调，网络请求成功后执行
      *
      * @param request 网络请求
      * @param result  返回的实体

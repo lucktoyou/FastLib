@@ -23,7 +23,7 @@ public class GlobalListener{
     }
 
     /**
-     * 原始字节数据回调
+     * 原始字节数据回调，网络请求成功后执行
      *
      * @param request 网络请求
      * @param data    源字节
@@ -35,7 +35,7 @@ public class GlobalListener{
     }
 
     /**
-     * 数据原型回调
+     * 数据原型回调，网络请求成功后执行
      *
      * @param request 网络请求
      * @param result  返回的实体

@@ -173,15 +173,28 @@ public class HttpProcessor implements Runnable, Cancelable{
 
     /**
      * 自动检查body类型返回.
-     * 先检查自定义头部是否有Content-Type如果可以识别则使用不可识别或不存在再
-     * 根据参数检查form-data、json、默认form-urlencoded
-     *
      * @return body类型
      */
     private @ParamInterpreterFactor.ParamInterpreterType
     String checkBodyType(){
+//        //先检查自定义头部是否有Content-Type如果可以识别则使用不可识别或不存在，再
+//        for(Map.Entry<String,List<String>> entry : mRequest.getHeader().entrySet()){
+//            for(String value : entry.getValue()){
+//                String headKey = entry.getKey();
+//                if(headKey.equals(HeaderDefinition.KEY_CONTENT_TYPE)){
+//                    switch(value){
+//                        case ParamInterpreterFactor.BODY_FORM_DATA:
+//                            return ParamInterpreterFactor.BODY_FORM_DATA;
+//                        case ParamInterpreterFactor.BODY_RAW_JSON:
+//                            return ParamInterpreterFactor.BODY_RAW_JSON;
+//                        case ParamInterpreterFactor.BODY_FORM_URLENCODED:
+//                            return ParamInterpreterFactor.BODY_FORM_URLENCODED;
+//                    }
+//                }
+//            }
+//        }
+        //根据参数检查form-data、json、默认form-urlencoded
         List<Pair<String,Object>> bottomParam = mRequest.getRequestParam().getBottomParam();
-
         for(Pair<String,Object> pair : bottomParam){
             if(pair.second instanceof File)
                 return ParamInterpreterFactor.BODY_FORM_DATA;
@@ -198,14 +211,15 @@ public class HttpProcessor implements Runnable, Cancelable{
      */
     private String genContentType(String bodyType){
         switch(bodyType){
-            case ParamInterpreterFactor.BODY_FORM_URLENCODED:
-                return HeaderDefinition.VALUE_CONTENT_TYPE_X_WWW_FORM_URLENCODED;
-            case ParamInterpreterFactor.BODY_RAW_JSON:
-                return HeaderDefinition.VALUE_CONTENT_TYPE_JSON;
             case ParamInterpreterFactor.BODY_FORM_DATA:
                 return HeaderDefinition.VALUE_CONTENT_TYPE_MULTIPART_FORM_DATA + "; boundary=" + FormDataInterpreter.BOUNDARY;
+            case ParamInterpreterFactor.BODY_RAW_JSON:
+                return HeaderDefinition.VALUE_CONTENT_TYPE_JSON;
+            case ParamInterpreterFactor.BODY_FORM_URLENCODED:
+                return HeaderDefinition.VALUE_CONTENT_TYPE_X_WWW_FORM_URLENCODED;
+            default:
+                return null;
         }
-        return null;
     }
 
     /**
@@ -243,8 +257,8 @@ public class HttpProcessor implements Runnable, Cancelable{
         if(mException == null){
             try{
                 byte[] bytes = SaveUtil.loadInputStream(mRawDataInputStream,false);
-                bytes = wrapperListener.onRawData(mRequest,bytes,mResultType);
                 if(mStatusCode == ResponseCodeDefinition.OK){
+                    bytes = wrapperListener.onRawData(mRequest,bytes,mResultType);
                     if(mResultType == void.class || mResultType == Void.class)
                         wrapperListener.onResponseSuccess(mRequest,null);
                     else if(mResultType == null || mResultType == Object.class || mResultType == byte[].class)
@@ -259,8 +273,10 @@ public class HttpProcessor implements Runnable, Cancelable{
                         Object obj = gson.fromJson(json,mResultType);
                         wrapperListener.onResponseSuccess(mRequest,obj);
                     }
-                }else
-                    wrapperListener.onError(mRequest,new CustomException("网络请求异常状态码：" + mStatusCode));
+                }else{
+                    Exception ex = new CustomException("网络请求失败（HTTP状态码：" + mStatusCode + "）.响应内容：" + new String(bytes));
+                    wrapperListener.onError(mRequest,ex);
+                }
             }catch(IOException e){
                 //这里仅关闭流时可能出现的异常，不处理
             }finally{
