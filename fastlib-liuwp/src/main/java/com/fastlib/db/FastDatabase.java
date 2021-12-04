@@ -83,16 +83,38 @@ public class FastDatabase{
     }
 
     /**
-     * 异步存或修改数据
-     * @param obj 对象类
+     * 异步存数据
+     * @param fissionObj 裂变对象
      * @param callback 结束后回调
      */
-    public void saveOrUpdateAsync(final Object obj,final DatabaseNoDataResultCallback callback){
+    public void saveAsync(final Object fissionObj,final DatabaseNoDataResultCallback callback){
         ThreadPoolManager.sSlowPool.execute(new Runnable(){
             @Override
             public void run(){
                 Handler handle = new Handler(Looper.getMainLooper());
-                final boolean success = saveOrUpdate(obj);
+                final boolean success = save(fissionObj);
+                if(callback!=null)
+                    handle.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            callback.onResult(success);
+                        }
+                    });
+            }
+        });
+    }
+
+    /**
+     * 异步修改数据
+     * @param obj 对象类
+     * @param callback 结束后回调
+     */
+    public void updateAsync(final Object obj,final DatabaseNoDataResultCallback callback){
+        ThreadPoolManager.sSlowPool.execute(new Runnable(){
+            @Override
+            public void run(){
+                Handler handle = new Handler(Looper.getMainLooper());
+                final boolean success = update(obj);
                 if(callback!=null)
                     handle.post(new Runnable(){
                         @Override
@@ -149,19 +171,6 @@ public class FastDatabase{
     }
 
     /**
-     * 获取数据库请求第一条记录
-     * @param cla 对象类
-     * @param <T> 任意泛型
-     * @return 不为空则返回表中首个数据，否则返回null
-     */
-    public <T> T getFirst(Class<T> cla){
-        List<T> all = limit(0,1).get(cla);
-        if(all!=null && !all.isEmpty())
-            return all.get(0);
-        return null;
-    }
-
-    /**
      * 异步获取数据库记录
      * @param cla 对象类
      * @param listener 监听回调
@@ -186,6 +195,19 @@ public class FastDatabase{
     ////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * 获取数据库请求第一条记录
+     * @param cla 对象类
+     * @param <T> 任意泛型
+     * @return 不为空则返回表中首个数据，否则返回null
+     */
+    public <T> T getFirst(Class<T> cla){
+        List<T> all = limit(0,1).get(cla);
+        if(all!=null && !all.isEmpty())
+            return all.get(0);
+        return null;
+    }
 
     /**
      * 获取表中数据
@@ -388,6 +410,8 @@ public class FastDatabase{
      * @return 成功删除返回true，否则fase
      */
     public boolean delete(Object obj){
+        if(obj == null)
+            return false;
         SQLiteDatabase db = prepare(null);
         String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = obj.getClass().getCanonicalName();
@@ -397,10 +421,8 @@ public class FastDatabase{
             return false;
         }
         Field[] fields = obj.getClass().getDeclaredFields();
-        Field keyField = null;
-        String keyFieldValue;
-
-        //是否有主键
+        Field keyField = null;//主键字段
+        String keyValue;//主键字段值
         for(Field field: fields){
             field.setAccessible(true);
             Database fieldInject = field.getAnnotation(Database.class);
@@ -411,21 +433,25 @@ public class FastDatabase{
         }
         if(keyField ==null){
             FastLog.d("错误的使用了delete(Object obj),obj没有注解主键");
+            db.close();
             return false;
         }else{
             String fieldType = getCustomFieldTypeName(keyField);
             if(!Reflect.isInteger(fieldType) && !Reflect.isReal(fieldType) && !Reflect.isVarchar(fieldType)){
                 FastLog.d("不支持成为主键的自定义字段类型："+fieldType);
+                db.close();
                 return false;
             }
             try{
-                keyFieldValue = Reflect.objToStr(keyField.get(obj));
+                keyValue = Reflect.objToStr(keyField.get(obj));
             }catch(IllegalAccessException e){
-                FastLog.d(e.toString());
+                FastLog.e(e.toString());
+                db.close();
                 return false;
             }
         }
-        setFilter(And.condition(Condition.equal(keyFieldValue)));
+        db.close();
+        setFilter(And.condition(Condition.equal(keyValue)));
         return delete(obj.getClass());
     }
 
@@ -469,7 +495,7 @@ public class FastDatabase{
             db.setTransactionSuccessful();
             FastLog.d(databaseName+"--d-"+count+"->"+tableName);
         }catch(SQLiteException e){
-            FastLog.d("数据库删除数据时发生异常："+e.toString());
+            FastLog.e("数据库删除数据时发生异常："+e.toString());
             return false;
         }finally{
             db.endTransaction();
@@ -480,11 +506,67 @@ public class FastDatabase{
     }
 
     /**
+     * 更新单条数据(优先使用手动设置的过滤条件，如果未手动设置并且主键存在使用主键过滤)
+     * @param obj 更新对象
+     * @return 是否成功更新
+     */
+    public boolean update(Object obj){
+        if(obj == null)
+            return false;
+        SQLiteDatabase db = prepare(null);
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator) + 1);
+        String tableName = obj.getClass().getCanonicalName();
+        if(!tableExists(db,tableName)){
+            FastLog.d("更新数据失败，" + databaseName + "表" + tableName + "不存在");
+            db.close();
+            return false;
+        }
+        if(!tableHasData(db,tableName)){
+            FastLog.d("更新数据失败，" + databaseName + "表" + tableName + "中不含任何数据");
+            db.close();
+            return false;
+        }
+        if(mAttribute.getFilterCommand() == null){
+            Field[] fields = obj.getClass().getDeclaredFields();
+            Field keyField = null;//主键字段
+            String keyValue;//主键字段值
+            for(Field field : fields){
+                field.setAccessible(true);
+                Database fieldInject = field.getAnnotation(Database.class);
+                if(fieldInject != null && fieldInject.keyPrimary()){
+                    keyField = field;
+                    break;
+                }
+            }
+            if(keyField != null){
+                String fieldType = getCustomFieldTypeName(keyField);
+                if(!Reflect.isInteger(fieldType) && !Reflect.isReal(fieldType) && !Reflect.isVarchar(fieldType)){
+                    FastLog.d("不支持成为主键的自定义字段类型：" + fieldType);
+                    db.close();
+                    return false;
+                }
+                try{
+                    keyValue = Reflect.objToStr(keyField.get(obj));
+                }catch(IllegalAccessException e){
+                    FastLog.e(e.toString());
+                    db.close();
+                    return false;
+                }
+                setFilter(And.condition(Condition.equal(keyValue)));
+            }
+        }
+        db.close();
+        return updateNow(obj);
+    }
+
+    /**
      * 更新单条数据
      * @param obj 更新对象
      * @return 是否成功更新
      */
-    public boolean update(@NonNull Object obj){
+    private boolean updateNow(Object obj){
+        if(obj == null)
+            return false;
         SQLiteDatabase db = prepare(null);
         String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = obj.getClass().getCanonicalName();
@@ -493,7 +575,6 @@ public class FastDatabase{
         List<String> args = new ArrayList<>();
         String filter;
         String[] ss;
-
         if(!tableExists(db,tableName)){
             FastLog.d("更新数据失败，"+databaseName+"表"+tableName+"不存在");
             db.close();
@@ -603,11 +684,40 @@ public class FastDatabase{
     }
 
     /**
-     * 保存对象到数据库
+     * 保存单多个对象.支持传入数组、列表、映射
+     * @param fissionObj 裂变对象
+     * @return 是否保存成功
+     */
+    public boolean save(Object fissionObj){
+        if(fissionObj==null)
+            return false;
+        Object[] objs;
+        if(fissionObj instanceof Collection){
+            Collection collection = (Collection)fissionObj;
+            objs = collection.toArray();
+        }else if(fissionObj instanceof Map){
+            Map<?,?> map = (Map<?,?>)fissionObj;
+            Iterator<?> iter = map.keySet().iterator();
+            int index = 0;
+            objs = new Object[map.size()];
+            while(iter.hasNext())
+                objs[index++] = map.get(iter.next());
+        }else if(fissionObj.getClass().isArray())
+            objs = (Object[])fissionObj;
+        else{
+            //也许obj是一个普通引用
+            objs = new Object[1];
+            objs[0] = fissionObj;
+        }
+        return saveNow(objs);
+    }
+
+    /**
+     * 保存对象组到数据库
      * @param array 对象组
      * @return 如果存储成功返回true，否则为false
      */
-    public boolean save(Object[] array){
+    private boolean saveNow(Object[] array){
         if(array==null || array.length<=0){
             return false;//没什么对象可存应该返回false吗？
         }
@@ -620,7 +730,7 @@ public class FastDatabase{
         if(firstObj==null){
             return false;
         }
-        SQLiteDatabase db = prepare(null);
+        SQLiteDatabase db = prepare(generateCreateTableSql(firstObj.getClass()));
         String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = firstObj.getClass().getCanonicalName();
         Field[] fields = firstObj.getClass().getDeclaredFields();
@@ -742,105 +852,6 @@ public class FastDatabase{
         }
         return true;
     }
-
-    /**
-     * 根据主键或过滤条件更新已存在的数据（如果主键存在不使用过滤条件）或存储不存在的数据
-     * @param objs
-     * @return
-     */
-    private boolean saveOrUpdate(Object[] objs){
-        Object firstObj = null;
-        boolean isUpdate = false;
-        boolean success = false;
-
-        if(objs==null || objs.length<=0)
-            return false;
-        //取第一个非null的对象
-        for(Object object: objs){
-            if(object!=null){
-                firstObj = object;
-                break;
-            }
-        }
-        //有可能一个数组全是null,这种情况直接跳出
-        if(firstObj==null)
-            return false;
-        SQLiteDatabase db = prepare(null);
-        String tableName = firstObj.getClass().getCanonicalName();
-        Field[] fields = firstObj.getClass().getDeclaredFields();
-        Field keyField = null;//主键
-
-        if(tableExists(db,tableName)){
-            for(Field field: fields){
-                field.setAccessible(true);
-                Database fieldInject = field.getAnnotation(Database.class);
-                if(fieldInject!=null && fieldInject.keyPrimary()){
-                    keyField = field;
-                    break;
-                }
-            }
-            if(keyField!=null){
-                try{
-                    Object keyValue = keyField.get(firstObj);
-                    Object oldData = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).getFirst(firstObj.getClass());
-                    if(oldData!=null){
-                        isUpdate = true;
-                        success = setFilter(And.condition(Condition.equal(Reflect.objToStr(keyValue)))).update(firstObj);
-                    }
-                }catch(IllegalAccessException e){
-                    FastLog.e("数据库saveOrUpdate时出现异常:"+e.toString());
-                    success = false;
-                }
-            }else{ //如果主键不存在，查询是否有过滤条件，如果这个有并且这个条件能查询到数据，则修改首个数据的值
-                if(mAttribute.getFilterCommand()!=null){
-                    Object oldData = getFirst(firstObj.getClass());
-                    if(oldData!=null){
-                        isUpdate = true;
-                        success = update(firstObj);
-                    }
-                }
-            }
-        }
-        if(!isUpdate){
-            db = prepare(generateCreateTableSql(firstObj.getClass()));
-            success = save(objs);
-        }
-        db.close();
-        return success;
-    }
-
-    /**
-     * 保存单多个对象、修改单个对象.支持传入数组、列表、映射
-     * @param obj
-     * @return
-     */
-    public boolean saveOrUpdate(Object obj){
-        if(obj==null)
-            return false;
-        Object[] objs;
-        if(obj instanceof Collection){
-            Collection collection = (Collection)obj;
-            objs = collection.toArray();
-        }else if(obj instanceof Map){
-            Map<?,?> map = (Map<?,?>)obj;
-            Iterator<?> iter = map.keySet().iterator();
-            int index = 0;
-            objs = new Object[map.size()];
-            while(iter.hasNext())
-                objs[index++] = map.get(iter.next());
-        }else if(obj.getClass().isArray())
-            objs = (Object[])obj;
-        else{
-            //也许obj是一个普通引用
-            objs = new Object[1];
-            objs[0] = obj;
-        }
-        return saveOrUpdate(objs);
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * 获取主键名
@@ -1422,14 +1433,6 @@ public class FastDatabase{
     public FastDatabase toWhichDatabase(String databaseName){
         mAttribute.setToWhichDatabase(databaseName);
         return this;
-    }
-
-    /**
-     * 指定操作的数据库,直到程序重新运行或者再调用此方法转换操作数据库对象
-     * @param databaseName
-     */
-    public void switchDatabase(String databaseName){
-        sConfig.switchDatabase(databaseName);
     }
 
     public static DatabaseConfig getConfig(){

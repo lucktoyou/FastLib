@@ -28,15 +28,39 @@ public class DatabaseConfig{
     public synchronized static DatabaseConfig getInstance(){
         if(instance == null){
             instance = new DatabaseConfig();
-            FastLog.d(TAG+"类实例化");
+            FastLog.d(TAG + "类实例化");
         }
         return instance;
     }
 
-    private DatabaseConfig() {
+    private DatabaseConfig(){
         mCurrentDatabase = DEFAULT_DATABASE_NAME;
-        mVersion = SaveUtil.getFromSp(SAVE_INT_DB_VERSION, 1);
+        mVersion = SaveUtil.getFromSp(SAVE_INT_DB_VERSION,1);
         mFileRefDir = initDatabaseFileReferenceDirectory();
+    }
+
+    public void switchDatabase(@NonNull String databaseName){
+        mCurrentDatabase = databaseName;
+    }
+
+    public String getDatabaseName(){
+        return mCurrentDatabase;
+    }
+
+    public String getDatabaseNameComplete(){
+        return mCurrentDatabase + ".db";
+    }
+
+    public void setVersion(int newVersion){
+        if(newVersion <= mVersion){
+            return;
+        }
+        mVersion = newVersion;
+        SaveUtil.saveToSp(SAVE_INT_DB_VERSION,newVersion);
+    }
+
+    public int getVersion(){
+        return mVersion;
     }
 
     private File initDatabaseFileReferenceDirectory(){
@@ -55,30 +79,6 @@ public class DatabaseConfig{
 
     public File getFileRefDir(){
         return mFileRefDir;
-    }
-
-    public void switchDatabase(@NonNull String databaseName){
-        mCurrentDatabase = databaseName;
-    }
-
-    public String getDatabaseNameComplete(){
-        return mCurrentDatabase+".db";
-    }
-
-    public String getDatabaseName(){
-        return mCurrentDatabase;
-    }
-
-    public void setVersion(int newVersion){
-        if(newVersion<=mVersion){
-            return;
-        }
-        mVersion = newVersion;
-        SaveUtil.saveToSp(SAVE_INT_DB_VERSION,newVersion);
-    }
-
-    public int getVersion(){
-        return mVersion;
     }
 
     public String getDefaultDatabaseName(){

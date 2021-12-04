@@ -44,7 +44,7 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 list.add(bean);
 
                 fastDatabase.clear()
-                        .saveOrUpdate(list);
+                        .save(list);
                 showText();
                 break;
             }
@@ -58,7 +58,7 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 data.cities =city;
 
                 fastDatabase.clear()
-                        .saveOrUpdate(data);
+                        .update(data);
                 showText();
                 break;
             }
@@ -103,7 +103,7 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
     private void showTextFormDB() {
         PersonBeen rawData = new PersonBeen("明兰", 28, "柔弱的外表下，有颗坚毅勇敢的心");
         fastDatabase.clear().delete(PersonBeen.class);
-        fastDatabase.clear().saveOrUpdateAsync(FastUtil.listOf(rawData), new DatabaseNoDataResultCallback() {
+        fastDatabase.clear().saveAsync(FastUtil.listOf(rawData), new DatabaseNoDataResultCallback() {
             @Override
             public void onResult(boolean success) {
                 if (success) {
