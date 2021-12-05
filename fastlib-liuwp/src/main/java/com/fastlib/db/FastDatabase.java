@@ -506,7 +506,7 @@ public class FastDatabase{
     }
 
     /**
-     * 更新单条数据(优先使用手动设置的过滤条件，如果未手动设置并且主键存在使用主键过滤)
+     * 更新单条数据(优先手动设置的过滤条件，如果未手动设置并且主键存在使用主键过滤)
      * @param obj 更新对象
      * @return 是否成功更新
      */
@@ -514,20 +514,24 @@ public class FastDatabase{
         if(obj == null)
             return false;
         SQLiteDatabase db = prepare(null);
-        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator) + 1);
+        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
         String tableName = obj.getClass().getCanonicalName();
+        Field[] fields = obj.getClass().getDeclaredFields();
+        ContentValues cv = new ContentValues();
+        List<String> args = new ArrayList<>();
+        String filter;
+        String[] ss;
         if(!tableExists(db,tableName)){
-            FastLog.d("更新数据失败，" + databaseName + "表" + tableName + "不存在");
+            FastLog.d("更新数据失败，"+databaseName+"表"+tableName+"不存在");
             db.close();
             return false;
         }
         if(!tableHasData(db,tableName)){
-            FastLog.d("更新数据失败，" + databaseName + "表" + tableName + "中不含任何数据");
+            FastLog.d("更新数据失败，"+databaseName+"表"+tableName+"中不含任何数据");
             db.close();
             return false;
         }
         if(mAttribute.getFilterCommand() == null){
-            Field[] fields = obj.getClass().getDeclaredFields();
             Field keyField = null;//主键字段
             String keyValue;//主键字段值
             for(Field field : fields){
@@ -555,33 +559,8 @@ public class FastDatabase{
                 setFilter(And.condition(Condition.equal(keyValue)));
             }
         }
-        db.close();
-        return updateNow(obj);
-    }
-
-    /**
-     * 更新单条数据
-     * @param obj 更新对象
-     * @return 是否成功更新
-     */
-    private boolean updateNow(Object obj){
-        if(obj == null)
-            return false;
-        SQLiteDatabase db = prepare(null);
-        String databaseName = db.getPath().substring(db.getPath().lastIndexOf(File.separator)+1);
-        String tableName = obj.getClass().getCanonicalName();
-        Field[] fields = obj.getClass().getDeclaredFields();
-        ContentValues cv = new ContentValues();
-        List<String> args = new ArrayList<>();
-        String filter;
-        String[] ss;
-        if(!tableExists(db,tableName)){
-            FastLog.d("更新数据失败，"+databaseName+"表"+tableName+"不存在");
-            db.close();
-            return false;
-        }
-        if(!tableHasData(db,tableName)){
-            FastLog.d("更新数据失败，"+databaseName+"表"+tableName+"中不含任何数据");
+        if(mAttribute.getFilterCommand() == null){
+            FastLog.d("更新数据失败,请设置过滤条件或注解主键");
             db.close();
             return false;
         }
