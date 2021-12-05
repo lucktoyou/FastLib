@@ -124,7 +124,7 @@ public class N {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && manager.getNotificationChannel(channelId).getImportance() == NotificationManager.IMPORTANCE_NONE && SaveUtil.getFromSp(CHANNEL_NOTIFICATION_NOT_ENABLED, true)) {
             new AlertDialog.Builder(context)
                     .setTitle("提示")
-                    .setMessage("是否开启“" + channelName + "”的通知渠道，成功开启后可正常接收通知？")
+                    .setMessage("是否开启“" + channelName + "”渠道通知？")
                     .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
