@@ -234,15 +234,19 @@ public class FastDatabase{
         //过滤条件
         filters = getFilters(key,mAttribute.getFilterCommand(),selectionArgs);
         //排序条件
-        if(!TextUtils.isEmpty(mAttribute.getOrderColumn())){
-            //按指定列排序
-            order = " order by "+mAttribute.getOrderColumn()+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
+        if(mAttribute.getOrderColumn() == null){
+            order = "";//不排序
         }else {
-            if(!TextUtils.isEmpty(key)){
-                //按主键排序
-                order = " order by "+key+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
+            if(mAttribute.getOrderColumn().equals("")){
+                if(key == null){
+                    order = "";//不排序
+                }else {
+                    //按主键排序
+                    order = " order by "+key+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
+                }
             }else {
-                order = "";//不排序
+                //按指定列排序
+                order = " order by "+mAttribute.getOrderColumn()+" "+(mAttribute.getOrderAsc() ? "asc" : "desc");
             }
         }
         //限制条件
@@ -842,8 +846,8 @@ public class FastDatabase{
         String key = null;
         for(Field f: fields){
             Database fieldInject = f.getAnnotation(Database.class);
-            if(fieldInject!=null && fieldInject.keyPrimary()){
-                key = (!TextUtils.isEmpty(fieldInject.columnName()))?fieldInject.columnName():f.getName();
+            if(fieldInject != null && fieldInject.keyPrimary()){
+                key = (!TextUtils.isEmpty(fieldInject.columnName())) ? fieldInject.columnName() : f.getName();
                 break;
             }
         }
@@ -1341,21 +1345,19 @@ public class FastDatabase{
     }
 
     /**
-     * 取数据时,如果主键存在，根据主键排序
-     * @param asc
+     * 排序,如果主键存在，根据主键排序
+     * @param asc 如果是true为升序，反之降序
      * @return current database
      */
     public FastDatabase orderBy(boolean asc){
-        mAttribute.setOrderAsc(asc);
-        mAttribute.setOrderColumn(null);
-        return this;
+        return orderBy(asc,"");
     }
 
     /**
      * 排序
      * @param asc 如果是true为升序，反之降序
-     * @param columnName
-     * @return
+     * @param columnName 列名
+     * @return current database
      */
     public FastDatabase orderBy(boolean asc,String columnName){
         mAttribute.setOrderAsc(asc);
