@@ -3,7 +3,7 @@ apply plugin: 'maven-publish'
 
 def gStr = 'com.github.lucktoyou'
 def aStr = 'FastLib'
-def vStr = '3.8.7'
+def vStr = '3.8.8'
 group = gStr
 version = vStr
 

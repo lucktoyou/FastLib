@@ -289,8 +289,7 @@ public class HttpProcessor implements Runnable, Cancelable{
         }else wrapperListener.onError(mRequest,mException);
     }
 
-    public Object getResultData() throws Exception{
-        if(mException != null) throw mException;
+    public Object getResultData(){
         return mResultData;
     }
 

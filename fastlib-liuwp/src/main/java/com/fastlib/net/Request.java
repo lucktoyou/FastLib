@@ -305,11 +305,11 @@ public class Request{
         ThreadPoolManager.sSlowPool.execute(new HttpProcessor(this));
     }
 
-    public void startSync() throws Exception{
+    public void startSync(){
         startSync(void.class);
     }
 
-    public Object startSync(Type type) throws Exception{
+    public Object startSync(Type type){
         isCanceled = false;
         mCustomType = type;
         setCallbackOnWorkThread(true);
