@@ -130,7 +130,11 @@ public class TaskActivity extends BindViewActivity<ActivityTaskBinding>{
                     @Override
                     protected Boolean execute(String param){
                         FastLog.d("filter " + Thread.currentThread().getName());
-                        return true;
+                        if("<小花>".equals(param)){
+                            return true;
+                        }else {
+                            return false;
+                        }
                     }
                 })
                 .again(new NoReturnAction<List<String>>(){
