@@ -115,10 +115,9 @@ public class Reflect {
      * @return
      */
     public static String objToStr(Object obj) {
-//        if (obj instanceof Byte)
-//            return Byte.toString((byte)obj);
-//        else
-        if (obj instanceof Short)
+        if (obj instanceof Byte)
+            return Byte.toString((byte)obj);
+        else if (obj instanceof Short)
             return Short.toString((short) obj);
         else if (obj instanceof Integer)
             return Integer.toString((int) obj);
@@ -128,6 +127,10 @@ public class Reflect {
             return Float.toString((float) obj);
         else if (obj instanceof Double)
             return Double.toString((double) obj);
+        else if (obj instanceof Character)
+            return Character.toString((char)obj);
+        else if (obj instanceof Boolean)
+            return Boolean.toString((boolean)obj);
         else if (obj instanceof String)
             return (String) obj;
         else
@@ -144,8 +147,6 @@ public class Reflect {
     public static boolean equalBasicOrBasicObj(Class<?> obj1, Class<?> obj2) {
         if (obj1 == byte.class || obj1 == Byte.class)
             return obj2 == byte.class || obj2 == Byte.class;
-        if (obj1 == char.class || obj1 == Character.class)
-            return obj2 == char.class || obj2 == Character.class;
         if (obj1 == short.class || obj1 == Short.class)
             return obj2 == short.class || obj2 == Short.class;
         if (obj1 == int.class || obj1 == Integer.class)
@@ -156,6 +157,10 @@ public class Reflect {
             return obj2 == float.class || obj2 == Float.class;
         if (obj1 == double.class || obj1 == Double.class)
             return obj2 == double.class || obj2 == Double.class;
+        if (obj1 == char.class || obj1 == Character.class)
+            return obj2 == char.class || obj2 == Character.class;
+        if (obj1 == boolean.class || obj1 == Boolean.class)
+            return obj2 == boolean.class || obj2 == Boolean.class;
         return obj1 == obj2;
     }
 }

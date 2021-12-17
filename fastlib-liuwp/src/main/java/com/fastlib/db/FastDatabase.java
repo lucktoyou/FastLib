@@ -746,7 +746,13 @@ public class FastDatabase{
                     if(fieldInject!=null && fieldInject.ignore())
                         continue;
                     if(fieldInject!=null && fieldInject.keyPrimary() && fieldInject.autoincrement()){
-                        if(type==int.class){
+                       if(type==short.class){
+                            short keyValue = field.getShort(obj);
+                            if(keyValue<=0){
+                                autoIncreKeyField = field;
+                                continue;
+                            }
+                        }else if(type==int.class){
                             int keyValue = field.getInt(obj);
                             if(keyValue<=0){
                                 autoIncreKeyField = field;
@@ -817,9 +823,11 @@ public class FastDatabase{
                 //对自动增长的主键赋值
                 if(rowId!=-1 && autoIncreKeyField!=null){
                     Class<?> fieldType = autoIncreKeyField.getType();
-                    if(fieldType==int.class)
+                   if(fieldType==short.class)
+                        autoIncreKeyField.setShort(obj,(short)rowId);
+                   else if(fieldType==int.class)
                         autoIncreKeyField.setInt(obj,(int)rowId);
-                    else if(fieldType==long.class)
+                   else if(fieldType==long.class)
                         autoIncreKeyField.setLong(obj,rowId);
                 }
             }

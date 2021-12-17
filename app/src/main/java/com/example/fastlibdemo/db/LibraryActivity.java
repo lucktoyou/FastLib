@@ -90,7 +90,7 @@ public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
                 sb.append(gson.toJson(p)).append("\n");
             }
         }
-        //获取表中某列总值(不常用，目前FastDatabase支持short、int、long、float、long这五个数值类型)
+        //获取表中某列总值(不常用，目前FastDatabase支持short、int、long、float、double这五个数值类型)
         ProvinceBeen been = fastDatabase.clear()
                 .putFunctionCommand("score", FunctionCommand.sum())
                 .getFirst(ProvinceBeen.class);
