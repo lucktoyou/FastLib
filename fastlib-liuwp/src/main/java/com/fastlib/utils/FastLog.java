@@ -1,6 +1,6 @@
 package com.fastlib.utils;
 
-import android.text.TextUtils;
+import androidx.annotation.Nullable;
 
 import com.fastlib.BuildConfig;
 import com.orhanobut.logger.AndroidLogAdapter;
@@ -15,49 +15,42 @@ import com.orhanobut.logger.PrettyFormatStrategy;
  * 3.使用范围：打印库内、库外日志信息。
  */
 public class FastLog{
-    private static boolean debug = BuildConfig.DEBUG;
-    private static PrettyFormatStrategy strategy = PrettyFormatStrategy.newBuilder().showThreadInfo(true).methodCount(2).tag("FAST_PRETTY_LOGGER").build();
-    private static AndroidLogAdapter adapter = new AndroidLogAdapter(strategy);
 
-    public static void setDebug(boolean debug){
-        FastLog.debug = debug;
+    static{
+        setDebug(BuildConfig.DEBUG);
     }
 
-    public static void setDebug(boolean debug,boolean showThreadInfo,int methodCount,String tag){
-        FastLog.debug = debug;
-        strategy = PrettyFormatStrategy.newBuilder().showThreadInfo(showThreadInfo).methodCount(methodCount).tag(tag).build();
-        adapter = new AndroidLogAdapter(strategy);
+    public static void setDebug(boolean debug){
+        setDebug(debug,false,0,"FASTER");
+    }
+
+    public static void setDebug(final boolean debug,boolean showThreadInfo,int methodCount,String tag){
+        PrettyFormatStrategy strategy = PrettyFormatStrategy.newBuilder()
+                .showThreadInfo(showThreadInfo).methodCount(methodCount).tag(tag)
+                .build();
+        AndroidLogAdapter adapter = new AndroidLogAdapter(strategy){
+            @Override
+            public boolean isLoggable(int priority,@Nullable String tag){
+                return debug;
+            }
+        };
+        Logger.clearLogAdapters();
+        Logger.addLogAdapter(adapter);
     }
 
     public static void d(String msg){
-        if(debug && !TextUtils.isEmpty(msg)){
-            Logger.clearLogAdapters();
-            Logger.addLogAdapter(adapter);
-            Logger.d(msg);
-        }
+        Logger.d(msg);
     }
 
     public static void i(String msg){
-        if(debug && !TextUtils.isEmpty(msg)){
-            Logger.clearLogAdapters();
-            Logger.addLogAdapter(adapter);
-            Logger.i(msg);
-        }
+        Logger.i(msg);
     }
 
     public static void w(String msg){
-        if(debug && !TextUtils.isEmpty(msg)){
-            Logger.clearLogAdapters();
-            Logger.addLogAdapter(adapter);
-            Logger.w(msg);
-        }
+        Logger.w(msg);
     }
 
     public static void e(String msg){
-        if(debug && !TextUtils.isEmpty(msg)){
-            Logger.clearLogAdapters();
-            Logger.addLogAdapter(adapter);
-            Logger.e(msg);
-        }
+        Logger.e(msg);
     }
 }

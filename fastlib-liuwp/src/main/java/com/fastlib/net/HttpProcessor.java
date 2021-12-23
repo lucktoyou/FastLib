@@ -274,7 +274,7 @@ public class HttpProcessor implements Runnable, Cancelable{
                         wrapperListener.onResponseSuccess(mRequest,obj);
                     }
                 }else{
-                    Exception ex = new CustomException("网络响应异常（HTTP状态码：" + mStatusCode + "）.响应内容：" + new String(bytes));
+                    Exception ex = new CustomException("网络响应异常(" + mStatusCode + ").");//响应内容: new String(bytes)
                     wrapperListener.onError(mRequest,ex);
                 }
             }catch(IOException e){
