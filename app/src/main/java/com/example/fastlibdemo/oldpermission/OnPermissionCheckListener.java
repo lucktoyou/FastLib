@@ -1,4 +1,4 @@
-package com.example.fastlibdemo.oldPermission;
+package com.example.fastlibdemo.oldpermission;
 
 
 /**
