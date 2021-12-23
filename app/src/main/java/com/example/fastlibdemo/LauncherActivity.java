@@ -22,7 +22,7 @@ public class LauncherActivity extends FastActivity {
 
     @Override
     public void alreadyPrepared() {
-       getThreadPool().execute(new Runnable() {
+        mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
                 try {

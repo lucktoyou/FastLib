@@ -86,7 +86,7 @@ public class MainActivity extends FastActivity {
     @Bind(R.id.btnProgress)
     public void progress() {
         loading();
-        getThreadPool().execute(new Runnable() {
+        mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
                 try {
