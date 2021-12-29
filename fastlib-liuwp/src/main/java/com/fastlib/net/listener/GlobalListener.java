@@ -27,10 +27,9 @@ public class GlobalListener{
      *
      * @param request 网络请求
      * @param data    源字节
-     * @param type    {@link Request#getResultType()}
      * @return 处理后的源字节,影响回调结果
      */
-    public byte[] onRawData(Request request,byte[] data,Type type){
+    public byte[] onRawData(Request request,byte[] data){
         return data;
     }
 
@@ -39,7 +38,7 @@ public class GlobalListener{
      *
      * @param request 网络请求
      * @param result  返回的实体
-     * @return 默认返回非空result
+     * @return 处理后的返回实体，影响回调结果
      */
     public Object onResponseListener(Request request,Object result){
         return result;

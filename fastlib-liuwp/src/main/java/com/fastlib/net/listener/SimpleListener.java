@@ -18,10 +18,9 @@ public abstract class SimpleListener<T>{
      *
      * @param request 网络请求
      * @param data    源字节
-     * @param type    {@link Request#getResultType()}
      * @return 处理后的源字节,影响回调结果
      */
-    public byte[] onRawData(Request request,byte[] data,Type type){
+    public byte[] onRawData(Request request,byte[] data){
         return data;
     }
 

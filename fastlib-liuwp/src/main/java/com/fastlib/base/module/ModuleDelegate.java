@@ -168,9 +168,9 @@ public class ModuleDelegate implements ModuleInterface {
                 if (mLoading == null) {
                     mLoading = new LoadingDialog();
                     mLoading.showAllowingStateLoss(getRealActivity().getSupportFragmentManager());
-                    mLoading.setOnLoadingStateListener(new LoadingDialog.OnLoadingStateListener() {
+                    mLoading.setDialogDismissListener(new LoadingDialog.OnDialogDismissListener() {
                         @Override
-                        public void onLoadingDialogDismiss() {
+                        public void onDialogDismiss() {
                             mLoading = null;
                         }
                     });

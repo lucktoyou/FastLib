@@ -41,9 +41,9 @@ public class ApplicationImpl extends Application{
             }
 
             @Override
-            public byte[] onRawData(Request request,byte[] data,Type type){
+            public byte[] onRawData(Request request,byte[] data){
                 request.printRequestAndResponse(data);
-                return super.onRawData(request,data,type);
+                return super.onRawData(request,data);
             }
 
             @Override

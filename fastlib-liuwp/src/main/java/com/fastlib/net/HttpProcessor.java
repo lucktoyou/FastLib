@@ -235,9 +235,9 @@ public class HttpProcessor implements Runnable, Cancelable{
         //此包裹监听将回调先经过globalListener然后走原监听
         SimpleListener wrapperListener = new SimpleListener(){
             @Override
-            public byte[] onRawData(Request request,byte[] data,Type type){
-                byte[] bytes = globalListener.onRawData(request,data,type);
-                return listener.onRawData(request,bytes,type);
+            public byte[] onRawData(Request request,byte[] data){
+                byte[] bytes = globalListener.onRawData(request,data);
+                return listener.onRawData(request,bytes);
             }
 
             @Override
@@ -258,7 +258,7 @@ public class HttpProcessor implements Runnable, Cancelable{
             try{
                 byte[] bytes = SaveUtil.loadInputStream(mRawDataInputStream,false);
                 if(mStatusCode == ResponseCodeDefinition.OK){
-                    bytes = wrapperListener.onRawData(mRequest,bytes,mResultType);
+                    bytes = wrapperListener.onRawData(mRequest,bytes);
                     if(mResultType == void.class || mResultType == Void.class)
                         wrapperListener.onResponseSuccess(mRequest,null);
                     else if(mResultType == null || mResultType == Object.class || mResultType == byte[].class)

@@ -367,10 +367,10 @@ public class Request{
     /**
      * 打印请求信息和响应结果
      *
-     * @param rawBytes  网络请求结束后返回的原始字节流
-     * @param format    是否格式化日志
+     * @param rawBytes     网络请求结束后返回的原始字节流
+     * @param formatIfJson 是否格式化日志
      */
-    public void printRequestAndResponse(byte[] rawBytes,boolean format){
+    public void printRequestAndResponse(byte[] rawBytes,boolean formatIfJson){
         StringBuilder sb = new StringBuilder();
 
         RequestHeader requestHeaderEntity = getRequestHeader();
@@ -427,26 +427,26 @@ public class Request{
         if(resultType == void.class || resultType == Void.class){
             sb.append("【响应结果(" + resultType.toString() + ")】\n" + null);
         }else if(resultType == null || resultType == Object.class || resultType == byte[].class){
-            sb.append("【响应结果(" + (resultType == null ? null : resultType.toString()) + ")】\n").append(genPrettyLog(format,rawBytes));
+            sb.append("【响应结果(" + (resultType == null ? null : resultType.toString()) + ")】\n").append(genPrettyLog(rawBytes,formatIfJson));
         }else if(resultType == File.class){
             sb.append("【响应结果(" + resultType.toString() + ")】\n").append(getDownloadController().getTargetFile().getAbsoluteFile());
         }else if(resultType == String.class){
-            sb.append("【响应结果(" + resultType.toString() + ")】\n").append(genPrettyLog(format,rawBytes));
+            sb.append("【响应结果(" + resultType.toString() + ")】\n").append(genPrettyLog(rawBytes,formatIfJson));
         }else{
-            sb.append("【响应结果(" + resultType.toString() + ")】\n").append(genPrettyLog(format,rawBytes));
+            sb.append("【响应结果(" + resultType.toString() + ")】\n").append(genPrettyLog(rawBytes,formatIfJson));
         }
 
         FastLog.i(sb.toString());
     }
 
     /**
-     * @param format true有效json字符串将会格式化，false不格式化。
      * @param bytes  字节流
+     * @param formatIfJson true有效json字符串将会格式化，false不格式化。
      * @return 漂亮的打印日志
      */
-    private String genPrettyLog(boolean format,byte[] bytes){
+    private String genPrettyLog(byte[] bytes,boolean formatIfJson){
         String str = new String(bytes);
-        if(format){
+        if(formatIfJson){
             Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
             boolean isValidJSON;//是否是有效json字符串
             try{

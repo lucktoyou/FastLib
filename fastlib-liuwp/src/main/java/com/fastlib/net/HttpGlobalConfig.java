@@ -18,8 +18,8 @@ public class HttpGlobalConfig{
     private GlobalListener mEmptyGlobalListener = new GlobalListener();
     private SimpleListener mEmptyListener = new SimpleListener(){
         @Override
-        public byte[] onRawData(Request request,byte[] data,Type type){
-            return super.onRawData(request,data,type);
+        public byte[] onRawData(Request request,byte[] data){
+            return super.onRawData(request,data);
         }
 
         @Override

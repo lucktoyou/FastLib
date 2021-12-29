@@ -22,12 +22,13 @@ import java.lang.reflect.Field;
 
 /**
  * Created by liuwp on 2018/12/11.
+ * Modified by liuwp on 2021/12/29.
  * 进度提示,默认居中
  */
 public class LoadingDialog extends DialogFragment{
 
     private TextView tvHint;
-    private String content;
+    private OnDialogDismissListener mDialogDismissListener;
 
     public LoadingDialog(){
         setStyle(STYLE_NORMAL,R.style.LoadDialogStyle);
@@ -38,23 +39,22 @@ public class LoadingDialog extends DialogFragment{
     public View onCreateView(@NonNull LayoutInflater inflater,@Nullable ViewGroup container,@Nullable Bundle savedInstanceState){
         View contentView = inflater.inflate(R.layout.dialog_loading,container,false);
         tvHint = contentView.findViewById(R.id.tv_hint);
-        if(!TextUtils.isEmpty(content)){
-            tvHint.setText(content);
-        }
         return contentView;
     }
 
-    //设置提示文字
     public void setHint(String hint){
-        content = hint;
         if(tvHint != null){
-            if(TextUtils.isEmpty(content))
+            if(TextUtils.isEmpty(hint))
                 tvHint.setVisibility(View.GONE);
             else{
                 tvHint.setVisibility(View.VISIBLE);
-                tvHint.setText(content);
+                tvHint.setText(hint);
             }
         }
+    }
+
+    public void setDialogDismissListener(OnDialogDismissListener loadingStateListener){
+        this.mDialogDismissListener = loadingStateListener;
     }
 
     public void showAllowingStateLoss(FragmentManager manager){
@@ -82,7 +82,7 @@ public class LoadingDialog extends DialogFragment{
 
     @Override
     public void dismiss(){
-        //防止横竖屏切换时 getFragmentManager置空引起的问题：
+        //防止横竖屏切换时getFragmentManager置空引起的问题：
         //Attempt to invoke virtual method 'android.app.FragmentTransaction
         //android.app.FragmentManager.beginTransaction()' on a null object reference
         if(getFragmentManager() == null) return;
@@ -92,18 +92,12 @@ public class LoadingDialog extends DialogFragment{
     @Override
     public void onDismiss(@NonNull DialogInterface dialog){
         super.onDismiss(dialog);
-        if(loadingStateListener != null){
-            loadingStateListener.onLoadingDialogDismiss();
+        if(mDialogDismissListener != null){
+            mDialogDismissListener.onDialogDismiss();
         }
     }
 
-    public interface OnLoadingStateListener{
-        void onLoadingDialogDismiss();
-    }
-
-    private OnLoadingStateListener loadingStateListener;
-
-    public void setOnLoadingStateListener(OnLoadingStateListener loadingStateListener){
-        this.loadingStateListener = loadingStateListener;
+    public interface OnDialogDismissListener{
+        void onDialogDismiss();
     }
 }
