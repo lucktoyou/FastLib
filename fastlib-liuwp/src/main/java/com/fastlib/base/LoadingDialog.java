@@ -27,7 +27,10 @@ import java.lang.reflect.Field;
  */
 public class LoadingDialog extends DialogFragment{
 
+    private static final String ARG_HINT = "hint";
+
     private TextView tvHint;
+    private boolean isViewCreated;
     private OnDialogDismissListener mDialogDismissListener;
 
     public LoadingDialog(){
@@ -42,14 +45,32 @@ public class LoadingDialog extends DialogFragment{
         return contentView;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view,@Nullable Bundle savedInstanceState){
+        super.onViewCreated(view,savedInstanceState);
+        isViewCreated = true;
+        Bundle arguments = getArguments();
+        if(arguments!=null){
+            String hint = arguments.getString(ARG_HINT);
+            if(!TextUtils.isEmpty(hint)){
+                tvHint.setVisibility(View.VISIBLE);
+                tvHint.setText(hint);
+            }
+        }
+    }
+
     public void setHint(String hint){
-        if(tvHint != null){
+        if(isViewCreated){
             if(TextUtils.isEmpty(hint))
                 tvHint.setVisibility(View.GONE);
             else{
                 tvHint.setVisibility(View.VISIBLE);
                 tvHint.setText(hint);
             }
+        }else {
+            Bundle bundle = new Bundle();
+            bundle.putString(ARG_HINT,hint);
+            setArguments(bundle);
         }
     }
 

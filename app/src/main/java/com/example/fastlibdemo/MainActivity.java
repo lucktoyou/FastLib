@@ -85,14 +85,16 @@ public class MainActivity extends FastActivity {
 
     @Bind(R.id.btnProgress)
     public void progress() {
-        loading();
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(3000);
-                    loading("hello");
-                    Thread.sleep(3000);
+                    loading();
+                    Thread.sleep(2000);
+                    loading("hello world");
+                    Thread.sleep(2000);
+                    loading("");
+                    Thread.sleep(2000);
                     dismissLoading();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
