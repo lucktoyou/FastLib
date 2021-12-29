@@ -91,7 +91,7 @@ public class MainActivity extends FastActivity {
                 try {
                     loading();
                     Thread.sleep(2000);
-                    loading("hello world");
+                    loading("hello world! hello world! hello world!\nhello world! hello world! hello world!");
                     Thread.sleep(2000);
                     loading("");
                     Thread.sleep(2000);

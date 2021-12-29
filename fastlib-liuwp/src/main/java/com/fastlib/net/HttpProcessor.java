@@ -21,6 +21,7 @@ import com.fastlib.net.tool.StatisticalImpl;
 import com.fastlib.net.tool.Statistical;
 import com.fastlib.utils.core.SaveUtil;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -270,8 +271,12 @@ public class HttpProcessor implements Runnable, Cancelable{
                     else{
                         Gson gson = new Gson();
                         String json = new String(bytes);
-                        Object obj = gson.fromJson(json,mResultType);
-                        wrapperListener.onResponseSuccess(mRequest,obj);
+                        try{
+                            Object obj = gson.fromJson(json,mResultType);
+                            wrapperListener.onResponseSuccess(mRequest,obj);
+                        }catch(JsonSyntaxException e){
+                            wrapperListener.onError(mRequest,e);
+                        }
                     }
                 }else{
                     Exception ex = new CustomException("网络响应异常(" + mStatusCode + ").");//响应内容: new String(bytes)
