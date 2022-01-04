@@ -20,7 +20,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             app:SpinKit_Color="@android:color/white"
-            app:SpinKit_Style="Circle" />
+            app:SpinKit_Style="Circle"/>
 
         <TextView
             android:id="@+id/tv_hint"
@@ -32,6 +32,6 @@
             android:layout_marginBottom="3dp"
             android:textColor="@android:color/white"
             android:textSize="13sp"
-            android:visibility="gone" />
+            android:visibility="gone"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

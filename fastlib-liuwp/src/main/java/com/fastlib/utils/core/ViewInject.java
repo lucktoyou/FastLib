@@ -37,9 +37,7 @@ public class ViewInject {
             if (result instanceof Boolean){
                 return (boolean) result;
             }
-        } catch (InvocationTargetException e) {//这个异常是非方法参数异常所以直接显示或抛出
-            e.printStackTrace();
-        }  catch (IllegalAccessException e) {
+        } catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }catch (IllegalArgumentException e) {
             try {
@@ -47,10 +45,8 @@ public class ViewInject {
                 if (result instanceof Boolean) {
                     return (Boolean) result;
                 }
-            } catch (IllegalAccessException e1) {
+            } catch (IllegalAccessException | InvocationTargetException e1) {
                 e1.printStackTrace();
-            } catch (InvocationTargetException e2) {
-                e2.printStackTrace();
             }
         }
         return false;

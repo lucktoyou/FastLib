@@ -69,9 +69,7 @@ public class LocalDataInject {
             }
             try {
                 pair.first.invoke(mHost, args);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
         }
@@ -100,9 +98,7 @@ public class LocalDataInject {
             }
             try {
                 pair.first.invoke(mHost, args);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (InvocationTargetException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
@@ -261,9 +257,7 @@ public class LocalDataInject {
             }
             //View必须在第一个，接下来是参数对象数组
             flatInvoke(m, v, data);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }

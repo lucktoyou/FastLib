@@ -7,7 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Created by liuwp on 2020/8/13.
- * 视图注解，使用在字段上填充字段，使用在方法上接受onClick回调。
+ * Modified by liuwp on 2022/1/4.
+ * 视图注解，使用在成员变量上绑定视图，使用在成员方法上接受onClick回调。
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

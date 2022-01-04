@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD,ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LocalData{
-    String[] value(); //对应Intent和SP中key，database中主键值，Assets和文件的路径.特殊的多键值对应方法触发
+    String[] value(); //对应Intent中bundle中key,SharedPreferences中key，Database中主键值，Assets和文件的路径.特殊的多键值对应方法触发
     GiverType from() default GiverType.INTENT_PARENT;
 
     /**
