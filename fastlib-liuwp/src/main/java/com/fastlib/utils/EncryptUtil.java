@@ -36,23 +36,42 @@ public final class EncryptUtil {
         throw new UnsupportedOperationException("u can't instantiate me...");
     }
 
-    /**
-     * Return Base64-encode bytes.
-     *
-     * @param input The input.
-     * @return Base64-encode bytes
-     */
+
+    public static String base64EncodeToString(final String input) {
+        if (input == null || input.length() == 0) return "";
+        return new String(Base64.encode(input.getBytes(), Base64.NO_WRAP));
+    }
+
+    public static String base64EncodeToString(final byte[] input) {
+        if (input == null || input.length == 0) return "";
+        return new String(Base64.encode(input, Base64.NO_WRAP));
+    }
+
+    public static byte[] base64Encode(final String input) {
+        if (input == null || input.length() == 0) return new byte[0];
+        return Base64.encode(input.getBytes(), Base64.NO_WRAP);
+    }
+
     public static byte[] base64Encode(final byte[] input) {
         if (input == null || input.length == 0) return new byte[0];
         return Base64.encode(input, Base64.NO_WRAP);
     }
 
-    /**
-     * Return the bytes of decode Base64-encode bytes.
-     *
-     * @param input The input.
-     * @return the bytes of decode Base64-encode bytes
-     */
+    public static String base64DecodeToString(final String input) {
+        if (input == null || input.length() == 0) return "";
+        return new String(Base64.decode(input, Base64.NO_WRAP));
+    }
+
+    public static String base64DecodeToString(final byte[] input) {
+        if (input == null || input.length == 0) return "";
+        return new String(Base64.decode(input, Base64.NO_WRAP));
+    }
+
+    public static byte[] base64Decode(final String input) {
+        if (input == null || input.length() == 0) return new byte[0];
+        return Base64.decode(input, Base64.NO_WRAP);
+    }
+
     public static byte[] base64Decode(final byte[] input) {
         if (input == null || input.length == 0) return new byte[0];
         return Base64.decode(input, Base64.NO_WRAP);
@@ -130,9 +149,9 @@ public final class EncryptUtil {
      * @param filePath The path of file.
      * @return the hex string of file's MD5 encryption
      */
-    public static String encryptMD5File2String(final String filePath) {
+    public static String encryptMD5FileToString(final String filePath) {
         File file = isSpace(filePath) ? null : new File(filePath);
-        return encryptMD5File2String(file);
+        return encryptMD5FileToString(file);
     }
 
     /**
@@ -152,7 +171,7 @@ public final class EncryptUtil {
      * @param file The file.
      * @return the hex string of file's MD5 encryption
      */
-    public static String encryptMD5File2String(final File file) {
+    public static String encryptMD5FileToString(final File file) {
         return bytes2HexString(encryptMD5File(file));
     }
 

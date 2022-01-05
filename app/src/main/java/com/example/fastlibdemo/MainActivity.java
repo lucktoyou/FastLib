@@ -63,8 +63,8 @@ public class MainActivity extends FastActivity {
         map.put(null, "我是null key的值");
         FastLog.e("测试:" + map.get(null));
 
-        FastLog.e("测试:" + new String(EncryptUtil.base64Encode("你好".getBytes())));//5L2g5aW9
-        FastLog.e("测试:" + new String(EncryptUtil.base64Decode("5L2g5aW9".getBytes())));//你好
+        FastLog.e("测试:" + EncryptUtil.base64EncodeToString("你好"));//5L2g5aW9
+        FastLog.e("测试:" + EncryptUtil.base64DecodeToString("5L2g5aW9"));//你好
         FastLog.e("测试:" + EncryptUtil.encryptMD5ToString("你好世界"));//65396ee4aad0b4f17aacd1c6112ee364
         FastLog.e("测试:" + EncryptUtil.encryptSHA1ToString("你好世界"));//dabaa5fe7c47fb21be902480a13013f16a1ab6eb
 
