@@ -9,6 +9,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,76 +21,71 @@ import java.util.List;
 
 
 /**
- * Modified by liuwp 2020/11/23.
- *
+ * Created by liuwp 2020/11/23.
+ * Modified by liuwp 2022/1/6.
+ * <p>
  * 使用FastLuban进行图片压缩，说明：
- *  ①问世背景：由于luban作者短期内不再维护，而该库图片压缩功能又比较喜欢，所以只能自行维护了。
- *  ②使用方式：链式调用。
+ * ①问世背景：由于luban作者短期内不再维护，而该库图片压缩功能又比较喜欢，所以只能自行维护了。
+ * ②使用方式：链式调用。
  */
-public class FastLuban implements Handler.Callback {
+public class FastLuban{
     private static final String TAG = "Luban";
     private static final String DEFAULT_DISK_CACHE_DIR = "luban_disk_cache";
 
-    private static final int MSG_COMPRESS_SUCCESS = 0;
-    private static final int MSG_COMPRESS_START = 1;
+    private static final int MSG_COMPRESS_START = 0;
+    private static final int MSG_COMPRESS_SUCCESS = 1;
     private static final int MSG_COMPRESS_ERROR = 2;
 
-    private String mTargetDir;
-    private int mLeastCompressSize;
-    private OnRenameListener mRenameListener;
-    private OnCompressListener mCompressListener;
-    private OnFilterListener mFilterListener;
+    private Context mContext;
     private List<InputStreamProvider> mStreamProviders;
+    private int mLeastCompressSize;
+    private String mTargetDir;
+    private OnRenameListener mRenameListener;
+    private OnFilterListener mFilterListener;
+    private OnCompressListener mCompressListener;
 
-    private Handler mHandler;
+    private Handler mHandler = new Handler(Looper.getMainLooper(),new Handler.Callback(){
+        @Override
+        public boolean handleMessage(@NonNull Message msg){
+            if(mCompressListener != null){
+                switch(msg.what){
+                    case MSG_COMPRESS_START:
+                        mCompressListener.onStart();
+                        break;
+                    case MSG_COMPRESS_SUCCESS:
+                        mCompressListener.onSuccess((File)msg.obj);
+                        break;
+                    case MSG_COMPRESS_ERROR:
+                        mCompressListener.onError((Throwable)msg.obj);
+                        break;
+                }
+            }
+            return true;
+        }
+    });
 
-    private FastLuban(Builder builder) {
+    private FastLuban(Context context,Builder builder){
+        this.mContext = context;
+        this.mStreamProviders = builder.mStreamProviders;
+        this.mLeastCompressSize = builder.mLeastCompressSize;
         this.mTargetDir = builder.mTargetDir;
         this.mRenameListener = builder.mRenameListener;
-        this.mStreamProviders = builder.mStreamProviders;
-        this.mCompressListener = builder.mCompressListener;
-        this.mLeastCompressSize = builder.mLeastCompressSize;
         this.mFilterListener = builder.mFilterListener;
-        mHandler = new Handler(Looper.getMainLooper(), this);
     }
 
-    public static Builder with(Context context) {
-        return new Builder(context);
-    }
-
-    @Override
-    public boolean handleMessage(Message msg) {
-        if(mCompressListener!=null){
-            switch (msg.what) {
-                case MSG_COMPRESS_START:
-                    mCompressListener.onStart();
-                    break;
-                case MSG_COMPRESS_SUCCESS:
-                    mCompressListener.onSuccess((File) msg.obj);
-                    break;
-                case MSG_COMPRESS_ERROR:
-                    mCompressListener.onError((Throwable) msg.obj);
-                    break;
-            }
-        }
-        return false;
-    }
-
-    private void start(final Context context) {
-        if (mStreamProviders == null || mStreamProviders.size() == 0 && mCompressListener != null) {
-            mCompressListener.onError(new NullPointerException("image file cannot be null"));
-        }
+    public void start(OnCompressListener listener){
+        this.mCompressListener = listener;
         final Iterator<InputStreamProvider> iterator = mStreamProviders.iterator();
-        while (iterator.hasNext()) {
-            AsyncTask.SERIAL_EXECUTOR.execute(new Runnable() {
+        while(iterator.hasNext()){
+            AsyncTask.SERIAL_EXECUTOR.execute(new Runnable(){
                 @Override
-                public void run() {
-                    try {
+                public void run(){
+                    try{
                         mHandler.sendMessage(mHandler.obtainMessage(MSG_COMPRESS_START));
-                        File result = compress(context, iterator.next());
-                        mHandler.sendMessage(mHandler.obtainMessage(MSG_COMPRESS_SUCCESS, result));
-                    } catch (IOException e) {
-                        mHandler.sendMessage(mHandler.obtainMessage(MSG_COMPRESS_ERROR, e));
+                        File result = compress(mContext,iterator.next());
+                        mHandler.sendMessage(mHandler.obtainMessage(MSG_COMPRESS_SUCCESS,result));
+                    }catch(IOException e){
+                        mHandler.sendMessage(mHandler.obtainMessage(MSG_COMPRESS_ERROR,e));
                     }
                 }
             });
@@ -96,211 +93,210 @@ public class FastLuban implements Handler.Callback {
         }
     }
 
-    private List<File> get(Context context) throws IOException {
+    public List<File> get() throws IOException{
         List<File> results = new ArrayList<>();
         Iterator<InputStreamProvider> iterator = mStreamProviders.iterator();
-        while (iterator.hasNext()) {
-            results.add(compress(context, iterator.next()));
+        while(iterator.hasNext()){
+            results.add(compress(mContext,iterator.next()));
             iterator.remove();
         }
         return results;
     }
 
-    private File get(Context context,InputStreamProvider provider) throws IOException {
-        return compress(context,provider);
+    public File get(final String source) throws IOException{
+        return compress(mContext,new InputStreamAdapter(){
+            @Override
+            public InputStream openInternal() throws IOException{
+                return new FileInputStream(source);
+            }
+
+            @Override
+            public String getPath(){
+                return source;
+            }
+        });
     }
 
-    private File compress(Context context, InputStreamProvider provider) throws IOException {
-        try {
+    private File compress(Context context,InputStreamProvider provider) throws IOException{
+        try{
             File result;
             File outFile = getImageSaveFile(context,provider);
-            if (mFilterListener != null) {
-                if (mFilterListener.allowFileCompress(provider.getPath()) && Checker.SINGLE.needCompress(mLeastCompressSize, provider.getPath())) {
-                    result = new Engine(provider, outFile).compress();
-                } else {
+            if(mFilterListener != null){
+                if(mFilterListener.allowFileCompress(provider.getPath()) && Checker.SINGLE.needCompress(mLeastCompressSize,provider.getPath())){
+                    result = new Engine(provider,outFile).compress();
+                }else{
                     result = new File(provider.getPath());
                 }
-            } else {
-                result = Checker.SINGLE.needCompress(mLeastCompressSize, provider.getPath()) ?
-                        new Engine(provider, outFile).compress() :
+            }else{
+                result = Checker.SINGLE.needCompress(mLeastCompressSize,provider.getPath()) ?
+                        new Engine(provider,outFile).compress() :
                         new File(provider.getPath());
             }
             return result;
-        } finally {
+        }finally{
             provider.close();
         }
     }
 
-    private File getImageSaveFile(Context context, InputStreamProvider provider) {
+    private File getImageSaveFile(Context context,InputStreamProvider provider) throws IOException{
         File dir = null;
-        if (TextUtils.isEmpty(mTargetDir)) {
-            if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+        if(TextUtils.isEmpty(mTargetDir)){
+            if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
                 dir = context.getExternalCacheDir();
-            } else {
+            }else{
                 dir = context.getCacheDir();
             }
-            dir = new File(dir, DEFAULT_DISK_CACHE_DIR);
-        } else {
-            dir = new File(mTargetDir, DEFAULT_DISK_CACHE_DIR);
+            dir = new File(dir,DEFAULT_DISK_CACHE_DIR);
+        }else{
+            dir = new File(mTargetDir,DEFAULT_DISK_CACHE_DIR);
         }
-        if (!dir.exists()) {
+        if(!dir.exists()){
             dir.mkdir();
         }
-        String fileName = System.currentTimeMillis() + (int) (Math.random() * 1000) + Checker.SINGLE.extSuffix(provider);
-        if (mRenameListener != null) {
+        String fileName = System.currentTimeMillis() + (int)(Math.random() * 1000) + Checker.SINGLE.extSuffix(provider);
+        if(mRenameListener != null){
             fileName = mRenameListener.renameCompressFile(provider.getPath());
         }
-        File outFile = new File(dir, fileName);
-        if (!outFile.exists()) {
-            try {
-                outFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        File outFile = new File(dir,fileName);
+        if(!outFile.exists()){
+            outFile.createNewFile();
         }
         return outFile;
     }
 
-    public static class Builder {
-        private Context context;
+    public static Builder with(Context context){
+        return new Builder(context);
+    }
+
+    public static class Builder{
+        private Context mContext;
+        private List<InputStreamProvider> mStreamProviders;
+        private int mLeastCompressSize;
         private String mTargetDir;
-        private int mLeastCompressSize = 100;
         private OnRenameListener mRenameListener;
         private OnFilterListener mFilterListener;
-        private OnCompressListener mCompressListener;
-        private List<InputStreamProvider> mStreamProviders;
 
-        Builder(Context context) {
-            this.context = context;
+        public Builder(Context context){
+            this.mContext = context;
             this.mStreamProviders = new ArrayList<>();
+            this.mLeastCompressSize = 100;//不压缩的阈值
         }
 
-        private FastLuban build() {
-            return new FastLuban(this);
+        public FastLuban build(){
+            return new FastLuban(mContext,this);
         }
 
-        public Builder load(InputStreamProvider inputStreamProvider) {
+        public Builder load(InputStreamProvider inputStreamProvider){
             mStreamProviders.add(inputStreamProvider);
             return this;
         }
 
-        public Builder load(final File file) {
-            mStreamProviders.add(new InputStreamAdapter() {
+        public Builder load(final File file){
+            mStreamProviders.add(new InputStreamAdapter(){
                 @Override
-                public InputStream openInternal() throws IOException {
+                public InputStream openInternal() throws IOException{
                     return new FileInputStream(file);
                 }
 
                 @Override
-                public String getPath() {
+                public String getPath(){
                     return file.getAbsolutePath();
                 }
             });
             return this;
         }
 
-        public Builder load(final String source) {
-            mStreamProviders.add(new InputStreamAdapter() {
+        public Builder load(final String source){
+            mStreamProviders.add(new InputStreamAdapter(){
                 @Override
-                public InputStream openInternal() throws IOException {
+                public InputStream openInternal() throws IOException{
                     return new FileInputStream(source);
                 }
 
                 @Override
-                public String getPath() {
+                public String getPath(){
                     return source;
                 }
             });
             return this;
         }
 
-        public Builder load(final Uri uri) {
-            mStreamProviders.add(new InputStreamAdapter() {
+        public Builder load(final Uri uri){
+            mStreamProviders.add(new InputStreamAdapter(){
                 @Override
-                public InputStream openInternal() throws IOException {
-                    return context.getContentResolver().openInputStream(uri);
+                public InputStream openInternal() throws IOException{
+                    return mContext.getContentResolver().openInputStream(uri);
                 }
 
                 @Override
-                public String getPath() {
+                public String getPath(){
                     return uri.getPath();
                 }
             });
             return this;
         }
 
-        public <T> Builder load(List<T> list) {
-            for (T src : list) {
-                if (src instanceof String) {
-                    load((String) src);
-                } else if (src instanceof File) {
-                    load((File) src);
-                } else if (src instanceof Uri) {
-                    load((Uri) src);
-                } else {
+        public <T> Builder load(List<T> list){
+            for(T src : list){
+                if(src instanceof String){
+                    load((String)src);
+                }else if(src instanceof File){
+                    load((File)src);
+                }else if(src instanceof Uri){
+                    load((Uri)src);
+                }else{
                     throw new IllegalArgumentException("Incoming data type exception, it must be String or File or Uri");
                 }
             }
             return this;
         }
 
-        public Builder targetDir(String targetDir) {
+        public Builder cache(String targetDir){
             this.mTargetDir = targetDir;
             return this;
         }
 
-        public Builder rename(OnRenameListener renameListener) {
+        public Builder rename(OnRenameListener renameListener){
             this.mRenameListener = renameListener;
             return this;
         }
 
-        public Builder filter(OnFilterListener filterListener) {
+        public Builder filter(OnFilterListener filterListener){
             this.mFilterListener = filterListener;
             return this;
         }
 
-        /**
-         * @param size 不压缩的阈值，默认100KB
-         */
-        public Builder ignore(int size) {
+        public Builder ignore(int size){
             this.mLeastCompressSize = size;
             return this;
         }
 
         /**
          * 开始异步压缩图片
+         *
          * @param listener 压缩回调
          */
-        public void start(OnCompressListener listener) {
-            this.mCompressListener = listener;
-            build().start(context);
+        public void start(OnCompressListener listener){
+            build().start(listener);
         }
 
         /**
          * 开始同步压缩图片
+         *
          * @return 含符合压缩条件的已压缩文件或含不符合压缩条件的源文件组成的文件列表。
          */
-        public List<File> get() throws IOException {
-            return build().get(context);
+        public List<File> get() throws IOException{
+            return build().get();
         }
 
         /**
          * 开始同步压缩图片
+         *
          * @param source 传入源文件路径,路径：①file.getAbsolutePath() ②uri.getPath().
          * @return 符合压缩条件的已压缩文件或不符合压缩条件的源文件。
          */
-        public File get(final String source) throws IOException {
-            return build().get(context,new InputStreamAdapter() {
-                @Override
-                public InputStream openInternal() throws IOException {
-                    return new FileInputStream(source);
-                }
-
-                @Override
-                public String getPath() {
-                    return source;
-                }
-            });
+        public File get(String source) throws IOException{
+            return build().get(source);
         }
     }
 }

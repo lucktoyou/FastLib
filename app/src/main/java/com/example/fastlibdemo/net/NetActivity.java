@@ -9,12 +9,11 @@ import com.example.fastlibdemo.base.BindViewActivity;
 import com.example.fastlibdemo.databinding.ActivityNetBinding;
 import com.fastlib.annotation.Bind;
 import com.fastlib.net.Request;
-import com.fastlib.net.download.DownloadMonitor;
 import com.fastlib.net.download.DownloadControllerImpl;
+import com.fastlib.net.download.DownloadMonitor;
 import com.fastlib.net.listener.SimpleListener;
 import com.fastlib.net.upload.UploadMonitor;
 import com.fastlib.utils.AppUtil;
-import com.fastlib.utils.FastLog;
 import com.fastlib.utils.FastUtil;
 import com.fastlib.utils.N;
 import com.fastlib.utils.zipimage.FastLuban;
@@ -162,7 +161,10 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
                 .pick(this,new OnImagePickCompleteListener(){
                     @Override
                     public void onImagePickComplete(ArrayList<ImageItem> items){
-                        uploadQRCode(items.get(0).getPath());
+                        ImageItem item = items.get(0);
+                        if(item!=null){
+                            uploadQRCode(item.getPath());
+                        }
                     }
                 });
     }
@@ -172,19 +174,7 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
         request.setSkipRootAddress(true);
         request.setSkipGlobalListener(true);
         request.put("requestParam","{\"riskAppHeader\":{\"signMsg\":\"341f3d74dab41066acba025bd8996e84\"},\"riskAppContent\":{\"agentId\":\"208321\"}}");
-        try{
-
-            File compressFile = FastLuban.with(this).targetDir(getCacheDir().getAbsolutePath()).ignore(100).get(path);
-            String text = "压缩前:" + Formatter.formatFileSize(this,new File(path).length()) + " 路径：" + path
-                    + " 压缩后:" + Formatter.formatFileSize(this,compressFile.length()) + " 路径：" + compressFile.getAbsolutePath();
-            FastLog.d(text);
-            mViewBinding.imgSource.setImageBitmap(BitmapFactory.decodeFile(path));
-            mViewBinding.imgCompress.setImageBitmap(BitmapFactory.decodeFile(compressFile.getAbsolutePath()));
-            mViewBinding.text.setText(text);
-            request.put("image",compressFile);
-        }catch(IOException e){
-            e.printStackTrace();
-        }
+        request.put("image",getCompressFile(path));
         request.setUploadMonitor(new UploadMonitor(){
 
             @Override
@@ -210,6 +200,21 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
             }
         });
         net(request);
+    }
+
+    private File getCompressFile(String path){
+        File rawFile = new File(path);
+        try{
+            File compressFile = FastLuban.with(this).get(rawFile.getAbsolutePath());
+            mViewBinding.imgSource.setImageBitmap(BitmapFactory.decodeFile(rawFile.getAbsolutePath()));
+            mViewBinding.imgCompress.setImageBitmap(BitmapFactory.decodeFile(compressFile.getAbsolutePath()));
+            String text = "压缩前:" + Formatter.formatFileSize(this,rawFile.length()) + " 路径：" + rawFile.getAbsolutePath()
+                    + " 压缩后:" + Formatter.formatFileSize(this,compressFile.length()) + " 路径：" + compressFile.getAbsolutePath();
+            mViewBinding.text.setText(text);
+            return compressFile;
+        }catch(IOException e){
+            return rawFile;
+        }
     }
 
     @Bind(R.id.btnNetLocation)

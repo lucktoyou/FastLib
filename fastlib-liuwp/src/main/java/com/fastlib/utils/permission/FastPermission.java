@@ -20,44 +20,44 @@ import com.fastlib.utils.N;
  **/
 public class FastPermission{
 
+    private Context mContext;
     private String[] mPermissions;
     private final String mFailureHint;
     private final String mRationaleHint;
 
-    private FastPermission(Builder builder){
+    private FastPermission(Context context,Builder builder){
+        this.mContext = context;
         this.mPermissions = builder.mPermissions;
         this.mFailureHint = builder.mFailureHint;
         this.mRationaleHint = builder.mRationaleHint;
     }
 
-    private void request(Context context,OnPermissionCallback permissionCallback){
+    public void request(OnPermissionCallback permissionCallback){
         mPermissions = PermissionUtil.getRealRequestPermissions(mPermissions);
         if (mPermissions==null || mPermissions.length==0) {
-            N.showToast(context,"滤除掉违规添加的权限后，没有多余的权限需要申请.");
+            N.showToast(mContext,"没有权限需要申请.");
         }else {
             PermissionHelper.getInstance().setPermissionCallback(permissionCallback);
-            PermissionActivity.start(context,mPermissions,mFailureHint,mRationaleHint);
+            PermissionActivity.start(mContext,mPermissions,mFailureHint,mRationaleHint);
         }
     }
-
 
     public static Builder with(Context context){
         return new Builder(context);
     }
 
     public static class Builder{
-        private final Context context;
+        private Context mContext;
         private String[] mPermissions;
         private String mFailureHint;
         private String mRationaleHint;
 
-
-        Builder(Context context){
-            this.context = context;
+        public Builder(Context context){
+            this.mContext = context;
         }
 
-        private FastPermission build(){
-            return new FastPermission(this);
+        public FastPermission build(){
+            return new FastPermission(mContext,this);
         }
 
         //失败提示,不设置则使用默认提示.
@@ -80,7 +80,7 @@ public class FastPermission{
 
         //申请权限
         public void request(OnPermissionCallback permissionCallback){
-            build().request(context,permissionCallback);
+            build().request(permissionCallback);
         }
     }
 }
