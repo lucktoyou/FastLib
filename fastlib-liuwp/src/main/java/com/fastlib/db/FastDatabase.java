@@ -1298,7 +1298,7 @@ public class FastDatabase{
      * @param cla
      */
     public void dropTable(Class<?> cla){
-        SQLiteDatabase db = mContext.openOrCreateDatabase(getCurrDatabaseNameComplete(),Context.MODE_PRIVATE,null);
+        SQLiteDatabase db = getCurrDatabase();
         String tableName = cla.getCanonicalName();
         if(tableExists(db,tableName)){
             db.execSQL("drop table '"+tableName+"'");
@@ -1307,6 +1307,14 @@ public class FastDatabase{
             FastLog.d(db+"表"+tableName+"不存在");
         }
         db.close();
+    }
+
+    public SQLiteDatabase getCurrDatabase(){
+        return prepare(null);//mContext.openOrCreateDatabase(getCurrDatabaseNameComplete(),Context.MODE_PRIVATE,null)
+    }
+
+    public String getCurrDatabaseName(){
+        return TextUtils.isEmpty(mAttribute.getWhichDatabaseName()) ? sConfig.getDatabaseName() : mAttribute.getWhichDatabaseName();
     }
 
     public String getCurrDatabaseNameComplete(){

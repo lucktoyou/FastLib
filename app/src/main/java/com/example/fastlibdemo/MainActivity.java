@@ -5,16 +5,15 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.format.Formatter;
-import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 
 import com.example.fastlibdemo.db.LibraryActivity;
 import com.example.fastlibdemo.decoration.DecorationActivity;
@@ -32,6 +31,7 @@ import com.fastlib.base.FastDialog;
 import com.fastlib.base.custom.CountDownService;
 import com.fastlib.base.module.FastActivity;
 import com.fastlib.bean.event.EventCountDown;
+import com.fastlib.db.FastDatabase;
 import com.fastlib.utils.DeviceUtil;
 import com.fastlib.utils.EncryptUtil;
 import com.fastlib.utils.FastLog;
@@ -42,7 +42,6 @@ import com.fastlib.utils.TimeUtil;
 import com.fastlib.utils.core.SaveUtil;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -264,11 +263,32 @@ public class MainActivity extends FastActivity {
                 runOnUiThread(new Runnable(){
                     @Override
                     public void run(){
-                        N.showToast(MainActivity.this,formatCacheSize);
+                        N.showToast(MainActivity.this,"缓存文件："+formatCacheSize);
                     }
                 });
             }
         });
+    }
+
+    @Bind(value = R.id.circleImageView,bindType = Bind.BindType.LONG_CLICK)
+    public boolean showDatabaseSize(){
+        mThreadPool.execute(new Runnable(){
+            @Override
+            public void run(){
+                final SQLiteDatabase db = FastDatabase.getDefaultInstance(MainActivity.this).getCurrDatabase();
+                File dbFile = getDatabasePath(db.getPath());
+                long dbSize = dbFile.length();
+                final String formatDatabaseSize = Formatter.formatFileSize(MainActivity.this,dbSize);
+                db.close();
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        N.showToast(MainActivity.this,"数据库文件："+formatDatabaseSize +" 绝对路径："+db.getPath());
+                    }
+                });
+            }
+        });
+        return true;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
