@@ -237,13 +237,13 @@ public class HttpProcessor implements Runnable, Cancelable{
         SimpleListener wrapperListener = new SimpleListener(){
             @Override
             public byte[] onRawData(Request request,byte[] data){
-                byte[] bytes = globalListener.onRawData(request,data);
+                byte[] bytes = globalListener.onRawDataListener(request,data);
                 return listener.onRawData(request,bytes);
             }
 
             @Override
             public void onResponseSuccess(Request request,Object result){
-                Object handledResult = globalListener.onResponseListener(request,result);
+                Object handledResult = globalListener.onResponseSuccessListener(request,result);
                 listener.onResponseSuccess(request,handledResult);
                 mResultData = handledResult;
             }

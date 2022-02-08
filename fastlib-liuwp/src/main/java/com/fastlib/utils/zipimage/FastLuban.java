@@ -179,7 +179,7 @@ public class FastLuban{
         public Builder(Context context){
             this.mContext = context;
             this.mStreamProviders = new ArrayList<>();
-            this.mLeastCompressSize = 100;//不压缩的阈值
+            this.mLeastCompressSize = 100;
         }
 
         public FastLuban build(){
@@ -266,6 +266,9 @@ public class FastLuban{
             return this;
         }
 
+        /**
+         * @param size 不压缩的阈值，默认100KB
+         */
         public Builder ignore(int size){
             this.mLeastCompressSize = size;
             return this;

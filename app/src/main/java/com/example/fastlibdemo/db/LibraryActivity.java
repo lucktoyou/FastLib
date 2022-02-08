@@ -3,7 +3,7 @@ package com.example.fastlibdemo.db;
 import android.view.View;
 
 import com.example.fastlibdemo.R;
-import com.example.fastlibdemo.app.ApplicationImpl;
+import com.example.fastlibdemo.app.AppImpl;
 import com.example.fastlibdemo.base.BindViewActivity;
 import com.example.fastlibdemo.databinding.ActivityLibraryBinding;
 import com.fastlib.annotation.Bind;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class LibraryActivity extends BindViewActivity<ActivityLibraryBinding>{
 
-    private final FastDatabase fastDatabase = FastDatabase.getDefaultInstance(ApplicationImpl.instance);
+    private final FastDatabase fastDatabase = FastDatabase.getDefaultInstance(AppImpl.instance);
     private final Gson gson = new Gson();
     private int scoree = 80;
 

@@ -11,15 +11,12 @@ import com.fastlib.net.Request;
 import com.fastlib.net.listener.GlobalListener;
 import com.fastlib.utils.AppUtil;
 import com.fastlib.utils.FastLog;
-import com.fastlib.utils.N;
-
-import java.lang.reflect.Type;
 
 
 /**
  * Created by liuwp on 2020/3/28.
  */
-public class ApplicationImpl extends Application{
+public class AppImpl extends Application{
     public static Application instance;
 
     @Override
@@ -41,19 +38,19 @@ public class ApplicationImpl extends Application{
             }
 
             @Override
-            public byte[] onRawData(Request request,byte[] data){
+            public byte[] onRawDataListener(Request request,byte[] data){
                 request.printRequestAndResponse(data);
-                return super.onRawData(request,data);
+                return super.onRawDataListener(request,data);
             }
 
             @Override
-            public Object onResponseListener(Request request,Object result){
-                return super.onResponseListener(request,result);
+            public Object onResponseSuccessListener(Request request,Object result){
+                return super.onResponseSuccessListener(request,result);
             }
 
             @Override
             public Exception onErrorListener(Request request,Exception error){
-                N.showToast(instance,error.toString());
+                FastLog.e(error.toString());
                 return super.onErrorListener(request,error);
             }
         });

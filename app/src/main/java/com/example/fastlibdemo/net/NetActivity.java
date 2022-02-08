@@ -3,6 +3,7 @@ package com.example.fastlibdemo.net;
 import android.graphics.BitmapFactory;
 import android.text.format.Formatter;
 
+import com.bumptech.glide.Glide;
 import com.example.fastlibdemo.R;
 import com.example.fastlibdemo.WeChatPresenter;
 import com.example.fastlibdemo.base.BindViewActivity;
@@ -17,6 +18,7 @@ import com.fastlib.utils.AppUtil;
 import com.fastlib.utils.FastUtil;
 import com.fastlib.utils.N;
 import com.fastlib.utils.zipimage.FastLuban;
+import com.fastlib.utils.zipimage.OnRenameListener;
 import com.ypx.imagepicker.ImagePicker;
 import com.ypx.imagepicker.bean.ImageItem;
 import com.ypx.imagepicker.bean.MimeType;
@@ -120,7 +122,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
     public void download(){
         Request request = new Request("https://file.wanlibaoxian.com/App/Android/wlbx.apk");
         request.setSkipRootAddress(true);
-        request.setSkipGlobalListener(true);
         File file = FastUtil.createEmptyFile(this,null,"E家保呗呗.apk");
         DownloadControllerImpl controller = new DownloadControllerImpl(file);
         controller.setDownloadMonitor(new DownloadMonitor(1000){
@@ -144,7 +145,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
             @Override
             public void onError(Request request,Exception error){
                 dismissLoading();
-                N.showToast(NetActivity.this,"下载失败");
             }
         });
         net(request);
@@ -172,7 +172,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
     public void uploadQRCode(String path){
         Request request = new Request("POST","https://ceshi.wanlibaoxian.com/wlbx01/activity/uploadAgentOrCusImage");
         request.setSkipRootAddress(true);
-        request.setSkipGlobalListener(true);
         request.put("requestParam","{\"riskAppHeader\":{\"signMsg\":\"341f3d74dab41066acba025bd8996e84\"},\"riskAppContent\":{\"agentId\":\"208321\"}}");
         request.put("image",getCompressFile(path));
         request.setUploadMonitor(new UploadMonitor(){
@@ -196,7 +195,6 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
             @Override
             public void onError(Request request,Exception error){
                 dismissLoading();
-                N.showToast(NetActivity.this,"上传失败");
             }
         });
         net(request);
@@ -205,9 +203,16 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
     private File getCompressFile(String path){
         File rawFile = new File(path);
         try{
-            File compressFile = FastLuban.with(this).get(rawFile.getAbsolutePath());
-            mViewBinding.imgSource.setImageBitmap(BitmapFactory.decodeFile(rawFile.getAbsolutePath()));
-            mViewBinding.imgCompress.setImageBitmap(BitmapFactory.decodeFile(compressFile.getAbsolutePath()));
+            File compressFile = FastLuban.with(this)
+                    .rename(new OnRenameListener(){
+                        @Override
+                        public String renameCompressFile(String source){
+                            return source.substring(source.lastIndexOf("/")+1,source.lastIndexOf("."))+".png";
+                        }
+                    })
+                    .get(rawFile.getAbsolutePath());
+            Glide.with(this).load(rawFile).into(mViewBinding.imgSource);
+            Glide.with(this).load(compressFile).into(mViewBinding.imgCompress);
             String text = "压缩前:" + Formatter.formatFileSize(this,rawFile.length()) + " 路径：" + rawFile.getAbsolutePath()
                     + " 压缩后:" + Formatter.formatFileSize(this,compressFile.length()) + " 路径：" + compressFile.getAbsolutePath();
             mViewBinding.text.setText(text);
@@ -221,6 +226,7 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
     public void location(){
         net(new Request("https://www.zhihu.com/")
                 .setSkipRootAddress(true)
+                .setSkipGlobalListener(true)
                 .setListener(new SimpleListener<String>(){
 
                     @Override
@@ -234,7 +240,7 @@ public class NetActivity extends BindViewActivity<ActivityNetBinding>{
 
                     @Override
                     public void onError(Request request,Exception error){
-
+                        N.showToast(NetActivity.this,error.toString());
                     }
                 })
         );

@@ -29,7 +29,7 @@ public class GlobalListener{
      * @param data    源字节
      * @return 处理后的源字节,影响回调结果
      */
-    public byte[] onRawData(Request request,byte[] data){
+    public byte[] onRawDataListener(Request request,byte[] data){
         return data;
     }
 
@@ -40,7 +40,7 @@ public class GlobalListener{
      * @param result  返回的实体
      * @return 处理后的返回实体，影响回调结果
      */
-    public Object onResponseListener(Request request,Object result){
+    public Object onResponseSuccessListener(Request request,Object result){
         return result;
     }
 
